@@ -10,6 +10,8 @@
 
 ---
 
+
+
 ## 技术栈
 
 ### 后端技术
@@ -126,7 +128,7 @@
 - 深色 / 浅色主题切换
 - 响应式设计，支持移动端访问
 
-![Dashboard](pic/截图1.png)
+![Dashboard](pic/dashboard.svg)
 
 ### 分析页
 支持按以下维度排序作物：
@@ -134,7 +136,7 @@
 - 净利润效率 / 普通肥净利润效率
 - 等级要求
 
-![分析页面](pic/截图2.png)
+![分析页面](pic/analytics.svg)
 
 ### 帮助中心
 - 新手入门指南
@@ -143,7 +145,7 @@
 - 故障排查指南
 - 配置模板推荐
 
-![帮助中心](pic/截图3.png)
+![帮助中心](pic/help-center.svg)
 
 ---
 
@@ -231,15 +233,15 @@ ADMIN_PASSWORD='你的强密码' pnpm dev:core
 - 本机：`http://localhost:3000`
 - 局域网：`http://<你的 IP>:3000`
 
-![设置页面](pic/截图4.png)
+![设置页面](pic/settings.svg)
 
 ---
 
-# 🐳 跨平台 Docker 一键部署指南 (V3 终局版)
+# 🐳 Docker 部署完整指南（整合版）
 
-本项目全架构拥抱 Docker 化并原生支持 **linux/amd64 (x86_64)** 与 **linux/arm64**，搭载强隔离式 MySQL 与 Redis 的完整集群体系。
+## 🚀 快速开始（双架构一键部署）
 
-## 🚀 推荐：单行脚本一键部署 (App + MySQL + Redis)
+### 🚀 推荐：单行脚本一键部署 (App + MySQL + Redis)
 
 无论您使用的是 Intel/AMD 服务器、还是类似甲骨文/树莓派等 ARM 架构的机器，请直接在终端中执行以下命令：
 
@@ -266,9 +268,10 @@ curl -O https://raw.githubusercontent.com/smdk000/qq-farm-ui-pro-max/main/script
 3. （重要）在侦测到 ARM 架构（如 aarch64）时，将自动开启 `vm.overcommit_memory=1` 释放系统内存限额，防止 Redis 等依赖无故崩溃。
 4. 全自动在当前目录生成 `.env` 安全脱敏配置模板供后期微调。
 
+
 ---
 
-## 🛠 方法二：使用原生 Docker Compose 编排启动
+### 方法 2: Docker Compose（生产环境纯净部署）
 
 如果您属于经验丰富的开发者并希望保持环境的纯净独立掌控权：
 
@@ -286,19 +289,323 @@ curl -o .env https://raw.githubusercontent.com/smdk000/qq-farm-ui-pro-max/main/.
 docker-compose -f docker-compose.prod.yml up -d
 ```
 
+**4. 查看状态**
+```bash
+docker-compose -f docker-compose.prod.yml ps
+docker-compose -f docker-compose.prod.yml logs -f
+```
+
+**配置文件** (`docker-compose.prod.yml`):
+```yaml
+version: '3.8'
+
+services:
+  qq-farm-bot-ui:
+    image: smdk000/qq-farm-bot-ui:latest
+    container_name: qq-farm-bot-ui
+    restart: unless-stopped
+    ports:
+      - "3080:3000"
+    environment:
+      - ADMIN_PASSWORD=qq007qq008
+      - TZ=Asia/Shanghai
+      - NODE_ENV=production
+      - LOG_LEVEL=info
+    volumes:
+      - ./data:/app/core/data
+      - ./logs:/app/core/logs
+      - ./backup:/app/core/backup
+```
+
 ---
 
-## 🛡️ 数据安全与防丢失挂载声明
+### 方法 3: Docker 命令（灵活配置）
 
-我们极端挂念所有农友的心血数据，为您做出了以下物理层面级的保障：
-- **MySQL 核心** 将被自动挂载于宿主机同级目录下的 `./mysql_data`。
-- **Redis 高速缓存** 映射至 `./redis_data` 并强制启用 AOF 增量同步断电续存。
-- **App 热配置** 落盘于 `./data` 中进行本地留痕冷备安全。
+```bash
+docker run -d \
+  --name qq-farm-bot-ui \
+  --restart unless-stopped \
+  -p 3080:3000 \
+  -v ./data:/app/core/data \
+  -v ./logs:/app/core/logs \
+  -v ./backup:/app/core/backup \
+  -e ADMIN_PASSWORD=qq007qq008 \
+  -e TZ=Asia/Shanghai \
+  -e LOG_LEVEL=info \
+  smdk000/qq-farm-bot-ui:latest
+```
 
-> [!TIP]
-> 部署完成片刻后，当您通过 `docker ps` 看到 `qq-farm-app`、`qq-farm-mysql`、`qq-farm-redis` 军均处于 **Up (healthy)** 状态时，即代表部署大功告成！
+---
 
-**现在，请在浏览器访问主节点：`http://<服务器外网IP>:3000`**
+## 📊 验证部署成功
+
+### 检查清单
+
+```bash
+# 1. 检查容器状态
+docker ps
+
+# 2. 查看实时日志
+docker logs -f qq-farm-bot-ui
+
+# 3. 检查数据卷挂载
+docker inspect qq-farm-bot-ui | grep -A 10 Mounts
+
+# 4. 测试访问
+curl http://localhost:3080/api/ping
+```
+
+### 访问 Web 界面
+
+打开浏览器访问：`http://localhost:3080`
+
+- **默认用户名**: `admin`
+- **默认密码**: `qq007qq008`
+
+---
+
+## 🏗️ Docker 多平台构建
+
+### 构建并推送到 Docker Hub 和 GitHub
+
+#### 1. 环境准备
+
+```bash
+# 检查 Docker 和 Buildx
+docker --version
+docker buildx version
+
+# 登录 Docker Hub
+docker login
+
+# 登录 GitHub Container Registry
+echo $GH_PAT | docker login ghcr.io -u smdk000 --password-stdin
+```
+
+#### 2. 构建多平台镜像
+
+**使用脚本构建（推荐）**:
+```bash
+chmod +x scripts/docker-build-and-push.sh
+./scripts/docker-build-and-push.sh v3.6.0
+```
+
+**手动构建**:
+```bash
+# 构建并推送到 Docker Hub
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t smdk000/qq-farm-bot-ui:3.6.0 \
+  -t smdk000/qq-farm-bot-ui:latest \
+  -f core/Dockerfile . \
+  --push
+
+# 构建并推送到 GitHub Container Registry
+docker buildx build \
+  --platform linux/amd64,linux/arm64 \
+  -t ghcr.io/smdk000/qq-farm-bot-ui:3.6.0 \
+  -t ghcr.io/smdk000/qq-farm-bot-ui:latest \
+  -f core/Dockerfile . \
+  --push
+```
+
+#### 3. 验证构建
+
+```bash
+# 查看镜像信息
+docker manifest inspect smdk000/qq-farm-bot-ui:3.6.0
+
+# Docker Hub 查看
+# https://hub.docker.com/r/smdk000/qq-farm-bot-ui/tags
+
+# GitHub Packages 查看
+# https://github.com/users/smdk000/packages/container/package/qq-farm-bot-ui
+```
+
+---
+
+## 🔄 版本升级
+
+### 从旧版本升级
+
+```bash
+# 1. 备份数据（重要！）
+tar -czf farm-bot-backup-$(date +%Y%m%d).tar.gz ./data
+
+# 2. 停止旧容器
+docker stop qq-farm-bot-ui
+docker rm qq-farm-bot-ui
+
+# 3. 拉取新镜像
+docker pull smdk000/qq-farm-bot-ui:latest
+
+# 4. 启动新容器
+./scripts/deploy-arm.sh  # 或 deploy-x86.sh
+```
+
+---
+
+## 🛡️ 数据保护
+
+### 数据卷挂载说明
+
+| 宿主机路径 | 容器内路径 | 说明 |
+|-----------|-----------|------|
+| `./data` | `/app/core/data` | **核心数据库**（账号配置、用户数据） |
+| `./logs` | `/app/core/logs` | 日志文件（运行日志、操作日志） |
+| `./backup` | `/app/core/backup` | 备份文件目录 |
+
+### 备份策略
+
+**定期备份**:
+```bash
+# 每天凌晨 2 点备份
+0 2 * * * tar -czf /backup/farm-bot-$(date +\%Y\%m\%d).tar.gz ./data
+```
+
+**升级前备份**:
+```bash
+tar -czf farm-bot-backup-$(date +%Y%m%d).tar.gz ./data
+```
+
+**从备份恢复**:
+```bash
+tar -xzf farm-bot-backup-20260301.tar.gz -C ./data
+```
+
+### ⚠️ 重要提醒
+
+- ❌ **不要删除** `./data` 目录，否则所有数据将丢失
+- ❌ **不要手动修改** 数据库文件，可能导致数据损坏
+- ✅ **定期备份** 数据到安全位置
+- ✅ **升级前先备份**
+
+---
+
+## ⚠️ 常见错误与解决方案
+
+### 错误 1: 镜像拉取失败 ❌
+
+**错误信息**:
+```
+Error response from daemon: pull access denied
+```
+
+**原因**: 
+- 使用了错误的镜像名称
+- Docker Hub 账号未登录
+
+**解决方案**:
+```bash
+# ✅ 正确的镜像名称
+docker pull smdk000/qq-farm-bot-ui:latest
+
+# ❌ 错误的镜像名称
+docker pull qq-farm-bot-ui:latest  # 缺少用户名
+
+# 如果需要登录
+docker login
+```
+
+---
+
+### 错误 2: 端口被占用 ❌
+
+**错误信息**:
+```
+Error starting userland proxy: listen tcp 0.0.0.0:3080: bind: address already in use
+```
+
+**解决方案**:
+```bash
+# 检查端口占用
+lsof -i :3080
+
+# 使用不同端口
+export PORT=3081
+./scripts/deploy-arm.sh
+```
+
+---
+
+### 错误 3: 权限错误 ❌
+
+**错误信息**:
+```
+permission denied while trying to connect to the Docker daemon socket
+```
+
+**解决方案**:
+```bash
+# 使用 sudo
+sudo ./scripts/deploy-arm.sh
+
+# 或将用户添加到 docker 组
+sudo usermod -aG docker $USER
+newgrp docker
+```
+
+---
+
+## 📊 多平台支持
+
+- ✅ **linux/amd64** - Intel/AMD x86_64 服务器
+- ✅ **linux/arm64** - ARM64 服务器（树莓派 4B/鲲鹏/飞腾等）
+
+Docker 会自动选择适合您系统架构的镜像版本。
+
+---
+
+## 📝 配置说明
+
+### 环境变量
+
+| 变量名 | 说明 | 默认值 |
+|--------|------|--------|
+| `ADMIN_PASSWORD` | 管理员密码 | `qq007qq008` |
+| `TZ` | 时区 | `Asia/Shanghai` |
+| `LOG_LEVEL` | 日志级别 | `info` |
+| `NODE_ENV` | 运行环境 | `production` |
+
+### 端口映射
+
+| 容器端口 | 宿主机端口 | 说明 |
+|---------|-----------|------|
+| 3000 | 3080 | Web 界面访问端口 |
+
+---
+
+## 📚 完整文档
+
+- **GitHub 仓库**: https://github.com/smdk000/qq-farm-ui-pro-max
+- **Docker Hub**: https://hub.docker.com/r/smdk000/qq-farm-bot-ui
+- **GitHub Packages**: https://github.com/users/smdk000/packages/container/package/qq-farm-bot-ui
+- **部署指南**: [DEPLOYMENT_GUIDE_v3.6.0.md](DEPLOYMENT_GUIDE_v3.6.0.md)
+- **故障排查**: [docs/TROUBLESHOOTING.md](docs/TROUBLESHOOTING.md)
+- **配置模板**: [docs/CONFIG_TEMPLATES.md](docs/CONFIG_TEMPLATES.md)
+
+---
+
+## 🆘 获取帮助
+
+### 文档资源
+
+- [README.md](https://github.com/smdk000/qq-farm-ui-pro-max) - 项目说明
+- [DEPLOYMENT_FIX_REPORT.md](DEPLOYMENT_FIX_REPORT.md) - 部署问题修复报告
+- [DOCKER_BUILD_COMPLETE.md](DOCKER_BUILD_COMPLETE.md) - Docker 构建完成总结
+
+### 技术支持
+
+- **GitHub Issues**: https://github.com/smdk000/qq-farm-ui-pro-max/issues
+- **QQ 群**: 227916149
+- **Docker Hub**: https://hub.docker.com/r/smdk000/qq-farm-bot-ui
+
+---
+
+**维护者**: smdk000  
+**最后更新**: 2026-03-02  
+**版本**: v3.8.0
+
 ## 多用户模式
 
 ## 多用户模式
@@ -319,7 +626,7 @@ docker-compose -f docker-compose.prod.yml up -d
 3. 编辑用户（修改到期时间、启用/封禁）
 4. 删除普通用户
 
-![用户管理](pic/截图5.png)
+![用户管理](pic/users.svg)
 
 ### 普通用户操作
 
@@ -335,7 +642,7 @@ docker-compose -f docker-compose.prod.yml up -d
 3. 输入新卡密
 4. 确认续费
 
-![卡密管理](pic/截图6.png)
+![卡密管理](pic/cards.svg)
 
 ---
 
@@ -361,7 +668,7 @@ docker-compose -f docker-compose.prod.yml up -d
 6. 勾选好友（需先加载好友列表）
 7. 保存设置
 
-![偷菜设置](pic/截图7.png)
+![偷菜设置](pic/steal-settings.svg)
 
 ---
 
@@ -657,76 +964,6 @@ ISC License
 
 ---
 
-## 程序截图
-
-### 登录
-支持多模式验证、Token安全保护、体验卡自助领取与一键全自动登录入驻。
-
-![登录控制台1](pic/登录1.png)
-![登录控制台2](pic/登录2.png)
-![登录控制台3](pic/登录3.png)
-
-### 主题
-内置多种玻璃态 (Glassmorphism) 梦幻色彩主题，全面适配深浅双模与性能自适应。
-
-![主题切换1](pic/主题1.png)
-![主题切换2](pic/主题2.png)
-![主题切换3](pic/主题3.png)
-![主题切换4](pic/主题4.png)
-![主题切换5](pic/主题5.png)
-![主题切换6](pic/主题6.png)
-![主题切换7](pic/主题7.png)
-![主题切换8](pic/主题8.png)
-![主题切换9](pic/主题9.png)
-![主题切换10](pic/主题10.png)
-
-### 功能
-全网独家挂载系统，支持好友队列并行与精准到秒的农作物防风控安全蹲守拦截。
-
-![核心功能1](pic/功能1.png)
-![核心功能2](pic/功能2.png)
-![核心功能3](pic/功能3.png)
-![核心功能4](pic/功能4.png)
-![核心功能5](pic/功能5.png)
-![核心功能6](pic/功能6.png)
-![核心功能7](pic/功能7.png)
-![核心功能8](pic/功能8.png)
-![核心功能9](pic/功能9.png)
-![核心功能10](pic/功能10.png)
-![核心功能11](pic/功能11.png)
-![核心功能12](pic/功能12.png)
-![核心功能13](pic/功能13.png)
-![核心功能14](pic/功能14.png)
-![核心功能15](pic/功能15.png)
-![核心功能16](pic/功能16.png)
-![核心功能17](pic/功能17.png)
-
----
-
-**最后更新时间**：2026-03-02
----
-
-## 🚀 Iteration Logs (最近更新)
-
-### 2026-03-02 核心数据引擎重构与隔离修复 (v3.8.0)
-- **后端**
-  - MySQL & Redis 终局架构：彻底铲除基于 SQLite 与 accounts.json 的脆弱存储层。全量接入极速异步的 MySQL 连接池与 Redis 分布式机制。
-  - 数据源隔离屏障：重写核心控制器，利用高并发连接池特性解决大批量读取写入时的拥堵与撞锁风险；从根源处保障系统的高健壮性与越权阻断。
-- **前端**
-  - 断尾清理与UI鉴权拦截隔离，全盘保障稳定。
-
-### 2026-03-02 蹲守偷菜与精准打击架构 (v3.7.0)
-- **高级防守与进攻**：在“偷菜设置”中全新加入“蹲守偷菜”策略模块！支持开关控制并可自定义延迟（0-60秒），极大增强拟真感。
-- **智能感知**：自动倒推好友土地成熟时间表，在列表上直观监控。
-
-### 2026-03-01 极速挂载与端云同步架构 (v3.6.0)
-- **端云同步时间机器**：彻底解决在多设备间切换账号时的偏好设置冲突。
-- **首屏秒开级切片**：采用组件级并行级按需加载方案，首屏速度大幅度提升。
-
-### 2026-03-01 扫码重构与防风控限流机制 (v3.5.2)
-- **API密钥脱敏与隔离**：彻底剥离硬编码调用，通过强类型 `.env WX_API_KEY` 注入拦截非法利用。
-- **令牌桶防拥堵**：针对 WebSocket 限流网关重构为 3QPS 原生令牌桶排队削峰架构。
-
 ## 🎉 最近更新
 
 ### v3.7.0 - 蹲守偷菜架构实现 (2026-03-02)
@@ -868,6 +1105,3 @@ ISC License
 - ✅ 用户管理页面
 - ✅ 卡密管理页面
 - ✅ 帮助中心系统
-
-
-> 历史迭代记录可前往仓库内的 `UPDATE_LOG.md` 或 `CHANGELOG.md` 检阅。
