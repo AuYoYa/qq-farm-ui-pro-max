@@ -649,7 +649,8 @@ async function runBatchWithFallback(ids, batchFn, singleFn) {
                 await singleFn([landId]);
                 ok++;
             } catch { /* ignore */ }
-            // 令牌桶已在底层做了 334ms 间隔限流，无需额外 sleep
+            // Phase 3: Jitter 抖动防查 (0.5s - 1.2s) - 模拟人类点击单块土地的延迟
+            await sleep(500 + Math.floor(Math.random() * 700));
         }
         return ok;
     }
@@ -859,7 +860,8 @@ async function visitFriend(friend, totalActions, myGid) {
                         const info = status.stealableInfo.find(x => x.landId === landId);
                         if (info) stolenPlants.push(info.name);
                     } catch { /* ignore */ }
-                    // 令牌桶已在底层做了 334ms 间隔限流，无需额外 sleep
+                    // Phase 3: Jitter 防查
+                    await sleep(500 + Math.floor(Math.random() * 700));
                 }
             }
 
@@ -907,8 +909,18 @@ async function visitFriend(friend, totalActions, myGid) {
 
 // ============ 好友巡查主循环 ============
 
+let consecutiveErrors = 0; // Phase 3: 指数退避计数
+
 async function checkFriends() {
     const state = getUserState();
+
+    // Phase 2: 检测休眠锁
+    if (state.suspendUntil && Date.now() < state.suspendUntil) {
+        const resetMinutes = Math.ceil((state.suspendUntil - Date.now()) / 60000);
+        logWarn('好友', `账号风控自愈休眠中，跳过本次巡回 (剩余约 ${resetMinutes} 分钟)...`);
+        return false;
+    }
+
     // 首先检查主开关，如果未开启则直接返回
     if (!isAutomationOn('friend')) return false;
 
@@ -965,6 +977,28 @@ async function checkFriends() {
             }
         }
 
+        // ==========================================
+        // [防护级 - Noise Injection] 混入“无效参观”动作
+        // ==========================================
+        const unvisitedFriends = friends.filter(f => !visitedGids.has(toNum(f.gid)) && toNum(f.gid) !== state.gid && !blacklist.has(toNum(f.gid)));
+        if (unvisitedFriends.length > 0 && Math.random() < 0.15) {
+            // 15% 几率挑 1 到 2 个根本不需要操作的好友“进去看看”
+            const noiseCount = Math.floor(Math.random() * 2) + 1;
+            for (let i = 0; i < noiseCount; i++) {
+                if (unvisitedFriends.length > 0) {
+                    const rIdx = Math.floor(Math.random() * unvisitedFriends.length);
+                    const f = unvisitedFriends.splice(rIdx, 1)[0];
+                    otherFriends.push({
+                        gid: toNum(f.gid),
+                        name: f.remark || f.name || `GID:${f.gid}`,
+                        isPriority: false,
+                        isNoise: true // 标记为噪音
+                    });
+                }
+            }
+        }
+        // ==========================================
+
         // 排序优化: 优先偷菜多的，其次是需要帮助多的
         priorityFriends.sort((a, b) => {
             if (b.stealNum !== a.stealNum) return b.stealNum - a.stealNum; // 偷菜优先
@@ -977,6 +1011,7 @@ async function checkFriends() {
         const friendsToVisit = [...priorityFriends, ...otherFriends];
 
         if (friendsToVisit.length === 0) {
+            consecutiveErrors = 0; // 无任务视为正常
             return false;
         }
 
@@ -986,7 +1021,7 @@ async function checkFriends() {
             const friend = friendsToVisit[i];
 
             // 如果是仅捣乱的好友（帮忙/偷菜均未开启），且次数已用完，则停止
-            if (!friend.isPriority && !helpEnabled && !stealEnabled && !canOperate(10004) && !canOperate(10003)) {
+            if (!friend.isPriority && !friend.isNoise && !helpEnabled && !stealEnabled && !canOperate(10004) && !canOperate(10003)) {
                 break;
             }
 
@@ -996,7 +1031,11 @@ async function checkFriends() {
                 // 单个好友访问失败不影响整体
             }
 
-            // 令牌桶已在底层做了 334ms 间隔限流，无需额外 sleep
+            // 仿生延迟：模拟人类切换好友时的浏览思考行为 (1~5 秒随机)
+            // 令牌桶底层已有 334ms 限流，此处叠加人类行为模拟层
+            if (i < friendsToVisit.length - 1) {
+                await sleep(1000 + Math.floor(Math.random() * 4000));
+            }
         }
 
         // 偷菜后自动出售
@@ -1022,10 +1061,12 @@ async function checkFriends() {
                 module: 'friend', event: 'friend_cycle', result: 'ok', visited: friendsToVisit.length, summary
             });
         }
+        consecutiveErrors = 0; // 完成所有判定，视为正常操作
         return summary.length > 0;
 
     } catch (err) {
         logWarn('好友', `巡查异常: ${err.message}`);
+        consecutiveErrors++;
         return false;
     } finally {
         isCheckingFriends = false;
@@ -1046,7 +1087,21 @@ async function friendCheckLoop() {
 
     await checkFriends();
     if (!friendLoopRunning) return;
-    friendScheduler.setTimeoutTask('friend_check_loop', Math.max(0, CONFIG.friendCheckInterval), () => friendCheckLoop());
+
+    let finalDelay = CONFIG.friendCheckInterval;
+
+    // Phase 3: 根据连续报错情况计算退避。前3次不退避，第4次开始成倍激增
+    if (consecutiveErrors > 3) {
+        const backoff = Math.min(300000, 5000 * Math.pow(2, consecutiveErrors - 3));
+        finalDelay = Math.max(finalDelay, backoff);
+        logWarn('系统', `连续 ${consecutiveErrors} 次异常，启动风控退避，下次好友巡回延迟 ${Math.round(finalDelay / 1000)} 秒`);
+    }
+
+    // Phase 3: Jitter 随机抖动防查 (针对下一次定时的间隔时间做 2% ~ 8% 的随机浮动扩大)
+    const jitter = Math.floor((Math.random() * 0.06 + 0.02) * finalDelay);
+    finalDelay += jitter;
+
+    friendScheduler.setTimeoutTask('friend_check_loop', Math.max(0, finalDelay), () => friendCheckLoop());
 }
 
 function startFriendCheckLoop(options = {}) {

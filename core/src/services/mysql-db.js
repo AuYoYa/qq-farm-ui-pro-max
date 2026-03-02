@@ -74,6 +74,31 @@ async function initMysql() {
         await tempPool.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
         await tempPool.end();
 
+        // 检查核心表结构是否缺失，若缺失则自动执行初始化建表脚本
+        const [rows] = await pool.execute(`SHOW TABLES LIKE 'accounts'`);
+        if (rows.length === 0) {
+            logger.info('检测到空载数据库，正在自动执行建表初始化...');
+            const fs = require('node:fs');
+            const path = require('node:path');
+            const initSqlPath = path.join(__dirname, '../database/migrations/001-init_mysql.sql');
+            if (fs.existsSync(initSqlPath)) {
+                const initConn = await mysql.createConnection({
+                    host: DB_HOST,
+                    port: DB_PORT,
+                    user: DB_USER,
+                    password: DB_PASS,
+                    database: DB_NAME,
+                    multipleStatements: true // 开启多语句模式以执行整个 .sql
+                });
+                const initSql = fs.readFileSync(initSqlPath, 'utf8');
+                await initConn.query(initSql);
+                await initConn.end();
+                logger.info('✅ MySQL 核心表结构自动初始化完成');
+            } else {
+                logger.error('❌ 缺失 MySQL 初始化脚本: 001-init_mysql.sql');
+            }
+        }
+
         // 测试主池的连通性
         const connection = await pool.getConnection();
         logger.info(`✅ MySQL 数据库连接池初始化成功 (${DB_HOST}:${DB_PORT}, 上限=${DB_LIMIT})`);
@@ -85,13 +110,17 @@ async function initMysql() {
 }
 
 /**
- * 封装的快捷执行方法
+ * 封装的快捷执行方法 (带有连接自动重试功能防 Socket 闪断)
  */
-async function query(sql, params = []) {
+async function query(sql, params = [], retries = 1) {
     try {
         const [rows, fields] = await pool.execute(sql, params);
         return rows;
     } catch (e) {
+        if (retries > 0 && (e.code === 'ECONNRESET' || e.code === 'PROTOCOL_CONNECTION_LOST' || e.code === 'ETIMEDOUT')) {
+            logger.warn(`SQL执行遇到坏链 [${e.code}]，尝试重新获取可用连接再执行 (剩余: ${retries})`);
+            return query(sql, params, retries - 1);
+        }
         logger.error(`SQL执行错误 [${sql}]:`, e.message);
         throw e;
     }
@@ -100,8 +129,18 @@ async function query(sql, params = []) {
 /**
  * 获取连接以执行事务
  */
-async function transaction(fn) {
-    const connection = await pool.getConnection();
+async function transaction(fn, retries = 1) {
+    let connection;
+    try {
+        connection = await pool.getConnection();
+    } catch (err) {
+        if (retries > 0 && (err.code === 'ECONNRESET' || err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ETIMEDOUT')) {
+            logger.warn(`[mysql-db] 获取事务连接防老化判定触发 ${err.code}，正在重试 (剩余: ${retries})`);
+            return transaction(fn, retries - 1);
+        }
+        throw err;
+    }
+
     await connection.beginTransaction();
     try {
         const result = await fn(connection);
@@ -109,10 +148,17 @@ async function transaction(fn) {
         return result;
     } catch (e) {
         await connection.rollback();
+        if (retries > 0 && (e.code === 'ECONNRESET' || e.code === 'PROTOCOL_CONNECTION_LOST' || e.code === 'ETIMEDOUT')) {
+            logger.warn(`[mysql-db] 事务执行期遭逢断链 ${e.code}，回滚并移交重试管道 (剩余: ${retries})`);
+            try { connection.release(); } catch (ignore) { }
+            return transaction(fn, retries - 1);
+        }
         logger.error('事务已回滚:', e.message);
         throw e;
     } finally {
-        connection.release();
+        if (connection && connection.release) {
+            try { connection.release(); } catch (ignore) { }
+        }
     }
 }
 

@@ -241,7 +241,7 @@ const backgroundStyle = computed(() => {
     <div class="relative z-10 mx-4 max-w-5xl w-full lg:mx-auto">
       <div class="glass-panel flex flex-col overflow-hidden rounded-3xl shadow-2xl shadow-black/20 ring-1 ring-white/20 lg:flex-row">
         <!-- 左侧：品牌展示区 -->
-        <div class="relative flex flex-col items-center justify-center from-blue-600/90 to-indigo-700/90 bg-gradient-to-br p-10 text-center text-white lg:w-5/12">
+        <div class="relative flex flex-col items-center justify-center from-blue-600/95 via-indigo-600/95 to-purple-700/95 bg-gradient-to-br p-10 text-center text-white lg:w-5/12">
           <!-- 装饰背景 -->
           <div class="pointer-events-none absolute inset-0 opacity-10">
             <svg class="h-full w-full" viewBox="0 0 100 100" preserveAspectRatio="none">
@@ -269,20 +269,30 @@ const backgroundStyle = computed(() => {
           </div>
 
           <h1 class="mb-3 text-3xl font-extrabold tracking-tight">
-            QQ 农场智能助手
+            <span class="bg-gradient-to-r from-white via-blue-200 to-white bg-clip-text text-transparent animate-pulse decoration-clone drop-shadow-sm">
+              御农·QQ 农场智能助手
+            </span>
           </h1>
           <p class="mb-8 text-blue-100 font-medium">
             精简化、自动化的多账号管理助手
           </p>
 
-          <div class="hidden w-full px-4 lg:block space-y-4">
-            <div class="flex items-center gap-3 border border-white/10 rounded-2xl bg-white/10 p-3">
-              <div class="i-carbon-flash text-xl" />
-              <span class="text-sm">极速自动化响应</span>
+          <div class="hidden w-full px-4 lg:grid lg:grid-cols-2 lg:gap-3">
+            <div class="group flex flex-col items-center justify-center gap-2 border border-white/10 rounded-2xl bg-white/10 p-4 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:shadow-white/10 cursor-default">
+              <div class="i-carbon-flash text-2xl text-blue-300 transition-colors group-hover:text-white" />
+              <span class="text-xs font-semibold tracking-wide">极速自动化</span>
             </div>
-            <div class="flex items-center gap-3 border border-white/10 rounded-2xl bg-white/10 p-3">
-              <div class="i-carbon-security text-xl" />
-              <span class="text-sm">安全的多用户隔离存储</span>
+            <div class="group flex flex-col items-center justify-center gap-2 border border-white/10 rounded-2xl bg-white/10 p-4 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:shadow-white/10 cursor-default">
+              <div class="i-carbon-security text-2xl text-blue-300 transition-colors group-hover:text-white" />
+              <span class="text-xs font-semibold tracking-wide">租户级防封隔离</span>
+            </div>
+            <div class="group flex flex-col items-center justify-center gap-2 border border-white/10 rounded-2xl bg-white/10 p-4 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:shadow-white/10 cursor-default">
+              <div class="i-carbon-bot text-2xl text-blue-300 transition-colors group-hover:text-white" />
+              <span class="text-xs font-semibold tracking-wide">无感智能验证</span>
+            </div>
+            <div class="group flex flex-col items-center justify-center gap-2 border border-white/10 rounded-2xl bg-white/10 p-4 transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] hover:-translate-y-1.5 hover:scale-105 hover:bg-white/20 hover:shadow-xl hover:shadow-white/10 cursor-default">
+              <div class="i-carbon-rocket text-2xl text-blue-300 transition-colors group-hover:text-white" />
+              <span class="text-xs font-semibold tracking-wide">多核并发引擎</span>
             </div>
           </div>
         </div>

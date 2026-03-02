@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>qq-farm-ui-pro-max 核心双架构 Docker 构建与完全部署方案 (V3 终局版)</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            /* Blue */
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+        }
+
+        h1 {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 2.5rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border-color);
+            color: var(--primary);
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-warning {
+            border-color: var(--warning);
+            color: #fcd34d;
+            background-color: rgba(245, 158, 11, 0.1);
+        }
+
+        .alert-info {
+            border-color: var(--primary);
+            color: #93c5fd;
+            background-color: rgba(59, 130, 246, 0.1);
+        }
+
+        .alert-success {
+            border-color: var(--success);
+            color: #6ee7b7;
+            background-color: rgba(16, 185, 129, 0.1);
+        }
+
+        code {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: ui-monospace, monospace;
+            color: #a78bfa;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #000;
+            color: #00ff00;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            white-space: pre-wrap;
+            font-size: 0.85rem;
+        }
+
+        ul {
+            padding-left: 1.2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #93c5fd;
+        }
+
+        .tag-red {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: #fca5a5;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 qq-farm-ui-pro-max 容器化、多架构与高可用部署方案 (V3 终局版)</h1>
+    <p class="text-muted">已充分阅读 <code>开发交接文档_20260302.md</code> 和更新日志，确认系统已进入 <strong>v3.8.0 MySQL/Redis
+            终局驱动架构</strong>。本次开源计划将以“极致的数据安全性”和“真正的多架构部署一键通”为核心。</p>
+
+    <div class="alert alert-success">
+        <strong>🛡️ 核心承诺清单：</strong><br />
+        ✓ 绝不丢失用户原始 README 核心介绍。<br />
+        ✓ 绝不丢失历史 Update.log 版本迭代记录。<br />
+        ✓ 绝对保障 MySQL 与 Redis 数据的宿主机级持久化（卷挂载），容器就算被删数据也 100% 安全。<br />
+        ✓ 真・无脑多架构兼容，提供 <code>ARM64</code> & <code>x86_64</code> Docker 一键跑通脚本。
+    </div>
+
+    <h2>阶段一：代码纯净隔离与脱敏</h2>
+    <div class="card">
+        <ul>
+            <li>建立 <code>../qq-farm-ui-pro-max-github-sync</code> 纯净物理隔离库。</li>
+            <li>擦除 <code>.git</code> 及内部敏感缓存，包括 <code>.env</code> 文件内的 <code>WX_API_KEY</code> 与数据库口令。</li>
+            <li>生成带有 <code>MYSQL_HOST</code>、<code>REDIS_HOST</code>、<code>PORT</code> 等强扩展性的 <code>.env.example</code>。
+            </li>
+        </ul>
+    </div>
+
+    <h2>阶段二：ARM / x86_64 双架构原生 Docker 矩阵构建与推送</h2>
+    <div class="card">
+        <p>不再依赖外部缓慢工具，我们将首先在<strong>您本地直接进行交叉编译与推送</strong>：</p>
+        <ul>
+            <li>编写基于 <code>node:22-alpine</code> 的 <strong>Multi-stage Dockerfile</strong>。利用本地 <code>Buildx</code>
+                引擎构建超级压缩包（仅保留纯代码与依赖层）。</li>
+            <li><strong>一键构建并推送多架构命令 (我会在最终执行时带你运行)：</strong>
+                <pre>docker buildx create --use
+docker buildx build --platform linux/amd64,linux/arm64 \
+  -t smdk000/qq-farm-ui-pro-max:latest \
+  -t smdk000/qq-farm-ui-pro-max:v3.8.0 \
+  --push .</pre>
+            </li>
+        </ul>
+    </div>
+
+    <h2>阶段三：高可用服务器一键部署编排 <span class="tag">关键防丢策略</span></h2>
+    <div class="card">
+        <p>为小白服主提供完美整合 <code>App + MySQL 8.0 + Redis 7.4</code> 的 <strong>docker-compose.yml</strong>：</p>
+        <ul>
+            <li><span class="tag-red">数据完全持久化</span> <code>mysql-data</code> 挂载到
+                <code>./mysql_data</code>，<code>redis-data</code> 挂载到 <code>./redis_data</code>，应用配置挂载到
+                <code>./data</code>。不论怎么 <code>docker-compose down</code> 都不丢任何东西！</li>
+            <li><strong>ARM 容错设计：</strong> 若是甲骨文/树莓派 ARM ，因为 MySQL 8.0 本身限制，我们在配置文件中会智能利用 <code>mysql:8.0-oracle</code>
+                镜像或降维侦测，甚至通过 <code>deploy.sh</code> 放宽 <code>vm.overcommit_memory</code> 以保护 Redis。</li>
+            <li><strong>一键启动命令（供用户）：</strong>
+                <pre>curl -fsSL https://raw.githubusercontent.com/smdk000/qq-farm-ui-pro-max/main/deploy.sh -o deploy.sh && chmod +x deploy.sh && ./deploy.sh</pre>
+                这个脚本会聪明地检测它身处 ARM 还是 x86_64 ，缺 Docker 就装 Docker ，然后一秒拉起三剑客（MySQL/Redis/Bot）。
+            </li>
+        </ul>
+    </div>
+
+    <h2>阶段四：文档传承 (README.md 更新策略)</h2>
+    <div class="card">
+        <p><strong>精确遵循“保留元数据、只动部署与日志”的微创手术刀法则：</strong></p>
+        <ul>
+            <li>1️⃣ 原有的系统介绍、旧的功能截图、免责声明等<strong>丝毫不动</strong>。</li>
+            <li>2️⃣ 覆盖老旧模糊的**部署方案**，替换为上述全新的 【Docker Compose 组合发版】 和 【一键 <code>deploy.sh</code>
+                傻瓜拉取版】。详细列出端口是如何暴露的，以及云服务器安全组要放行哪些端口（如 Web: 3000）。</li>
+            <li>3️⃣ <strong>更新历史长卷：</strong> 从本地的 <code>CHANGELOG.md</code> 或 <code>Update.log</code> 中提取最干货的内容（例如
+                v3.8.0 终端数据库大迭代，v3.7 蹲守偷菜等），悉数附在 README 的**最底层尾部**，名曰
+                <code>## 🚀 Iteration Logs (最近更新)</code>，让开源圈看到旺盛的生机。</li>
+        </ul>
+    </div>
+
+</body>
+
+</html>

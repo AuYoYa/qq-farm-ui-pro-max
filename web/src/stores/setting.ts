@@ -53,6 +53,12 @@ export interface TrialCardConfig {
   cooldownMs?: number
 }
 
+export interface ThirdPartyApiConfig {
+  wxApiKey?: string
+  wxApiUrl?: string
+  wxAppId?: string
+}
+
 export interface UIConfig {
   theme?: string
 }
@@ -84,6 +90,7 @@ export interface SettingsState {
   ui: UIConfig
   offlineReminder: OfflineConfig
   trialConfig: TrialCardConfig
+  thirdPartyApi: ThirdPartyApiConfig
   workflowConfig: WorkflowConfig
 }
 
@@ -113,9 +120,14 @@ export const useSettingStore = defineStore('setting', () => {
       dailyLimit: 50,
       cooldownMs: 4 * 60 * 60 * 1000,
     },
+    thirdPartyApi: {
+      wxApiKey: '',
+      wxApiUrl: '',
+      wxAppId: '',
+    },
     workflowConfig: {
-      farm: { enabled: false, minInterval: 2, maxInterval: 2, nodes: [] },
-      friend: { enabled: false, minInterval: 10, maxInterval: 10, nodes: [] },
+      farm: { enabled: false, minInterval: 30, maxInterval: 120, nodes: [] },
+      friend: { enabled: false, minInterval: 60, maxInterval: 300, nodes: [] },
     },
   })
   const loading = ref(false)
@@ -138,7 +150,7 @@ export const useSettingStore = defineStore('setting', () => {
         settings.value.ui = d.ui || {}
           // 蹲守配置挂到 settings 上层以便 StealSettings.vue 读取
           ; (settings.value as any).stakeoutSteal = d.stakeoutSteal || { enabled: false, delaySec: 3 }
-        settings.value.workflowConfig = d.workflowConfig || { farm: { enabled: false, minInterval: 2, maxInterval: 2, nodes: [] }, friend: { enabled: false, minInterval: 10, maxInterval: 10, nodes: [] } }
+        settings.value.workflowConfig = d.workflowConfig || { farm: { enabled: false, minInterval: 30, maxInterval: 120, nodes: [] }, friend: { enabled: false, minInterval: 60, maxInterval: 300, nodes: [] } }
         settings.value.offlineReminder = d.offlineReminder || {
           channel: 'webhook',
           reloginUrlMode: 'none',
@@ -235,5 +247,33 @@ export const useSettingStore = defineStore('setting', () => {
     }
   }
 
-  return { settings, loading, fetchSettings, saveSettings, saveOfflineConfig, changeAdminPassword, fetchTrialCardConfig }
+  async function fetchThirdPartyApiConfig() {
+    try {
+      const { data } = await api.get('/api/admin/third-party-api')
+      if (data && data.ok && data.data) {
+        settings.value.thirdPartyApi = data.data
+      }
+      return data?.data
+    }
+    catch (e) {
+      console.error('获取第三方 API 配置失败:', e)
+    }
+  }
+
+  async function saveThirdPartyApiConfig(config: ThirdPartyApiConfig) {
+    loading.value = true
+    try {
+      const { data } = await api.post('/api/admin/third-party-api', config)
+      if (data && data.ok) {
+        settings.value.thirdPartyApi = config
+        return { ok: true }
+      }
+      return { ok: false, error: '保存失败' }
+    }
+    finally {
+      loading.value = false
+    }
+  }
+
+  return { settings, loading, fetchSettings, saveSettings, saveOfflineConfig, changeAdminPassword, fetchTrialCardConfig, fetchThirdPartyApiConfig, saveThirdPartyApiConfig }
 })

@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>方案设计：策略流程编排引擎 UI 重构</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --surface: #1e293b;
+            --border: #334155;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --primary: #3b82f6;
+            --primary-hover: #2563eb;
+            --success: #10b981;
+            --danger: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+            max-w: 1200px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+        }
+
+        .section {
+            background-color: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .diff {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .diff-col {
+            padding: 1rem;
+            border-radius: 6px;
+            background-color: rgba(0, 0, 0, 0.2);
+            border: 1px solid var(--border);
+        }
+
+        .diff-old {
+            border-left: 4px solid var(--danger);
+        }
+
+        .diff-new {
+            border-left: 4px solid var(--success);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 4px;
+            background: var(--primary);
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .node-track {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 1rem;
+            background: #0f172a;
+            border-radius: 6px;
+            overflow-x: auto;
+        }
+
+        .node-chip {
+            background: transparent;
+            border: 1px solid #3b82f6;
+            color: #60a5fa;
+            padding: 0.4rem 0.8rem;
+            border-radius: 4px;
+            white-space: nowrap;
+            font-size: 0.9rem;
+        }
+
+        .node-arrow {
+            color: #64748b;
+        }
+
+        .toolbar {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-top: 1rem;
+            font-size: 0.9rem;
+            color: var(--text-muted);
+        }
+
+        .tool-chip {
+            background: transparent;
+            border: 1px solid #475569;
+            color: #cbd5e1;
+            padding: 0.2rem 0.6rem;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 策略流程编排 UI 重构方案</h1>
+    <p>基于用户提供的竞品 UI 参考图，现有垂直两栏布局将彻底废弃，转为 <strong>单页横向流式编排 (Horizontal Track)</strong> 设计。此方案能更好地传达 "自动化序列"
+        的直观感受，且完全复用暗黑系 <code>glass-panel</code> 主题系统。</p>
+
+    <div class="section">
+        <h2>1. 视觉架构对比</h2>
+        <div class="diff">
+            <div class="diff-col diff-old">
+                <h3>🚫 旧版布局 (已废弃)</h3>
+                <ul>
+                    <li><strong>双栏布局</strong>：左侧可用节点库，右侧流程队列。</li>
+                    <li><strong>纵向排列</strong>：节点上下拖拽，占用垂直空间大。</li>
+                    <li><strong>行内编辑独立</strong>：编辑面板固定在右侧容器，影响布局流。</li>
+                    <li><strong>移动端割裂</strong>：在小屏幕上极其拥挤。</li>
+                </ul>
+            </div>
+            <div class="diff-col diff-new">
+                <h3>✅ 新版布局 (目标方案)</h3>
+                <ul>
+                    <li><strong>单页横带</strong>：农场与好友流程分别为两个独立的上下文卡片。</li>
+                    <li><strong>水平滚动轨道</strong>：节点横向排列，用 <code>&rarr;</code> 连接，更符合逻辑流。</li>
+                    <li><strong>底部操作栏</strong>："添加节点工具栏" 结合 "保存操作按钮" 收纳于每个流程轨道底部。</li>
+                    <li><strong>就地展开编辑</strong>：点击节点，在该节点下方横向展开编辑抽屉。</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>2. 布局 Demo 演示</h2>
+        <p>新版农场流程卡片架构演示：</p>
+        <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 8px; border: 1px solid var(--border);">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 1rem;">
+                <div style="font-weight: bold; font-size: 1.1rem;">🚜 农场流程编排 <span class="tag"
+                        style="background: #334155;">未启用</span></div>
+                <div><input type="checkbox"> 启用流程模式</div>
+            </div>
+
+            <div style="display: flex; gap: 2rem; margin-bottom: 1rem; color: var(--text-muted); font-size: 0.9rem;">
+                <div>最小间隔 (秒)<br><input type="text" value="2"
+                        style="background:var(--bg-color); border:1px solid var(--border); color:#fff; padding:0.2rem; width: 60px;">
+                </div>
+                <div>最大间隔 (秒)<br><input type="text" value="2"
+                        style="background:var(--bg-color); border:1px solid var(--border); color:#fff; padding:0.2rem; width: 60px;">
+                </div>
+            </div>
+
+            <!-- Horizontal Track -->
+            <div class="node-track">
+                <div class="node-chip">🧪 阶段施肥</div>
+                <div class="node-arrow">&rarr;</div>
+                <div class="node-chip">✂️ 除草</div>
+                <div class="node-arrow">&rarr;</div>
+                <div class="node-chip">🐛 除虫</div>
+                <div class="node-arrow">&rarr;</div>
+                <div class="node-chip">💧 浇水</div>
+                <div class="node-arrow">&rarr;</div>
+                <div class="node-chip">⏳ 等待成熟</div>
+                <div class="node-arrow">&rarr;</div>
+                <div class="node-chip">📦 收获</div>
+            </div>
+
+            <!-- Toolbar -->
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-top: 1rem;">
+                <div class="toolbar">
+                    添加节点：
+                    <div class="tool-chip">🧪 阶段施肥</div>
+                    <div class="tool-chip">⏳ 等待成熟</div>
+                    <div class="tool-chip">✂️ 除草</div>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button
+                        style="background:transparent; border:1px solid var(--border); color:#fff; padding: 0.4rem 1rem; border-radius:4px;">从当前策略生成</button>
+                    <button
+                        style="background:var(--primary); border:none; color:#fff; padding: 0.4rem 1rem; border-radius:4px;">保存农场流程</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>3. 技术实现细节</h2>
+        <ul>
+            <li><strong>拖拽引擎变更</strong>：保留 Native Pointer Event 物理引擎，但数学计算从 Y轴 (Vertical) 改为 <strong>X轴
+                    (Horizontal)</strong> 测量坐标。</li>
+            <li><strong>CSS 响应式</strong>：横向轨道使用 <code>white-space: nowrap</code> 和 <code>overflow-x: auto</code> 搭配
+                <code>custom-scrollbar</code> 确保内容可滑，不卡屏幕。</li>
+            <li><strong>动态节点宽度</strong>：节点为 inline-flex 撑开宽度，Ghost 占位同样按真实宽度计算。</li>
+            <li><strong>展开参数面板 (Inline Panel)</strong>：若某一节点带参数，点击时在该 Container 内部下方展开一栏面板。使用 Vue <code>v-if</code>
+                挂载在该行下方即可。</li>
+        </ul>
+    </div>
+
+    <div class="section">
+        <h2>4. 影响面评估</h2>
+        <ul>
+            <li><strong>前端修改范围</strong>：只重构 <code>Workflow.vue</code>，不增加新依赖。</li>
+            <li><strong>后端数据结构</strong>：依然序列化为 <code>{ "uuid", "type", "params" }</code> 的列表，兼容之前版本或空状态。</li>
+            <li><strong>交互体验</strong>：保留用户全局的 Glassmorphism 样式。在低配设备或性能模式下依然流畅工作。</li>
+        </ul>
+    </div>
+
+</body>
+
+</html>

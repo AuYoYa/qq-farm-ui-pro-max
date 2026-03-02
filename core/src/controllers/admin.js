@@ -141,7 +141,7 @@ function startAdminServer(dataProvider) {
             return next();
         }
 
-        const allAccounts = await await store.getAccounts();
+        const allAccounts = await store.getAccounts();
         const account = allAccounts.accounts.find(a => String(a.id) === String(accountId));
 
         if (!account) {
@@ -653,7 +653,7 @@ function startAdminServer(dataProvider) {
                 : { channel: 'webhook', reloginUrlMode: 'none', endpoint: '', token: '', title: '账号下线提醒', msg: '账号下线', offlineDeleteSec: 120 };
             // 从完整配置快照中提取工作流编排配置
             const fullSnapshot = store.getConfigSnapshot(id);
-            const workflowConfig = fullSnapshot.workflowConfig || { farm: { enabled: false, minInterval: 2, maxInterval: 2, nodes: [] }, friend: { enabled: false, minInterval: 10, maxInterval: 10, nodes: [] } };
+            const workflowConfig = fullSnapshot.workflowConfig || { farm: { enabled: false, minInterval: 30, maxInterval: 120, nodes: [] }, friend: { enabled: false, minInterval: 60, maxInterval: 300, nodes: [] } };
             res.json({ ok: true, data: { intervals, strategy, preferredSeed, friendQuietHours, automation, stakeoutSteal, workflowConfig, ui, offlineReminder } });
         } catch (e) {
             res.status(500).json({ ok: false, error: e.message });
@@ -1065,6 +1065,32 @@ function startAdminServer(dataProvider) {
         }
     });
 
+    // ============ 第三方 API 配置管理 ============
+
+    app.get('/api/admin/third-party-api', authRequired, userRequired, async (req, res) => {
+        if (req.currentUser.role !== 'admin') {
+            return res.status(403).json({ ok: false, error: 'Forbidden' });
+        }
+        try {
+            res.json({ ok: true, data: store.getThirdPartyApiConfig() });
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
+    });
+
+    app.post('/api/admin/third-party-api', authRequired, userRequired, async (req, res) => {
+        if (req.currentUser.role !== 'admin') {
+            return res.status(403).json({ ok: false, error: 'Forbidden' });
+        }
+        try {
+            const body = (req.body && typeof req.body === 'object') ? req.body : {};
+            const data = store.setThirdPartyApiConfig(body);
+            res.json({ ok: true, data });
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
+    });
+
     // API: 账号日志
     app.get('/api/account-logs', async (req, res) => {
         try {
@@ -1192,10 +1218,53 @@ function startAdminServer(dataProvider) {
     app.post('/api/qr/create', async (req, res) => {
         const { platform = 'qq' } = req.body || {};
         try {
+            // ========== Ipad860 iPad/车机 微信协议直连 ==========
+            if (platform === 'wx_ipad' || platform === 'wx_car') {
+                const thirdPartyCfg = store.getThirdPartyApiConfig();
+                const ipad860Url = thirdPartyCfg.ipad860Url
+                    || process.env.IPAD860_URL
+                    || 'http://127.0.0.1:8058';
+                const endpoint = platform === 'wx_car'
+                    ? '/api/Login/LoginGetQRCar'
+                    : '/api/Login/LoginGetQR';
+
+                const ipadCtrl = new AbortController();
+                const ipadTimer = setTimeout(() => ipadCtrl.abort(), 15000);
+                const qrRes = await fetch(`${ipad860Url}${endpoint}`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({}),
+                    signal: ipadCtrl.signal,
+                }).then(r => r.json()).finally(() => clearTimeout(ipadTimer));
+
+                if (qrRes.Code === 1 && qrRes.Data) {
+                    let qrcodeData = qrRes.Data.QrBase64 || '';
+                    if (qrcodeData) {
+                        qrcodeData = qrcodeData.replace(/^data:image\/(png|jpg|jpeg);base64,/i, '');
+                        qrcodeData = `data:image/png;base64,${qrcodeData}`;
+                    }
+                    res.json({
+                        ok: true,
+                        data: {
+                            qrcode: qrcodeData,
+                            code: qrRes.Data.Uuid || '',
+                            platform,
+                        }
+                    });
+                } else {
+                    res.json({ ok: false, error: qrRes.Message || '获取二维码失败' });
+                }
+                return;
+            }
+            // ========== 原有微信小程序（第三方 API）==========
             if (platform === 'wx') {
                 const wxCtrl = new AbortController();
                 const wxTimer = setTimeout(() => wxCtrl.abort(), 15000);
-                const wxRes = await fetch(`${CONFIG.wxApiUrl}?api_key=${encodeURIComponent(CONFIG.wxApiKey)}&action=getqr`, {
+                const thirdPartyCfg = store.getThirdPartyApiConfig();
+                const wxApiKey = thirdPartyCfg.wxApiKey || CONFIG.wxApiKey;
+                const wxApiUrl = thirdPartyCfg.wxApiUrl || CONFIG.wxApiUrl;
+
+                const wxRes = await fetch(`${wxApiUrl}?api_key=${encodeURIComponent(wxApiKey)}&action=getqr`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({}),
@@ -1230,10 +1299,126 @@ function startAdminServer(dataProvider) {
         }
 
         try {
+            // ========== Ipad860 iPad/车机 微信协议检测 ==========
+            if (platform === 'wx_ipad' || platform === 'wx_car') {
+                const thirdPartyCfg = store.getThirdPartyApiConfig();
+                const ipad860Url = thirdPartyCfg.ipad860Url
+                    || process.env.IPAD860_URL
+                    || 'http://127.0.0.1:8058';
+                const wxAppId = thirdPartyCfg.wxAppId || CONFIG.wxAppId;
+
+                // 步骤1: 检测扫码状态
+                const checkCtrl = new AbortController();
+                const checkTimer = setTimeout(() => checkCtrl.abort(), 10000);
+                const checkRes = await fetch(
+                    `${ipad860Url}/api/Login/LoginCheckQR?uuid=${encodeURIComponent(code)}`,
+                    { method: 'POST', signal: checkCtrl.signal }
+                ).then(r => r.json()).finally(() => clearTimeout(checkTimer));
+
+                console.log(`[Ipad860 CheckQR] 完整响应:`, JSON.stringify(checkRes));
+
+                if (checkRes.Code === 0 && checkRes.Success) {
+                    const data = checkRes.Data || {};
+                    // status == 0 待扫码, status == 1 已扫码待确认, status == 2 或包含 acctSectResp 时是登录成功
+                    const status = data.status;
+
+                    if (status === 0) {
+                        res.json({ ok: true, data: { status: 'Wait' } });
+                        return;
+                    } else if (status === 1) {
+                        // 正在手机上确认
+                        const NickName = data.nickName || '';
+                        const HeadImgUrl = data.headImgUrl || '';
+                        res.json({ ok: true, data: { status: 'Check', nickname: NickName, avatar: HeadImgUrl } });
+                        return;
+                    }
+
+                    // ====== 到了这里就是登录确认成功 ======
+                    const wxid = data?.acctSectResp?.userName || data?.WxId || data?.UserName || '';
+                    const nickname = data?.acctSectResp?.nickName || data?.NickName || '';
+                    const headUrl = data?.HeadUrl || '';
+
+                    if (!wxid) {
+                        console.error(`[Ipad860] 登录成功但未能解析出 wxid:`, JSON.stringify(data));
+                        res.json({ ok: true, data: { status: 'Error', error: '解析微信ID失败' } });
+                        return;
+                    }
+
+                    // 步骤2: 获取小程序授权 code（最多重试 3 次）
+                    let jsRes = null;
+                    let lastError = null;
+                    for (let attempt = 1; attempt <= 3; attempt++) {
+                        try {
+                            const jsCtrl = new AbortController();
+                            const jsTimer = setTimeout(() => jsCtrl.abort(), 10000);
+                            jsRes = await fetch(`${ipad860Url}/api/Wxapp/JSLogin`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ Wxid: wxid, Appid: wxAppId }),
+                                signal: jsCtrl.signal,
+                            }).then(r => r.json()).finally(() => clearTimeout(jsTimer));
+
+                            console.log(`[Ipad860 JSLogin] 第 ${attempt} 次响应:`, JSON.stringify(jsRes));
+
+                            if (jsRes && jsRes.Code === 0 && jsRes.Success) {
+                                break;
+                            }
+                        } catch (err) {
+                            lastError = err;
+                            console.error(`[Ipad860 JSLogin] 第 ${attempt} 次失败: ${err.message}`);
+                        }
+                        if (attempt < 3) {
+                            await new Promise(r => setTimeout(r, 1000));
+                        }
+                    }
+
+                    if (jsRes && jsRes.Code === 0 && jsRes.Success && jsRes.Data) {
+                        const authCode = jsRes.Data.Code || '';
+                        console.log(`[Ipad860 JSLogin] 登录成功! wxid=${wxid}, code=${authCode}, nickname=${nickname}`);
+                        res.json({
+                            ok: true,
+                            data: { status: 'OK', code: authCode, uin: wxid, avatar: headUrl, nickname }
+                        });
+                    } else {
+                        const errMsg = (jsRes && jsRes.Message) || (lastError ? lastError.message : 'JSLogin 失败');
+                        console.error(`[Ipad860 JSLogin] 最终失败: ${errMsg}`);
+                        res.json({ ok: true, data: { status: 'Error', error: errMsg } });
+                    }
+                } else if (checkRes.Code === -8) {
+                    // 解析具体的微信服务器错误（如风控、环境异常）
+                    let errMsg = '';
+                    try {
+                        const wxErrXml = checkRes.Data?.baseResponse?.errMsg?.string || '';
+                        if (wxErrXml.includes('CDATA[')) {
+                            const match = wxErrXml.match(/<!\[CDATA\[(.*?)\]\]>/);
+                            if (match && match[1]) errMsg = match[1];
+                        }
+                    } catch (e) { }
+
+                    if (errMsg) {
+                        console.error(`[Ipad860] 微信服务器拦截: ${errMsg}`);
+                        res.json({ ok: true, data: { status: 'Error', error: `微信拦截: ${errMsg}` } });
+                    } else {
+                        // 真的只是过期或无法解析的其他异常
+                        res.json({ ok: true, data: { status: 'Used' } });
+                    }
+                } else {
+                    // 等待扫码
+                    res.json({ ok: true, data: { status: 'Wait' } });
+                }
+                return;
+            }
+            // ========== 原有微信小程序（第三方 API）==========
             if (platform === 'wx') {
                 const checkCtrl = new AbortController();
                 const checkTimer = setTimeout(() => checkCtrl.abort(), 10000);
-                const wxCheckRes = await fetch(`${CONFIG.wxApiUrl}?api_key=${encodeURIComponent(CONFIG.wxApiKey)}&action=checkqr`, {
+
+                const thirdPartyCfg = store.getThirdPartyApiConfig();
+                const wxApiKey = thirdPartyCfg.wxApiKey || CONFIG.wxApiKey;
+                const wxApiUrl = thirdPartyCfg.wxApiUrl || CONFIG.wxApiUrl;
+                const wxAppId = thirdPartyCfg.wxAppId || CONFIG.wxAppId;
+
+                const wxCheckRes = await fetch(`${wxApiUrl}?api_key=${encodeURIComponent(wxApiKey)}&action=checkqr`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ uuid: code }),
@@ -1269,10 +1454,10 @@ function startAdminServer(dataProvider) {
                         try {
                             const loginCtrl = new AbortController();
                             const loginTimer = setTimeout(() => loginCtrl.abort(), 10000);
-                            wxLoginRes = await fetch(`${CONFIG.wxApiUrl}?api_key=${encodeURIComponent(CONFIG.wxApiKey)}&action=jslogin`, {
+                            wxLoginRes = await fetch(`${wxApiUrl}?api_key=${encodeURIComponent(wxApiKey)}&action=jslogin`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
-                                body: JSON.stringify({ wxid, appid: CONFIG.wxAppId }),
+                                body: JSON.stringify({ wxid, appid: wxAppId }),
                                 signal: loginCtrl.signal,
                             }).then(r => r.json()).finally(() => clearTimeout(loginTimer));
 

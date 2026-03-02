@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高级风控防护与架构维稳计划 - Antigravity Plan</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary-: #38bdf8;
+            --card-bg: #1e293b;
+            --accent-green: #22c55e;
+            --accent-red: #ef4444;
+            --accent-yellow: #eab308;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--primary-);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            border-bottom: 2px solid var(--primary-);
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+
+        .tag.risk {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--accent-red);
+        }
+
+        .tag.safe {
+            background-color: rgba(34, 197, 94, 0.2);
+            color: var(--accent-green);
+        }
+
+        .tag.warning {
+            background-color: rgba(234, 179, 8, 0.2);
+            color: var(--accent-yellow);
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .mermaid {
+            background-color: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            text-align: center;
+            overflow-x: auto;
+            border: 1px dashed var(--border-color);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+
+        th,
+        td {
+            border: 1px solid var(--border-color);
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(56, 189, 248, 0.1);
+            color: var(--primary-);
+        }
+    </style>
+    <!-- 引入 Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            theme: 'dark',
+            startOnLoad: true,
+            securityLevel: 'loose'
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>🚀 Plan: 高级风控防护与架构维稳 (Anti-Risk & Stabilization)</h1>
+        <p class="text-muted"><strong>创建日期:</strong> 2026-03-02 | <strong>目标:</strong> 修复近期架构隐患并引入仿生学安全护城河。</p>
+
+        <div class="card">
+            <h2>1. 核心挑战与背景</h2>
+            <p>随着系统向 <code>MySQL + Redis</code> 架构的全面演进以及高精度 <strong>“蹲守抢收”</strong>
+                等功能的引入，系统从过去的“被动定时访问”演变成了高强度的“精准执行并发矩阵”。在大幅度提高收益的同时，面临着以下双重挑战：</p>
+            <ul>
+                <li><span class="tag warning">底层架构耗损</span>低配服务器长连接休眠断链与 CPU 事件循环组（Event Loop）拥堵。</li>
+                <li><span class="tag risk">行为特征僵化</span>系统过高的“精准率”和“绝对不掉线”的非人特性，极易被大厂的大数据模型标记为特征级脚本。</li>
+            </ul>
+        </div>
+
+        <h2>2. 已知风险治理 (Impact Assessment & Remediation)</h2>
+
+        <div class="card">
+            <h3>2.1 MySQL 连接池断链与老化 (ECONNRESET)</h3>
+            <p><strong>影响面分析：</strong> 深夜无人操作或云厂商为了释放资源强杀空闲 TCP 连接后，<code>mysql2</code> 线程池内的连接变为僵尸连接。早晨唤醒瞬间，第一个获取到该句柄的
+                Worker 会抛出底层 Socket 断开错误。</p>
+            <p><strong>修复对策 - 「活性保活与探活重试机制」：</strong></p>
+            <ul>
+                <li>在 MySQL 连接池初始化时，追加 <code>enableKeepAlive: true</code> 与 <code>keepAliveInitialDelay: 10000</code>
+                    参数，维持底层 TCP 心跳。</li>
+                <li>给所有的数据库操作包裹一层重试闭包 (Retry Wrapper)。假如捕获到 <code>ECONNRESET</code> 或
+                    <code>PROTOCOL_CONNECTION_LOST</code>，主动强制清理该挂掉的链接并重试一次，对上层业务 100% 透明。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>2.2 低配服务器 Event Loop (事务循环) 队列拥堵</h3>
+            <p><strong>影响面分析：</strong> 开启“蹲守机制”后，每个账号衍生出高度并行的微观倒计时任务。多账号同时激活时，V8 引擎因为 CPU 分配不均，造成毫秒级级别的延迟失效，导致 60
+                秒的黄金抢收卡点失败。</p>
+            <p><strong>修复对策 - 「分片任务与时间补偿」：</strong></p>
+            <ul>
+                <li>不再信赖 <code>setTimeout</code> 的绝对准时，重构调度器（Scheduler），采用 <strong>时间补偿差 (Time Compensation)</strong>
+                    算法补平 CPU 挂起的时间丢失。</li>
+                <li>削减不必要的并发数组遍历映射（Map/Filter 等同步大循环），加入 <code>setImmediate</code> 或者微小 <code>sleep(10)</code> 把重量级的
+                    JSON/数组比对过程让出主线程切片。</li>
+            </ul>
+        </div>
+
+        <h2>3. 下世代仿生风控防御体系 (Next-Gen Anti-Risk)</h2>
+        <p>为将脚本伪装成接近物理人效的操作，需将以下三级智能随机化机制作为接下来的核心主线开发规划。</p>
+
+        <div class="card">
+            <h3>3.1 随机“打盹/掉线”机制 (Micro-Sleep / Ghosting)</h3>
+            <div class="mermaid">
+                graph TD
+                A[账户定时巡查轮询] --> B{进入防沉迷判定}
+                B -- 触发(小概率) --> C[强制休眠 30-90 分钟]
+                B -- 未触发 --> D[正常执行巡查]
+                C --> E[产生自然人离线行为断层]
+                E --> F[苏醒后追加一次密集收获]
+                D --> G[结束]
+            </div>
+            <p><strong>架构设计：</strong>引入账户级的体力疲劳模型。工作越久，触发 <code>Hibernate(挂起)</code> 的概率增加。在挂机界面可视化展示“休息中”，强行断绝与腾讯服务器的一切
+                API 牵连。</p>
+        </div>
+
+        <div class="card">
+            <h3>3.2 组网错峰唤醒 (Jittered Wake-up)</h3>
+            <p>打破现阶段在早晨 07:00（静默时段结束）所有账号一拥而上的请求脉冲图谱。</p>
+            <ul>
+                <li><strong>计算基准：</strong>以账号 <code>userId / Gid</code> 为基准计算一个固定的哈希散列时间（范围：0 ~ 45 分钟）。</li>
+                <li><strong>错峰执行：</strong>例如系统静默于 07:00 结束。A 账号哈希加值为 12 分钟，其实际启动时间为 07:12。B 账号为 07:23 启动，彻底抚平每日启动峰值的特征。
+                </li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h3>3.3 “无效”操作特征混淆 (Noise Injection)</h3>
+            <div class="mermaid">
+                sequenceDiagram
+                participant User Context
+                participant Target Farm
+
+                User Context->>Target Farm: 常规进入好友农场
+                alt 触发 10% Noise 几率
+                User Context->>Target Farm: 获取作物列表 (仅浏览)
+                Note right of Target Farm: 不做任何点击、浇水或偷菜动作
+                Target Farm-->>User Context: 返回并离开
+                else 常态
+                User Context->>Target Farm: 执行精准偷菜/帮忙
+                end
+            </div>
+            <ul>
+                <li>人类玩游戏有很多是纯粹的“走走看看”，而脚本每次请求都一定带有极高转化率的成果反馈。</li>
+                <li><strong>实施方案：</strong>向好友轮询操作注入极小概率的“只看不动”请求，或者随意拉取一下商城的货物数据单页，混淆腾讯用来评估异常转化率的统计表表头。</li>
+            </ul>
+        </div>
+
+        <h2>4. 架构实施与影响面追踪表</h2>
+        <table>
+            <thead>
+                <tr>
+                    <th>代号</th>
+                    <th>模块</th>
+                    <th>变动幅度</th>
+                    <th>优先级</th>
+                    <th>关联影响点 (Impact)</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>T-1</td>
+                    <td><code>database.js</code></td>
+                    <td>中</td>
+                    <td>P0</td>
+                    <td>对底层连接池添加保活探针与 Retry 重连包装器。可能引入数秒的重接堵塞停顿。</td>
+                </tr>
+                <tr>
+                    <td>T-2</td>
+                    <td><code>scheduler.js</code></td>
+                    <td>高</td>
+                    <td>P0</td>
+                    <td>重构主循环器为补偿制架构。如开发失误可能导致定时器错乱挂起，需强制写单测覆盖时间轴校验。</td>
+                </tr>
+                <tr>
+                    <td>T-3</td>
+                    <td><code>friend.js & farm.js</code></td>
+                    <td>高</td>
+                    <td>P1</td>
+                    <td>错峰判定、打盹锁与噪音操作入侵业务深处，日志输出需配合加上“伪装中/发呆中”标签以防用户疑虑。</td>
+                </tr>
+                <tr>
+                    <td>UI-1</td>
+                    <td><code>app.ts & Dashboard</code></td>
+                    <td>中</td>
+                    <td>P1</td>
+                    <td>需在日志组件展现出诸如：“账号[测试]正在休息中”状态，并在设定项赋予【拟人化防护级】强/中/弱全局调节。</td>
+                </tr>
+            </tbody>
+        </table>
+
+    </div>
+
+</body>
+
+</html>

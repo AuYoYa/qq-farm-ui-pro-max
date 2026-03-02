@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>业务逻辑全景解析报告 - 可视化流程编排引擎</title>
+    <style>
+        :root {
+            --bg-base: #0f172a;
+            --bg-panel: #1e293b;
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --border-color: #334155;
+            --glass-bg: rgba(30, 41, 59, 0.7);
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+            font-weight: 600;
+            margin-top: 1.5em;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            border-bottom: 2px solid var(--accent-blue);
+            padding-bottom: 10px;
+            margin-bottom: 1em;
+            display: inline-block;
+        }
+
+        h2 {
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 8px;
+        }
+
+        p,
+        li {
+            font-size: 1.05rem;
+            color: var(--text-muted);
+        }
+
+        .card {
+            background: var(--bg-panel);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 24px;
+            margin: 20px 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 10px;
+            border-radius: 9999px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            margin-left: 10px;
+        }
+
+        .badge-blue {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: #60a5fa;
+            border: 1px solid rgba(59, 130, 246, 0.3);
+        }
+
+        .badge-green {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: #34d399;
+            border: 1px solid rgba(16, 185, 129, 0.3);
+        }
+
+        .badge-orange {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: #fbbf24;
+            border: 1px solid rgba(245, 158, 11, 0.3);
+        }
+
+        pre {
+            background-color: #000;
+            color: #10b981;
+            padding: 16px;
+            border-radius: 8px;
+            overflow-x: auto;
+            border: 1px solid #1f2937;
+            font-family: 'Fira Code', 'Courier New', Courier, monospace;
+        }
+
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+        }
+
+        .mermaid {
+            background-color: rgba(255, 255, 255, 0.02);
+            padding: 20px;
+            border-radius: 12px;
+            text-align: center;
+            border: 1px solid var(--border-color);
+            margin: 20px 0;
+            overflow: auto;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <!-- 引入 Mermaid 渲染库 -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            mermaid.initialize({
+                startOnLoad: true,
+                theme: 'dark',
+                securityLevel: 'loose',
+                fontFamily: 'Inter'
+            });
+        });
+    </script>
+</head>
+
+<body>
+
+    <div class="container">
+        <h1>全景解析：可视化流程编排架构升级蓝图 <span class="badge badge-blue">System Design</span></h1>
+        <p><strong>撰写时间</strong>：2026-03-02 | <strong>目标</strong>：打破硬编码流水线框架，构建用户侧动态节点挂载引擎</p>
+
+        <div class="card">
+            <h2>🚀 背景与业务破局点</h2>
+            <p>目前农场的调度引擎（`worker.js` -> `farm.js`）采用了极强耦合的顺序 <code>await</code>
+                请求组装模式。虽然稳定，但丧失了**“灵活性”**与**“玩家战术配置”**的空间。例如用户提出希望能在作物“仅剩几分钟成熟”时拉起等待防偷锁闭动作，传统的 `if...else`
+                堆叠已经难以优雅支撑这类诉求。</p>
+            <p>引入 <span style="color:var(--text-main); font-weight:bold;">可视化编排 (Drag-and-Drop Workflow Engine)</span>
+                是破局唯一解。将“固化代码”升维为“JSON 字典解释器”。</p>
+        </div>
+
+        <h2>🔄 系统流转体系设计图</h2>
+        <div class="mermaid">
+            flowchart TD
+            A[用户配置界面 Settings/Workflow] -->|Vue Draggable 排序组合| B(JSON Schema Array)
+            B -->|POST /api/settings| C[admin.js / store.js 持久化层]
+            C --> D[(config_accountId.json 落盘)]
+
+            subgraph 调度微内核分离
+            E[worker.js 定时探针] --> F{判断: 是否启用 Workflow?}
+            F -->|否 (旧机制)| G[硬编码顺序 runFarmTick]
+            F -->|是 (新机制)| H[runFarmWorkflow 解释器发起]
+
+            H --> I{Node Parser}
+            I -->|Type: WEED| J[await 触发清理除草]
+            I -->|Type: DELAY| K[挂起线程 setTimeout]
+            I -->|Type: WAIT_MATURE| L[成熟倒计时侦测拦截器 - 中止余下任务]
+            end
+
+            D -.-> E
+        </div>
+
+        <div class="card">
+            <h2>🛠️ 核心域解构详解</h2>
+
+            <h3>1. 运行时状态记忆库扩展</h3>
+            <p>必须在 <code>core/src/models/store.js</code> 的底座基础数据模型中插入节点数组寄存器，以承接前端吐回的拓扑节点数据。</p>
+            <pre><code>// Data Schema Demo
+workflowConfig: {
+    farm: {
+        enabled: true,
+        nodes: [
+            { id: "uuid-1", type: "STAGE_FERTILIZE", props: { stages: ['seed', 'sprout'] } },
+            { id: "uuid-2", type: "WEED" },
+            { id: "uuid-3", type: "WAIT_MATURE", props: { stopRestIfUnmature: true } }
+        ]
+    }
+}
+        </code></pre>
+
+            <h3>2. 引擎驱动器开发 (Interpreter Pattern)</h3>
+            <p>此模块属于风险重点。需在 <code>farm.js</code> 中新增独立的流水线承接函子，该函子将依次 <code>switch (node.type)</code>
+                并派发给细粒度的真实通信动作。在此过程中，特别要留意“等待成熟中止后续操作”所带来的栈挂起或者回溯中断抛出处理。</p>
+        </div>
+
+        <div class="grid-2">
+            <div class="card">
+                <h2>🎨 Web 前端实现要略</h2>
+                <ul>
+                    <li><strong>模块加载</strong>：锁定引入轻量原生的 <code>vuedraggable@4.1.0</code>。</li>
+                    <li><strong>视效切地</strong>：重开一路由，或提供“独立弹窗”，以双区展示：左侧（资源面板 / Node Pool），右侧（泳道 / Operation Lane）。</li>
+                    <li><strong>参数配置表盘</strong>：采用事件总线点击节点，弹出右侧或底部的 <code>Drawer</code> 配置独立节点的参数（避免挤压拖拽轨道面积）。</li>
+                </ul>
+            </div>
+            <div class="card">
+                <h2>🛡️ 风险与安全制约边界</h2>
+                <ul>
+                    <li><span class="badge badge-orange">死板兼容</span>：不能破坏旧版全局自动开关的功能。两者需要互斥保护。</li>
+                    <li><span
+                            class="badge badge-orange">内存渗漏熔断</span>：必须硬编码写死「最大延时休眠时长」和「单次流程最大执行周期」，防止玩家配置无意义阻塞链条，烧毁有限的后台异步请求分发池。
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div style="text-align:center; margin-top: 40px; padding-top: 20px; border-top: 1px solid var(--border-color);">
+            <p style="font-size: 0.9em; color: #64748b;">Powered by Advanced AI Architect Module | 内部流转机密文档</p>
+        </div>
+    </div>
+
+</body>
+
+</html>

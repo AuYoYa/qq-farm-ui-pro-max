@@ -318,11 +318,22 @@ export const developmentProgress = {
   totalArticles: 21,
   completedArticles: 21, // 已完成
   draftArticles: 0,
-  lastUpdated: '2026-02-28',
-  nextUpdate: '2026-03-07',
-  version: 'v3.2.4',
+  lastUpdated: '2026-03-02',
+  nextUpdate: '2026-03-??',
+  version: 'v3.9.0',
   progress: 100,
   changelog: [
+    {
+      version: 'v3.9.0',
+      date: '2026-03-02',
+      changes: [
+        '品牌重塑：御农·QQ 农场智能助手启动，全新极光登录体验',
+        '后台管理配置：wxAppId 与密钥可自运维直接注入',
+        '高并发防御：数据库池化与请求连接分离（彻底解决连接池卡锁）',
+        '智能挂机进阶：蹲守偷菜（延迟抢收）与智能避让系统',
+        '底层限流系统：操作随机抖动加强，防检测算法再迭代'
+      ],
+    },
     {
       version: 'v3.2.4',
       date: '2026-02-28',

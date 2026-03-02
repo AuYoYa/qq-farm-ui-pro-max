@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>高并发与风控自愈架构优化规划 (Phase 2)</title>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #38bdf8;
+            --danger: #f87171;
+            --success: #34d399;
+            --border: #334155;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1 {
+            font-size: 2rem;
+            color: var(--accent);
+            border-bottom: 1px solid var(--border);
+            padding-bottom: 1rem;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            margin-top: 2rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 1px dashed var(--border);
+        }
+
+        h3 {
+            font-size: 1.25rem;
+            color: #e2e8f0;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            border: 1px solid var(--border);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin: 1rem 0;
+            border-left: 4px solid;
+        }
+
+        .alert-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-color: #f59e0b;
+        }
+
+        .alert-danger {
+            background-color: rgba(248, 113, 113, 0.1);
+            border-color: var(--danger);
+        }
+
+        .alert-success {
+            background-color: rgba(52, 211, 153, 0.1);
+            border-color: var(--success);
+        }
+
+        code {
+            background-color: #0f172a;
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: "Fira Code", monospace;
+            color: #fca5a5;
+        }
+
+        .mermaid {
+            background-color: white;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1.5rem 0;
+        }
+
+        ul {
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 农场核心：高并发与风控自愈架构优化 (Phase 2)</h1>
+        <p class="text-muted"><strong>文档版本:</strong> v1.0 | <strong>日期:</strong> 2026-03-02 | <strong>阶段:</strong> Plan
+            (设计与规划)</p>
+
+        <div class="alert alert-warning">
+            <strong>背景综述：</strong>近期在对底层 MySQL 通讯、多开隔离进行了深度改造，修复了 400 授权掉签等严重事故。但随着业务复杂度和承载目标（千/万级账号）的攀升，并发启动时的 I/O
+            雪崩危机、腾讯服务端对“代挂机”行为的风控（如 "1002003 假封禁" 拦截），以及高频循环引发的僵死问题，共同构成了下一阶段的“三座大山”。
+        </div>
+
+        <div class="card">
+            <h2>一、数据库并发回查重构 (防启动雪崩)</h2>
+            <p>解决海量并发场景下 <code>startAccount</code> 中 <code>for-loop</code> 枚举查 <code>getAccountFull</code> 导致的 API
+                积压与阻塞。</p>
+
+            <h3>1. 痛点分析</h3>
+            <p>如果在页面触发“全部启动”，1000 个账号会向 <code>mysql-db</code> 连接池暴雨般倾泻 1000 次
+                <code>SELECT * FROM accounts WHERE id = ?</code> 的点查。极易导致死锁、内存飙升并拖垮接口响应。</p>
+
+            <h3>2. 解决路径</h3>
+            <ul>
+                <li><strong>方案 A（内存级缓存投影）：</strong>在执行 <code>findAllLite</code> 获取轻量列表时，将 <code>code</code> 和
+                    <code>uin</code> 剥离进一个独立于主大 JSON (<code>auth_data</code>) 之外的、能被轻量查询直接提取的新列。这需要修改数据库字段 Schema。</li>
+                <li><strong>方案 B（SQL IN 批量化预提）：</strong>重写批量启动入口。在准备启动 1000 个账号时，收集所以 ID，在进入 <code>worker-manager</code>
+                    分发前，执行一次 <code>SELECT id, auth_data FROM accounts WHERE id IN (...)</code>，然后通过 Map 映射高速匹配。
+                    <strong>(建议采用此方案，无需动表结构，效果立竿见影)</strong></li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>二、腾讯防风控拦截反制解析 ("1002003 假封禁" 风波)</h2>
+            <p>解决高频请求被腾讯误判并抛出 <code>code=1002003 账号已被封禁</code> 的风险拦截。</p>
+
+            <div class="alert alert-danger">
+                <strong>风险剖析：腾讯为何报“封禁”却没真封？</strong><br>
+                由于农场端本质上是一个 HTML5 游戏。当后台 Worker 每分每秒都在不停发出 <code>enter_farm</code> 或偷菜时，在腾讯的审计大脑（如 WAF）看来，这个 IP
+                发出的频率和时序“根本不像物理人类”。
+                <br>所谓 <code>1002003</code> 实际上是服务端级别的<strong>软限制（Rate Limit / Soft
+                    Ban）</strong>，系统把你当“异常机器”屏蔽了这部分下行数据的回流。
+            </div>
+
+            <h3>反制护城河架构</h3>
+            <div class="mermaid">
+                graph TD
+                A[Worker 发起拦截点] --> B{请求频率分析仪}
+                B -->|短时过于密集| C[熔断器介入触发]
+                C --> D[注入拟人化随机延迟 Jitter]
+                B -->|正常频率| E[发往腾讯网关]
+                E --> |报 1002003 假封禁| F[执行指数退避休眠 Exponential Backoff]
+                F --> |沉默 5 - 30 分钟后| A
+            </div>
+
+            <ul>
+                <li><strong>全局动态速率节流机制 (Global Rate Throttler)：</strong>不要让程序“无脑”执行。巡田、好友互动的间隔要加入 `Random(10, 60)`
+                    秒的浮动扰动（Jitter），禁止绝对精准的机械化秒级发包。</li>
+                <li><strong>识别假装与软着陆：</strong>在底层截获 <code>1002003</code>，不要打出“已被封禁”这种引发恐慌的 Error。而是映射为
+                    <strong>"遭遇高频风控限制"</strong>。将该账号挂起（Suspended），强制使它休息 30 - 60 分钟后再重试，绝不要连续撞墙！</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>三、全量熔断与自退避机制 (死循环清理)</h2>
+            <p>将最近成功验证的“报错即掐断”防抖思维普及至整个农场架构。</p>
+
+            <h3>实施规范</h3>
+            <ul>
+                <li><strong>审查所有的 <code>while(true)</code>：</strong> 诸如长轮询监听收割、网络断连复充等模块，若遭遇连续 3 次以上的网络 Reject 或非 200
+                    错误：
+                    <ol>
+                        <li>不再立即 <code>await sleep(1000)</code> 然后原地复读机。</li>
+                        <li>立刻上锁进入 <strong>指数退避（Exponential Backoff）</strong>：失败1次等 5s，2次等 15s，3次等 60s，以此类推。</li>
+                    </ol>
+                </li>
+                <li><strong>看门狗 (Watchdog) 探针：</strong> 只要发现某个挂机账号的进程出现 <code>Event Loop Lag</code>，主动发送
+                    <code>STOP</code> 指令给自身，在日志流中报告“因安全原因被系统休眠”。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>四、影响面分析 (Impact Analysis)</h2>
+            <ul>
+                <li><strong>对数据库的影响：</strong>采用方案 B 大幅降低连接池高并发的抢占。启动耗时将由原先的 <code>O(n)</code> 变成了
+                    <code>O(1)</code>，对服务器内存极为友好。</li>
+                <li><strong>对偷菜效率的影响：</strong>由于引入了防封禁抖动（Jitter），可能偶尔会导致无法绝对卡在第 0 秒抢收到好友资源（但此前的
+                    60秒极限抢收本身就加入了时间提前量，所以自身逻辑不易受损）。但换来的是**封号概率直线收缩，挂机的存活率与安全性大幅跃升**。</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+</body>
+
+</html>

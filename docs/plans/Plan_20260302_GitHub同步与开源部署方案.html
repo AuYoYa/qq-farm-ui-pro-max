@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="dark">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>qq-farm-ui-pro-max 开源与多架构部署方案 v2</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --accent: #8b5cf6;
+            --success: #10b981;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            padding: 2rem;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+        }
+
+        h1 {
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+        }
+
+        h2 {
+            display: flex;
+            items-center;
+            gap: 0.5rem;
+            margin-top: 2rem;
+            padding-bottom: 0.3rem;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .alert {
+            padding: 1rem;
+            border-radius: 6px;
+            margin-bottom: 1rem;
+            border-left: 4px solid;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        .alert-warning {
+            background-color: rgba(245, 158, 11, 0.1);
+            border-color: var(--warning);
+            color: #fcd34d;
+        }
+
+        .alert-info {
+            background-color: rgba(59, 130, 246, 0.1);
+            border-color: var(--primary);
+            color: #93c5fd;
+        }
+
+        code {
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-family: ui-monospace, monospace;
+            color: #a78bfa;
+            font-size: 0.9em;
+        }
+
+        ul {
+            padding-left: 1.2rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .tag {
+            display: inline-block;
+            padding: 0.1rem 0.5rem;
+            border-radius: 999px;
+            font-size: 0.75rem;
+            font-weight: bold;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>🚀 qq-farm-ui-pro-max 开源与多架构部署计划 v2</h1>
+    <p class="text-muted">基于代码物理隔离原则，将为您构建包含极简一键部署与多架构 CI/CD 发布体系的开源版本。</p>
+
+    <div class="alert alert-warning">
+        <strong>⚠️ 安全红线与 Secret 管理提示</strong>
+        您已提供了您的 Docker 令牌 (<code>dckr_pat_***</code>)。我们在接下来的脚本与代码中<strong>绝对不会</strong>将其硬编码提交到 Github 中。
+        <br />您后续需要前往 Github 仓库 <code>Settings -> Secrets and variables -> Actions</code>，手动添加两个 Secret：
+        <ul>
+            <li><code>DOCKERHUB_USERNAME</code> (值为: smdk000)</li>
+            <li><code>DOCKERHUB_TOKEN</code> (值为您提供的 dckr_pat_... )</li>
+        </ul>
+    </div>
+
+    <h2>阶段一：代码隔离与彻底脱敏</h2>
+    <div class="card">
+        <ul>
+            <li><span class="tag">隔离</span> 创建同级目录 <code>../qq-farm-ui-pro-max</code> (避免误污染当前主开发目录)。</li>
+            <li><span class="tag">清理</span> 跳过所有
+                <code>node_modules</code>、<code>dist</code>、<code>.env</code>、<code>.git</code> 历史记录以及各种开发缓存。</li>
+            <li><span class="tag">脱敏</span> 扫描项目中的硬编码敏感信息（如遗留的真实密码、IP、QQ号、各种 API 的 AppId 等），全部通过 <code>os.environ</code>
+                提取。</li>
+            <li><span class="tag">配置</span> 生成规范的 <code>.env.example</code> 文档供开源用户参考。</li>
+        </ul>
+    </div>
+
+    <h2>阶段二：Docker 容器化与跨架构适配 <small>(x86_64 & ARM64)</small></h2>
+    <div class="card">
+        <p>针对软硬机器（如苹果 M1/M2, 树莓派, 常用 Intel 服务器）：</p>
+        <ul>
+            <li><strong>优化的 Dockerfile (Multi-stage Build):</strong> 采用交叉编译架构。构建出最小体积体积镜像，避免使用硬编码的平台依赖库。</li>
+            <li><strong>完善的 docker-compose.yml:</strong> 一次性整合主程序、<code>Redis</code> 和 <code>MySQL/SQLite</code>（若需）。
+            </li>
+            <li><strong>健壮性设计:</strong> 添加 <code>depends_on</code> 和 <code>healthcheck</code>，指定容器日志轮转
+                (<code>max-size: 10m</code>) 以防撑爆服务器磁盘。</li>
+        </ul>
+    </div>
+
+    <h2>阶段三：CI/CD (GitHub Actions 自动发版)</h2>
+    <div class="card">
+        <ul>
+            <li>编写 <code>.github/workflows/docker-publish.yml</code>。</li>
+            <li><strong>触发机制:</strong> 配置在 pushing changes 到主分支，或发布 `tags` 时自动运行。</li>
+            <li><strong>Buildx 矩阵:</strong> 采用 Docker Buildx 并行构建 <code>linux/amd64</code> 和 <code>linux/arm64</code>
+                并合并上传。</li>
+            <li><strong>智能缓存:</strong> 开启 <code>type=gha</code> 层缓存，极大提升后续 Github Actions 构建速度。</li>
+        </ul>
+    </div>
+
+    <h2>阶段四：保姆级一键部署脚本 (deploy.sh)</h2>
+    <div class="card">
+        <div class="alert alert-info">我将为您提供一个高度智能的 shell 脚本，即使用户只有一台空裸机，执行该脚本即可完成部署。</div>
+        <ul>
+            <li>自动侦测 Linux 操作系统，若未安装 Docker / Docker Compose 则自动通过清华镜像源安装。</li>
+            <li><strong>ARM 专项优化:</strong> 针对小内存 ARM 云实例启动 Redis 常报错的问题，脚本自动执行
+                <code>sysctl vm.overcommit_memory=1</code>。</li>
+            <li>自动检查端口占用，自动拉取 <code>smdk000/qq-farm-ui-pro-max:latest</code> 镜像并 <code>up -d</code>。</li>
+        </ul>
+    </div>
+
+    <h2>阶段五：README.md 更新与开源协议 (根据明确要求优化)</h2>
+    <div class="card">
+        <p class="text-muted" style="margin-bottom: 8px;"><strong>严格遵循保留源基本信息的原则：</strong></p>
+        <ul>
+            <li><strong>原汁原味：</strong> 原版的项目初衷、功能列表、基础介绍内容 <strong>全部原样保留</strong>（不丢失信息）。</li>
+            <li><strong>局部替换：</strong> 仅精准定位并**更新替换**掉原来陈旧的【部署方法】段落，换成“自动化脚本”、“Docker Compose”与“本地编译”的三合一先进说明指南。</li>
+            <li><strong>追加记录：</strong> 在 README 的**最底部**安全追加 <strong>Iteration Logs (更新日志)</strong>
+                章节，记录最新的功能迭代（如：可视化流程编排引擎、试用卡功能、云端主题同步库）。</li>
+            <li><strong>其它：</strong> 根目录添加 <code>LICENSE</code> 文件明确开源权限。</li>
+        </ul>
+    </div>
+
+</body>
+
+</html>

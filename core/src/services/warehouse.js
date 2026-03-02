@@ -228,7 +228,7 @@ async function autoOpenFertilizerGiftPacks() {
                 if (type === 'normal' && perItemHours > 0) containerHours.normal += used * perItemHours;
                 if (type === 'organic' && perItemHours > 0) containerHours.organic += used * perItemHours;
             }
-            await sleep(100);
+            await sleep(200 + Math.floor(Math.random() * 100));
         }
 
         if (opened > 0) {
@@ -452,7 +452,7 @@ async function sellAllFruits() {
                 goldAfter = currentGold;
                 break;
             }
-            await sleep(200);
+            await sleep(200 + Math.floor(Math.random() * 100));
         }
         const totalsAfter = getCurrentTotals();
         const totalGoldDelta = goldAfter > goldBefore ? (goldAfter - goldBefore) : 0;
@@ -466,7 +466,7 @@ async function sellAllFruits() {
                 const bagAfter = await getBag();
                 const bagGold = getGoldFromItems(getBagItems(bagAfter));
                 if (bagGold > goldBefore) bagDelta = bagGold - goldBefore;
-            } catch {}
+            } catch { }
         }
 
         const totalGoldEarned = Math.max(serverGoldTotal, totalGoldDelta, bagDelta);
@@ -489,7 +489,7 @@ async function sellAllFruits() {
             totalsDeltaGold,
             totalsDeltaExp,
         });
-        
+
         // 发送出售事件，用于统计金币收益
         if (totalGoldEarned > 0) {
             networkEvents.emit('sell', totalGoldEarned);

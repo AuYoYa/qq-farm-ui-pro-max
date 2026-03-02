@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>近期优化建议采纳及影响消除计划 (Plan)</title>
+    <style>
+        :root {
+            --bg-color: #0d1117;
+            --panel-bg: #161b22;
+            --border-color: #30363d;
+            --text-main: #c9d1d9;
+            --text-muted: #8b949e;
+            --primary: #58a6ff;
+            --success: #2ea043;
+            --warning: #d29922;
+            --danger: #f85149;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #fff;
+            margin-top: 1.5em;
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.3em;
+        }
+
+        h1 {
+            font-size: 2em;
+            text-align: center;
+            border-bottom: none;
+        }
+
+        .card {
+            background: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: bold;
+            margin-left: 10px;
+        }
+
+        .badge-p0 {
+            background: var(--danger);
+            color: white;
+        }
+
+        .badge-p1 {
+            background: var(--warning);
+            color: #000;
+        }
+
+        .badge-p2 {
+            background: var(--primary);
+            color: white;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 0.2em 0.4em;
+            border-radius: 4px;
+            font-family: ui-monospace, SFMono-Regular, Consolas, "Liberation Mono", Menlo, monospace;
+            font-size: 0.9em;
+        }
+
+        .diff-add {
+            color: var(--success);
+        }
+
+        .diff-del {
+            color: var(--danger);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>🚀 近期优化建议采纳及影响消除计划</h1>
+        <p style="text-align: center; color: var(--text-muted);">本文档响应《API密钥集中管理与近期优化核查报告》中的安全、性能与交互建议，实施排期规划。</p>
+
+        <div class="card">
+            <h2>模块一：API 密钥网络脱敏传输防护 <span class="badge badge-p1">Priority: High (P1)</span></h2>
+            <p><strong>现状痛点：</strong> `Settings.vue` 以密码框 `type="password"` 渲染第三方 API (如 `wxApiKey`)。但在初始化
+                `loadThirdPartyApiConfig()` 拉取配置经过网络层时，密钥作为 JSON 明文响应，存在被中间件探嗅的越权风险。</p>
+            <p><strong>修复策略与机制 (Masking Strategy)：</strong></p>
+            <ul>
+                <li><strong>后端切流 (Masking)：</strong> 在 `admin.js` 中 `GET /api/admin/third-party-api`
+                    输出前，运用正则对密钥仅保底渲染：`sk-**** + 末尾4位字符`。</li>
+                <li><strong>前端回传修正 (Diff Upload)：</strong> 当超级管理员点击“保存”时，前端在 `saveThirdPartyApiConfig` 请求中检测如果字符串依旧包含
+                    `****`，则将其从 HTTP Body (Payload) 剔除，向后台发出指令**“保持原本值，无需覆盖”**。</li>
+                <li><strong>后端安全拼接 (Patch Merge)：</strong> 后台 `POST /api/admin/third-party-api` 接口接收到 Payload 时，遇到未被传参的
+                    `wxApiKey`，直接合并保留原先 `store.json` 里未加密的持久化值。</li>
+            </ul>
+            <p><strong>操作边界：</strong>此修正完美达成安全审计。用户不修改时密码不流出；只有用户清空重输了一个完整的 Key（即没有星号时），它才会被真实传输并落库覆盖旧值。</p>
+        </div>
+
+        <div class="card">
+            <h2>模块二：登陆界面（核显杀手）极限性能隔离 <span class="badge badge-p1">Priority: High (P1)</span></h2>
+            <p><strong>现状痛点：</strong> 经过 v3.9.0 极品流明材质与 `cubic-bezier` 弹簧特效重组的 `Login.vue`，在搭载上代核显设备的 Chrome 渲染环境中，由
+                `hover:scale-105` 及 `animate-pulse` 等 GPU 加速合成引发重绘负荷（风扇升温）。</p>
+            <p><strong>修复策略与机制 (Performance Override)：</strong></p>
+            <ul>
+                <li><strong>扩大覆盖面：</strong> 将位于全局 `style.css` 或 `App.vue` 内原本专门为内部组件兜底的性能开关 `.performance-mode-active`
+                    选择器边界扩大，包容最高入口的 `Login` 父挂载点。</li>
+                <li><strong>原子类硬拦截：</strong> 在极简性能开关接管时，利用 CSS 层级直接注入
+                    <code>* { transform: none !important; animation: none !important; transition: none !important; }</code>，一剑斩断登录底板星空粒子和弹簧缩放
+                    3D 转换（`translate3d / scale`），大幅降维。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>模块三：智能抗边缘遮挡体系 (Floating UI) <span class="badge badge-p2">Priority: Medium (P2)</span></h2>
+            <p><strong>现状痛点：</strong> 虽然 v3.9.0 已统一将所有的 `Tooltip` 从侧边防割裂改为下方居中弹出。但在纵向空间极端紧缺（此时处于屏幕最后
+                30px）的环境下，往下弹会无视高度突破 `body` 底边，致使整个页面出现极长的滚动条或被遮住。</p>
+            <p><strong>修复策略与机制 (Dynamic Boundary Calculation)：</strong></p>
+            <ul>
+                <li><strong>放弃纯 CSS 的被动站位：</strong> 修改 `BaseTooltip.vue` 中单纯的 <code>top-full</code> 定位类。</li>
+                <li><strong>引入动态交会 (Intersection Strategy)：</strong> 在挂载后或者 Hover 前触发轻量级 JS
+                    `$el.getBoundingClientRect()` 测算。</li>
+                <li>**智能倒转：** 判定 `Y 轴剩余视口 (window.innerHeight - rect.bottom) < 气泡预估高度 (约 40px)` 时，自动切换为向顶部弹射
+                        `bottom-full mb-1` 并微调阴影方向，彻底消灭界面撑界 Bug。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>执行计划总览 & 影响验收 (Roadmap)</h2>
+            <ul>
+                <li><strong>Phase 1:</strong> 攻克【模块一】，改写后端 `/api/admin/third-party-api` 的 GET 遮蔽及 POST 合并，保障配置不落库失效。
+                    <em>(预计投入 15 分钟)</em></li>
+                <li><strong>Phase 2:</strong> 收缩核显压力【模块二】，通过扩充 `.performance-mode-active` 到 Root 或在 Login.vue
+                    中引入状态，实现物理切割。 <em>(预计投入 5 分钟)</em></li>
+                <li><strong>Phase 3:</strong> 导入核心交互演算【模块三】，升级 `BaseTooltip.vue` 追加空间边界反馈计算函数。 <em>(预计投入 15 分钟)</em>
+                </li>
+            </ul>
+            <p style="margin-top:20px; color: var(--success); font-weight: bold;">✅ [最终交付物核销] 上述三个模块全部完工与前端 TS
+                编译校验成功后，将本计划随工程交付。</p>
+        </div>
+    </div>
+</body>
+
+</html>

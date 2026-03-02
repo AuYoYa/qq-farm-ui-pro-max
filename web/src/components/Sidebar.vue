@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { useDateFormat, useIntervalFn, useNow } from '@vueuse/core'
+import { useMediaQuery, useDateFormat, useIntervalFn, useNow } from '@vueuse/core'
 import { storeToRefs } from 'pinia'
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
@@ -21,6 +21,16 @@ const route = useRoute()
 const { accounts, currentAccount } = storeToRefs(accountStore)
 const { status, realtimeConnected } = storeToRefs(statusStore)
 const { sidebarOpen } = storeToRefs(appStore)
+
+// 响应式检测是否为宽屏（xl 断点 ≥ 1280px）
+const isDesktop = useMediaQuery('(min-width: 1280px)')
+
+// 计算侧边栏的 transform 样式
+// 宽屏下始终不设位移，窄屏下由 sidebarOpen 控制滑入/滑出
+const sidebarTransform = computed(() => {
+  if (isDesktop.value) return 'none'
+  return sidebarOpen.value ? 'translateX(0)' : 'translateX(-100%)'
+})
 
 const showAccountDropdown = ref(false)
 const showAccountModal = ref(false)
@@ -322,8 +332,8 @@ function onNavClick() {
 
 <template>
   <aside
-    class="glass-panel fixed inset-y-0 left-0 z-50 h-full w-64 flex flex-col border-r border-gray-200/50 transition-transform duration-300 xl:static xl:translate-x-0 dark:border-gray-700/50"
-    :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full'"
+    class="glass-panel fixed inset-y-0 left-0 z-50 h-full w-64 flex flex-col border-r border-gray-200/50 transition-transform duration-300 xl:static dark:border-gray-700/50"
+    :style="{ transform: sidebarTransform }"
   >
     <!-- Brand -->
     <div class="h-16 flex items-center justify-between border-b border-gray-100 px-4 dark:border-gray-700/50">

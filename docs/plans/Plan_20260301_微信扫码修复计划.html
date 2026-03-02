@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Plan: 微信扫码登录 API 参数优化修复</title>
+    <style>
+        :root {
+            --bg: #0f172a;
+            --card: #1e293b;
+            --border: #334155;
+            --accent: #22c55e;
+            --accent2: #8b5cf6;
+            --warn: #f59e0b;
+            --danger: #ef4444;
+            --info: #0ea5e9;
+            --text: #f1f5f9;
+            --muted: #94a3b8;
+            --code-bg: #0d1117
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0
+        }
+
+        body {
+            font-family: 'SF Pro Display', 'Inter', system-ui, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            padding: 40px 24px
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto
+        }
+
+        h1 {
+            font-size: 1.8rem;
+            background: linear-gradient(135deg, var(--accent), var(--info));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px
+        }
+
+        .subtitle {
+            color: var(--muted);
+            font-size: .9rem;
+            margin-bottom: 32px
+        }
+
+        h2 {
+            font-size: 1.25rem;
+            color: var(--accent);
+            margin: 32px 0 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border)
+        }
+
+        h3 {
+            font-size: 1.05rem;
+            color: var(--text);
+            margin: 20px 0 10px
+        }
+
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            transition: border-color .2s
+        }
+
+        .card:hover {
+            border-color: var(--accent)
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 99px;
+            font-size: .75rem;
+            font-weight: 600;
+            margin-right: 8px;
+            vertical-align: middle
+        }
+
+        .badge-bug {
+            background: rgba(239, 68, 68, .15);
+            color: var(--danger)
+        }
+
+        .badge-enhance {
+            background: rgba(14, 165, 233, .15);
+            color: var(--info)
+        }
+
+        .file-list {
+            list-style: none;
+            padding: 0;
+            margin: 8px 0
+        }
+
+        .file-list li {
+            padding: 4px 0;
+            color: var(--muted);
+            font-size: .85rem
+        }
+
+        .file-list li code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: .8rem;
+            color: var(--info)
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 16px 0;
+            font-size: .88rem
+        }
+
+        th {
+            background: var(--code-bg);
+            color: var(--muted);
+            padding: 10px 12px;
+            text-align: left;
+            border-bottom: 2px solid var(--border)
+        }
+
+        td {
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--border);
+            word-break: break-all;
+        }
+
+        code {
+            background: var(--code-bg);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: .82rem;
+            color: var(--accent)
+        }
+
+        .impact {
+            margin: 8px 0;
+            padding: 10px 14px;
+            border-left: 3px solid var(--danger);
+            background: rgba(239, 68, 68, .05);
+            border-radius: 0 8px 8px 0;
+            font-size: .88rem
+        }
+
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            color: var(--muted);
+            font-size: .8rem;
+            border-top: 1px solid var(--border);
+            padding-top: 16px
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+
+        <h1>🛠️ 微信扫码端问题修复与优化计划</h1>
+        <p class="subtitle">针对 “获取失败，请先登录” 的根本性阻断问题进行剖析排查并提出修复落地方案</p>
+
+        <!-- ============ 根本原委 ============ -->
+        <h2>🔍 故障原因分析</h2>
+        <div class="card">
+            <span class="badge badge-bug">🧨 API 参数形式错误</span>
+            <h3>现象说明</h3>
+            <p class="detail">
+                在先前的代码中，我们把 <code>api_key</code> 和 <code>action</code> 参数统统打包放在了 HTTP POST 请求的
+                <code>body: JSON.stringify({...})</code> 中发给了 <code>api.aineishe.com</code>。而第三方接口网关因为在其路由 URL（Query
+                String）中提取不到相关的 <code>action</code> 和鉴权字段 <code>api_key</code>，因此它被误判为一次“无状态/未被授权”的错误访问，下发了 “请先登录”
+                或者空白拒绝的回调信息。
+            </p>
+            <div class="impact">
+                <strong>对比 vxcode 参照代码</strong>: 在参照代码中，请求是通过
+                <code>`${API_URL}?api_key=${encodeURIComponent(API_KEY)}&action=${action}`</code> 直接拼接到 <strong>URL
+                    问号后</strong>作为 Query 参数传递的，而我们原本写入的逻辑全都在 request body 里。
+            </div>
+        </div>
+
+        <!-- ============ 修正方案 ============ -->
+        <h2>📦 后端路由修改计划</h2>
+        <div class="card">
+            <span class="badge badge-enhance">✨ 代码重构</span>
+            <h3>实施方案</h3>
+            <ul class="file-list">
+                <li>重构所有的 <code>fetch</code> 函数。针对 <code>getqr</code>, <code>checkqr</code> 和 <code>jslogin</code>，把
+                    <code>api_key</code> 和 <code>action</code> 脱离出 JSON body，强行拼接为 URL。</li>
+                <li><code>body</code> 里只保留第三方需要的额外逻辑参数（如 <code>uuid</code> 或 <code>appid</code>），其它验证握手均上缴到 URL 中。</li>
+            </ul>
+
+            <h3>修改参照对比</h3>
+            <table>
+                <thead>
+                    <tr>
+                        <th>修改前 (JSON Body 传递) ❌</th>
+                        <th>修改后 (Query URL 传递) ✅</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>fetch(CONFIG.wxApiUrl, {<br>&nbsp;&nbsp;body: JSON.stringify({ action: 'getqr', api_key: CONFIG.wxApiKey })<br>})</code>
+                        </td>
+                        <td><code>fetch(CONFIG.wxApiUrl + '?api_key=...' + '&action=getqr', {<br>&nbsp;&nbsp;body: JSON.stringify({})<br>})</code>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <!-- ============ 展望与复查 ============ -->
+        <h2>✅ 其他可行的优化策略</h2>
+        <div class="card">
+            <h3>1. 安全断联（AbortController）兜底设计</h3>
+            <p class="detail">当前咱们已经在代码中注入了基于 <code>AbortController</code>
+                的超时熔断，能够防止请求出现因参数错误而被外部网关挂死导致资源耗尽的可能，这个安全项无需二次改动。</p>
+
+            <h3>2. 失败重试</h3>
+            <p class="detail">在获取 <code>jslogin</code> 获取微信授权 Code
+                的最后时刻（此时用户已在手机端点击允许），如果正好遭遇网络丢包，可考虑前端增加一个「重新获取」的状态重置闭环。</p>
+        </div>
+
+        <!-- ============ Footer ============ -->
+        <div class="footer">
+            Plan_20260301_微信扫码修复 · 待审核执行完毕即见效
+        </div>
+
+    </div>
+</body>
+
+</html>

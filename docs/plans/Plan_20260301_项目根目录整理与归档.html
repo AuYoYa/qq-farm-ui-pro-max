@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>项目根目录 5S 整理与重构计划</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --folder: #dcb676;
+            --file: #cbd5e1;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--primary-hover);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--primary-hover);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge.move {
+            background-color: rgba(245, 158, 11, 0.2);
+            color: var(--warning);
+        }
+
+        .badge.keep {
+            background-color: rgba(16, 185, 129, 0.2);
+            color: var(--success);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .tree-view {
+            font-family: monospace;
+            background-color: rgba(0, 0, 0, 0.3);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            white-space: pre;
+            line-height: 1.4;
+            color: var(--file);
+            overflow-x: auto;
+        }
+
+        .tree-folder {
+            color: var(--folder);
+            font-weight: bold;
+        }
+
+        .tree-comment {
+            color: var(--text-muted);
+            font-style: italic;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧹 项目根目录 5S 整理与重构计划</h1>
+            <p><strong>状态:</strong> 待审批 | <strong>时间:</strong> 2026-03-01</p>
+        </div>
+
+        <div class="card">
+            <h2>一、 目录现状与病因分析 (Current Status)</h2>
+            <p>当前项目根目录极为混杂，大量部署日志、历史备份、一次性脚本文件与项目核心代码交织在一起。严重降低了代码维护性及可读性。根据扫描，根目录下含有逾 40 个周边文件需要按类型归档拆分。</p>
+        </div>
+
+        <div class="card">
+            <h2>二、 结构重组骨架图 (Target Architecture Tree)</h2>
+            <div class="tree-view">
+                <span class="tree-folder">qq-farm-bot-ui-main/</span>
+                ├── <span class="tree-folder">docs/</span> <span class="tree-comment"># 所有文档的“集散中心”</span>
+                │ ├── <span class="tree-folder">archive/</span> <span class="tree-comment"># [新建] 历史工作日志 (*_COMPLETE.md,
+                    *_SUCCESS.md 等)</span>
+                │ ├── <span class="tree-folder">deployment/</span> <span class="tree-comment"># [新建] Docker
+                    与环境部署方案</span>
+                │ ├── <span class="tree-folder">guides/</span> <span class="tree-comment"># [新建] 开发向导、维护交接清单与 QA
+                    测试基准</span>
+                │ └── <span class="tree-folder">plans/</span> <span class="tree-comment"># 所有规划设计推演、前瞻报告 (Plan_*.html
+                    所在地)</span>
+                ├── <span class="tree-folder">scripts/</span> <span class="tree-comment"># 非高频运行的辅助维护脚本集合地</span>
+                ├── <span class="tree-folder">core/</span> <span class="tree-comment"># 服务端核心</span>
+                ├── <span class="tree-folder">web/</span> <span class="tree-comment"># 客户端核心</span>
+                ├── ... <span class="tree-comment">(保留根目录的核心启动入口及配置文件)</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>三、 迁移清理明细方案 (Migration Actions)</h2>
+
+            <h3>1. 清理与归档类快照 (Move to <code>docs/archive/</code>)</h3>
+            <p class="tree-comment">针对所有表示某项工作已结束、已固化的历史快照文件进行冷存储封存。</p>
+            <table>
+                <tr>
+                    <th width="80">动作</th>
+                    <th>目标文件 (Glob Match)</th>
+                </tr>
+                <tr>
+                    <td><span class="badge move">Move</span></td>
+                    <td><code>ALL_TASKS_COMPLETE.md</code>, <code>CLEANUP_REPORT.md</code>,
+                        <code>COMPLETE_OPTIMIZATION_SUMMARY.md</code>, <code>*_SUCCESS*.md</code>,
+                        <code>*_COMPLETE.md</code>, <code>*_SUMMARY.md</code>, <code>更新完成总结.md</code></td>
+                </tr>
+            </table>
+
+            <h3>2. 部署与运维专项 (Move to <code>docs/deployment/</code>)</h3>
+            <p class="tree-comment">容器化与云端搭建部署文档。</p>
+            <table>
+                <tr>
+                    <th width="80">动作</th>
+                    <th>目标文件 (Glob Match)</th>
+                </tr>
+                <tr>
+                    <td><span class="badge move">Move</span></td>
+                    <td><code>DOCKER*.md</code>, <code>DEPLOYMENT*.md</code>, <code>Docker多平台*.md/.html</code></td>
+                </tr>
+            </table>
+
+            <h3>3. 指南与交接库 (Move to <code>docs/guides/</code>)</h3>
+            <p class="tree-comment">操作指引、AI参考系与项目版图指南。</p>
+            <table>
+                <tr>
+                    <th width="80">动作</th>
+                    <th>目标文件 (Glob Match)</th>
+                </tr>
+                <tr>
+                    <td><span class="badge move">Move</span></td>
+                    <td><code>*GUIDE.md</code>, <code>HANDOVER.md</code>, <code>AI-QUICK-REFERENCE.md</code>,
+                        <code>QUICKSTART.AI.md</code>, <code>README.AI.md</code>, <code>PROJECT_ROADMAP.md</code></td>
+                </tr>
+            </table>
+
+            <h3>4. 工具脚本抽离 (Move to <code>scripts/</code>)</h3>
+            <p class="tree-comment">隐藏除启动脚本外的所有后台配置和杂项工具。</p>
+            <table>
+                <tr>
+                    <th width="80">动作</th>
+                    <th>目标文件 (Glob Match)</th>
+                </tr>
+                <tr>
+                    <td><span class="badge move">Move</span></td>
+                    <td><code>ai-*.js</code>, <code>ai-*.nssm</code>, <code>ai-*.systemd</code>,
+                        <code>check-sensitive-info.sh</code>, <code>generate-placeholder-images.js</code>,
+                        <code>prepare-github-sync.sh</code>, <code>setup-macos-launchd.sh</code>,
+                        <code>test-autostart.js</code></td>
+                </tr>
+            </table>
+
+            <h3>5. 计划类碎片入库 (Move to <code>docs/plans/</code>)</h3>
+            <p class="tree-comment">散落在根目录的企划书。</p>
+            <table>
+                <tr>
+                    <th width="80">动作</th>
+                    <th>目标文件 (Glob Match)</th>
+                </tr>
+                <tr>
+                    <td><span class="badge move">Move</span></td>
+                    <td><code>*_PLAN.md</code>, <code>github-sync-*.html</code>, <code>两季作物更新计划.md</code>,
+                        <code>主题*.html/.md</code></td>
+                </tr>
+            </table>
+
+            <h3>6. 根目录保留的绝对核心 (Keep in <code>/</code>)</h3>
+            <p class="tree-comment">真正的基础入口及构建锚点。</p>
+            <table>
+                <tr>
+                    <th width="80">动作</th>
+                    <th>目标文件 (Glob Match)</th>
+                </tr>
+                <tr>
+                    <td><span class="badge keep">Keep</span></td>
+                    <td>
+                        <code>README.md</code>, <code>CHANGELOG.md</code>, <code>CHANGELOG.DEVELOPMENT.md</code>,
+                        <code>Update.log</code>, <code>LICENSE</code> <br>
+                        <code>package.json</code>, <code>pnpm-workspace.yaml</code>, <code>pnpm-lock.yaml</code> <br>
+                        <code>.env</code>, <code>.gitignore</code>, <code>docker-compose*.yml</code> <br>
+                        <code>start.sh</code>, <code>start.bat</code>, <code>start-with-ai.sh</code>,
+                        <code>start-with-ai.bat</code>
+                    </td>
+                </tr>
+            </table>
+
+        </div>
+
+        <div class="card" style="border-left: 4px solid var(--warning);">
+            <h2>四、 风险预案 (Impact Analysis)</h2>
+            <p>1. <strong>命令失效</strong>：由于移动了脚本文件，如使用到了 <code>ai-autostart.js</code> 的某些古老自动化挂载脚本可能找不到路径。我会在移动前检查
+                <code>start-with-ai.sh</code> 的实际调用情况。<br>
+                2. <strong>Git 记录膨胀</strong>：大量的文件移动（Rename 操作）会产生 Git 树变动，不过由于系统当前未能关联上 Git（在你的环境下
+                <code>fatal: not a git repository</code>），可以直接进行物理层剪切覆盖移动。 </p>
+        </div>
+
+    </div>
+</body>
+
+</html>

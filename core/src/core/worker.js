@@ -173,13 +173,13 @@ function normalizeIntervalRangeSec(minSec, maxSec, fallbackSec) {
 function applyIntervalsToRuntime(intervals) {
     const data = (intervals && typeof intervals === 'object') ? intervals : {};
 
-    const farmLegacy = Math.max(1, Number.parseInt(data.farm, 10) || 2);
+    const farmLegacy = Math.max(1, Number.parseInt(data.farm, 10) || 300);
     const farmRange = normalizeIntervalRangeSec(data.farmMin, data.farmMax, farmLegacy);
     CONFIG.farmCheckIntervalMin = farmRange.min * 1000;
     CONFIG.farmCheckIntervalMax = farmRange.max * 1000;
     CONFIG.farmCheckInterval = CONFIG.farmCheckIntervalMin;
 
-    const friendLegacy = Math.max(1, Number.parseInt(data.friend, 10) || 10);
+    const friendLegacy = Math.max(1, Number.parseInt(data.friend, 10) || 900);
     const friendRange = normalizeIntervalRangeSec(data.friendMin, data.friendMax, friendLegacy);
     CONFIG.friendCheckIntervalMin = friendRange.min * 1000;
     CONFIG.friendCheckIntervalMax = friendRange.max * 1000;
@@ -395,7 +395,11 @@ async function startBot(config) {
         });
         if (isRunning) {
             workerScheduler.setTimeoutTask('ws_error_cleanup', 1000, () => {
-                if (isRunning) cleanup();
+                if (isRunning) {
+                    stopFarmCheckLoop();
+                    stopFriendCheckLoop();
+                    cleanup();
+                }
             });
         }
     };

@@ -12,6 +12,7 @@ const { updateStatusFromLogin, updateStatusGold, updateStatusLevel } = require('
 const { recordOperation } = require('../services/stats');
 const { types } = require('./proto');
 const { toLong, toNum, syncServerTime, log, logWarn } = require('./utils');
+const store = require('../models/store'); // Phase 3: 引入 store 用于持久化风控锁
 
 // ============ 事件发射器 (用于推送通知) ============
 const networkEvents = new EventEmitter();
@@ -32,6 +33,7 @@ const userState = {
     gold: 0,
     exp: 0,
     coupon: 0, // 点券(ID:1002)
+    suspendUntil: CONFIG.accountId ? store.getSuspendUntil(CONFIG.accountId) : 0, // Phase 3: 初始化时从本地存档抽取
 };
 
 function getUserState() { return userState; }
@@ -239,6 +241,15 @@ function handleMessage(data) {
         if (msgType === 2) {
             const errorCode = toNum(meta.error_code);
             const clientSeqVal = toNum(meta.client_seq);
+
+            // Phase 2: 拦截 1002003 封禁信号，启动自恢复休眠 (30分钟)
+            if (errorCode === 1002003) {
+                userState.suspendUntil = Date.now() + 30 * 60 * 1000;
+                if (CONFIG.accountId) {
+                    store.recordSuspendUntil(CONFIG.accountId, userState.suspendUntil);
+                }
+                logWarn('风控', `接口受到频率限制或被临时封禁 (1002003)，账号进入 30 分钟保护性休眠`);
+            }
 
             const cb = pendingCallbacks.get(clientSeqVal);
             if (cb) {

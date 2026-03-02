@@ -44,6 +44,14 @@ const DEFAULT_TRIAL_CARD_CONFIG = {
     userRenewEnabled: false,  // 用户可自助续费
     maxAccounts: 1,           // 绑定账号数上限
 };
+
+// 第三方 API 配置默认值
+const DEFAULT_THIRD_PARTY_API_CONFIG = {
+    wxApiKey: '',
+    wxApiUrl: '',
+    wxAppId: '',
+};
+
 // ============ 全局配置 ============
 const DEFAULT_ACCOUNT_CONFIG = {
     automation: {
@@ -72,15 +80,15 @@ const DEFAULT_ACCOUNT_CONFIG = {
     plantingStrategy: 'preferred',
     preferredSeedId: 0,
     intervals: {
-        farm: 2,
-        friend: 10,
-        farmMin: 2,
-        farmMax: 2,
-        friendMin: 10,
-        friendMax: 10,
+        farm: 30,
+        friend: 100,
+        farmMin: 30,
+        farmMax: 200,
+        friendMin: 100,
+        friendMax: 600,
     },
     friendQuietHours: {
-        enabled: false,
+        enabled: true,
         start: '23:00',
         end: '07:00',
     },
@@ -110,14 +118,14 @@ const DEFAULT_ACCOUNT_CONFIG = {
     workflowConfig: {
         farm: {
             enabled: false,
-            minInterval: 2,
-            maxInterval: 2,
+            minInterval: 30,
+            maxInterval: 120,
             nodes: [] // 例如: [{ id: 'uid1', type: 'weed' }, ...]
         },
         friend: {
             enabled: false,
-            minInterval: 10,
-            maxInterval: 10,
+            minInterval: 60,
+            maxInterval: 300,
             nodes: []
         }
     },
@@ -143,6 +151,7 @@ const globalConfig = {
     offlineReminder: { ...DEFAULT_OFFLINE_REMINDER },
     adminPasswordHash: '',
     trialCardConfig: { ...DEFAULT_TRIAL_CARD_CONFIG },
+    thirdPartyApi: { ...DEFAULT_THIRD_PARTY_API_CONFIG },
 };
 
 function normalizeOfflineReminder(input) {
@@ -242,18 +251,19 @@ function cloneAccountConfig(base = DEFAULT_ACCOUNT_CONFIG) {
         },
         runtimeRecords: {
             fertilizerBoughtStr: String(srcRuntimeRecords.fertilizerBoughtStr || ''),
+            suspendUntil: Number.parseInt(srcRuntimeRecords.suspendUntil, 10) || 0,
         },
         workflowConfig: {
             farm: {
                 enabled: !!(srcWorkflowConfig.farm && srcWorkflowConfig.farm.enabled),
-                minInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.farm?.minInterval, 10) || 2),
-                maxInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.farm?.maxInterval, 10) || 2),
+                minInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.farm?.minInterval, 10) || 30),
+                maxInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.farm?.maxInterval, 10) || 120),
                 nodes: Array.isArray(srcWorkflowConfig.farm?.nodes) ? srcWorkflowConfig.farm.nodes : [],
             },
             friend: {
                 enabled: !!(srcWorkflowConfig.friend && srcWorkflowConfig.friend.enabled),
-                minInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.friend?.minInterval, 10) || 10),
-                maxInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.friend?.maxInterval, 10) || 10),
+                minInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.friend?.minInterval, 10) || 60),
+                maxInterval: Math.max(1, Number.parseInt(srcWorkflowConfig.friend?.maxInterval, 10) || 300),
                 nodes: Array.isArray(srcWorkflowConfig.friend?.nodes) ? srcWorkflowConfig.friend.nodes : [],
             }
         },
@@ -348,6 +358,8 @@ function normalizeAccountConfig(input, fallback = accountFallbackConfig) {
     if (src.runtimeRecords && typeof src.runtimeRecords === 'object') {
         cfg.runtimeRecords = {
             fertilizerBoughtStr: src.runtimeRecords.fertilizerBoughtStr !== undefined ? String(src.runtimeRecords.fertilizerBoughtStr) : cfg.runtimeRecords.fertilizerBoughtStr,
+            // 透传风控休眠时间戳，防止保存设置时意外清零导致休眠期提前解除
+            suspendUntil: src.runtimeRecords.suspendUntil !== undefined ? (Number.parseInt(src.runtimeRecords.suspendUntil, 10) || 0) : (cfg.runtimeRecords.suspendUntil || 0),
         };
     }
 
@@ -573,6 +585,8 @@ function loadGlobalConfig() {
             }
             // 加载体验卡配置
             globalConfig.trialCardConfig = normalizeTrialCardConfig(data.trialCardConfig);
+            // 加载第三方 API 配置
+            globalConfig.thirdPartyApi = normalizeThirdPartyApiConfig(data.thirdPartyApi);
 
             // 如果从旧格式迁移了数据，重新写入 store.json（不含 accountConfigs 以减小体积）
             if (migratedFromOld) {
@@ -603,6 +617,9 @@ function sanitizeGlobalConfigBeforeSave() {
 
     // 净化体验卡配置
     globalConfig.trialCardConfig = normalizeTrialCardConfig(globalConfig.trialCardConfig);
+
+    // 净化第三方 API 配置
+    globalConfig.thirdPartyApi = normalizeThirdPartyApiConfig(globalConfig.thirdPartyApi);
 }
 
 let saveTimeout = null;
@@ -644,6 +661,7 @@ function saveGlobalConfigImmediate() {
             offlineReminder: globalConfig.offlineReminder,
             adminPasswordHash: globalConfig.adminPasswordHash,
             trialCardConfig: globalConfig.trialCardConfig,
+            thirdPartyApi: globalConfig.thirdPartyApi,
         };
         const oldJson = readTextFile(STORE_FILE, '');
         const newJson = JSON.stringify(globalOnly, null, 2);
@@ -851,9 +869,22 @@ function getFertilizerBoughtData(accountId) {
 function recordFertilizerBought(accountId, totalCount, dateVal) {
     const cfg = getAccountConfigSnapshot(accountId);
     if (!cfg.runtimeRecords) {
-        cfg.runtimeRecords = { fertilizerBoughtStr: '' };
+        cfg.runtimeRecords = { fertilizerBoughtStr: '', suspendUntil: 0 };
     }
     cfg.runtimeRecords.fertilizerBoughtStr = `${dateVal}|${totalCount}`;
+    setAccountConfigSnapshot(accountId, cfg, true);
+}
+
+function getSuspendUntil(accountId) {
+    return Number.parseInt(getAccountConfigSnapshot(accountId).runtimeRecords?.suspendUntil, 10) || 0;
+}
+
+function recordSuspendUntil(accountId, timestamp) {
+    const cfg = getAccountConfigSnapshot(accountId);
+    if (!cfg.runtimeRecords) {
+        cfg.runtimeRecords = { fertilizerBoughtStr: '', suspendUntil: 0 };
+    }
+    cfg.runtimeRecords.suspendUntil = timestamp;
     setAccountConfigSnapshot(accountId, cfg, true);
 }
 
@@ -864,15 +895,15 @@ function getIntervals(accountId) {
 function normalizeIntervals(intervals) {
     const src = (intervals && typeof intervals === 'object') ? intervals : {};
     const toSec = (v, d) => Math.max(1, Number.parseInt(v, 10) || d);
-    const farm = toSec(src.farm, 2);
-    const friend = toSec(src.friend, 10);
+    const farm = toSec(src.farm, 300);
+    const friend = toSec(src.friend, 900);
 
-    let farmMin = toSec(src.farmMin, farm);
-    let farmMax = toSec(src.farmMax, farm);
+    let farmMin = toSec(src.farmMin, 30);
+    let farmMax = toSec(src.farmMax, 200);
     if (farmMin > farmMax) [farmMin, farmMax] = [farmMax, farmMin];
 
-    let friendMin = toSec(src.friendMin, friend);
-    let friendMax = toSec(src.friendMax, friend);
+    let friendMin = toSec(src.friendMin, 100);
+    let friendMax = toSec(src.friendMax, 600);
     if (friendMin > friendMax) [friendMin, friendMax] = [friendMax, friendMin];
 
     return {
@@ -1042,6 +1073,34 @@ function setTrialCardConfig(cfg) {
     return getTrialCardConfig();
 }
 
+// ============ 第三方 API 配置 ============
+
+/**
+ * 规范化第三方 API 配置对象
+ * @param {object} input - 输入配置
+ * @returns {object} 规范化后的配置
+ */
+function normalizeThirdPartyApiConfig(input) {
+    const src = (input && typeof input === 'object') ? input : {};
+    return {
+        wxApiKey: String(src.wxApiKey || '').trim(),
+        wxApiUrl: String(src.wxApiUrl || '').trim(),
+        wxAppId: String(src.wxAppId || '').trim(),
+        ipad860Url: String(src.ipad860Url || '').trim(),
+    };
+}
+
+function getThirdPartyApiConfig() {
+    return normalizeThirdPartyApiConfig(globalConfig.thirdPartyApi);
+}
+
+function setThirdPartyApiConfig(cfg) {
+    const current = normalizeThirdPartyApiConfig(globalConfig.thirdPartyApi);
+    globalConfig.thirdPartyApi = normalizeThirdPartyApiConfig({ ...current, ...(cfg || {}) });
+    saveGlobalConfig();
+    return getThirdPartyApiConfig();
+}
+
 // ============ 账号管理 (对接 MySQL AccountRepository) ============
 const accountRepository = require('../repositories/account-repository');
 
@@ -1064,6 +1123,50 @@ async function getAccounts() {
         updatedAt: r.updated_at ? new Date(r.updated_at).getTime() : Date.now(),
     }));
     return { accounts, nextId: 0 };
+}
+
+/**
+ * 获取所有账号的完整数据（含 auth_data），用于批量启动时替代逐个查询
+ */
+async function getAccountsFull() {
+    const rawAccounts = await accountRepository.findAll();
+    const accounts = rawAccounts.map(r => ({
+        id: String(r.id),
+        name: r.name || `账号${r.id}`,
+        platform: r.platform || 'qq',
+        uin: r.uin ? String(r.uin) : '',
+        qq: r.uin ? String(r.uin) : '',
+        nick: r.nick || '',
+        running: !!r.running,
+        status: r.status,
+        username: r.username || '',
+        createdAt: r.created_at ? new Date(r.created_at).getTime() : Date.now(),
+        updatedAt: r.updated_at ? new Date(r.updated_at).getTime() : Date.now(),
+        ...(r.auth_data && typeof r.auth_data === 'object' ? r.auth_data : {})
+    }));
+    return { accounts, nextId: 0 };
+}
+
+/**
+ * 分批获取所有账号的完整数据（含 auth_data），用于安全分页启动，防止 10000+ 账号时的 JSON.parse 级联阻塞主线程
+ */
+async function getAccountsFullPaged(page = 1, pageSize = 100) {
+    const result = await accountRepository.findAllPaged(page, pageSize, { withJson: true });
+    const accounts = result.rows.map(r => ({
+        id: String(r.id),
+        name: r.name || `账号${r.id}`,
+        platform: r.platform || 'qq',
+        uin: r.uin ? String(r.uin) : '',
+        qq: r.uin ? String(r.uin) : '',
+        nick: r.nick || '',
+        running: !!r.running,
+        status: r.status,
+        username: r.username || '',
+        createdAt: r.created_at ? new Date(r.created_at).getTime() : Date.now(),
+        updatedAt: r.updated_at ? new Date(r.updated_at).getTime() : Date.now(),
+        ...(r.auth_data && typeof r.auth_data === 'object' ? r.auth_data : {})
+    }));
+    return { accounts, total: result.total, page: result.page, pageSize: result.pageSize };
 }
 
 /**
@@ -1168,6 +1271,8 @@ module.exports = {
     getOfflineReminder,
     setOfflineReminder,
     getAccounts,
+    getAccountsFull,
+    getAccountsFullPaged,
     getAccountFull,
     addOrUpdateAccount,
     deleteAccount,
@@ -1176,6 +1281,10 @@ module.exports = {
     ensureAccountConfig,
     getTrialCardConfig,
     setTrialCardConfig,
+    getThirdPartyApiConfig,
+    setThirdPartyApiConfig,
     getFertilizerBoughtData,
     recordFertilizerBought,
+    getSuspendUntil,
+    recordSuspendUntil,
 };

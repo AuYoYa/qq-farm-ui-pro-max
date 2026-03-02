@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>第三方 API 密钥集中管理方案 - Architecture Plan</title>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --container-bg: #1e293b;
+            --text-color: #f1f5f9;
+            --accent-color: #3b82f6;
+            --accent-hover: #60a5fa;
+            --border-color: #334155;
+            --success-color: #10b981;
+            --warning-color: #f59e0b;
+            --danger-color: #ef4444;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background-color: var(--bg-color);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 40px 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 50px;
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 30px;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            background: linear-gradient(to right, #60a5fa, #c084fc);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .subtitle {
+            color: #94a3b8;
+            font-size: 1.1rem;
+        }
+
+        .section {
+            background-color: var(--container-bg);
+            border-radius: 12px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            border: 1px solid var(--border-color);
+        }
+
+        h2 {
+            display: flex;
+            align-items: center;
+            color: var(--accent-color);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+
+        h2::before {
+            content: "";
+            display: inline-block;
+            width: 5px;
+            height: 20px;
+            background-color: var(--accent-color);
+            margin-right: 15px;
+            border-radius: 3px;
+        }
+
+        h3 {
+            color: #cbd5e1;
+            margin-top: 25px;
+        }
+
+        p,
+        li {
+            color: #cbd5e1;
+        }
+
+        ul {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        code {
+            background-color: #0f172a;
+            color: #e2e8f0;
+            padding: 3px 6px;
+            border-radius: 4px;
+            font-family: Consolas, Monaco, "Courier New", monospace;
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            background-color: rgba(0, 0, 0, 0.2);
+        }
+
+        .alert-info {
+            border-color: var(--accent-color);
+            color: #bfdbfe;
+        }
+
+        .alert-warning {
+            border-color: var(--warning-color);
+            color: #fde68a;
+        }
+
+        .alert-danger {
+            border-color: var(--danger-color);
+            color: #fca5a5;
+        }
+
+        .diagram-container {
+            background-color: #0f172a;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background: #0f172a;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+
+        th,
+        td {
+            text-align: left;
+            padding: 12px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(255, 255, 255, 0.05);
+            color: #f1f5f9;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            font-weight: bold;
+        }
+
+        .badge-added {
+            background: rgba(16, 185, 129, 0.2);
+            color: var(--success-color);
+            border: 1px solid var(--success-color);
+        }
+
+        .badge-modified {
+            background: rgba(59, 130, 246, 0.2);
+            color: var(--accent-color);
+            border: 1px solid var(--accent-color);
+        }
+
+        .badge-deleted {
+            background: rgba(239, 68, 68, 0.2);
+            color: var(--danger-color);
+            border: 1px solid var(--danger-color);
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <header>
+            <h1>第三方 API 密钥集中管理方案</h1>
+            <div class="subtitle">Architecture Design & Impact Analysis Document</div>
+        </header>
+
+        <div class="section">
+            <h2>1. 需求共识 (Goal & Consensus)</h2>
+            <div class="alert alert-info">
+                <strong>业务目标：</strong>将现散落在代码和环境变量中的第三方业务 API Key 集中管理，实现“控制台化”配置。避免新环境部署时每次都需要修改代码或配置死板的环境变量。
+            </div>
+            <ul>
+                <li><strong>纳管范围：</strong>微信扫码相关 API (<code>wxApiKey</code>, <code>wxAppId</code>,
+                    <code>wxApiUrl</code>)。这是目前涉及第三方交互的核心业务密钥。</li>
+                <li><strong>排除范围：</strong>明确排除通知模块 (用户各自配置 的 Webhook/Push Token) 以及 Coding AI 相关配置
+                    (<code>DASHSCOPE_API_KEY</code>, <code>OPENVIKING_URL</code>)。</li>
+                <li><strong>界面入口：</strong>在超级管理员界面（<code>Settings.vue</code>）新增配置面板，仅限 <code>role: 'admin'</code> 修改。
+                </li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>2. 架构设计 (Architecture)</h2>
+            <div class="grid">
+                <div class="card">
+                    <h3>后端持久化层</h3>
+                    <p>沿用现有的 <code>store.js</code> 及其 <code>globalConfig</code> 体系。扩展结构，新增 <code>thirdPartyApi</code>
+                        节点，数据持久化存储至 <code>store.json</code>。</p>
+                </div>
+                <div class="card">
+                    <h3>前端控制台</h3>
+                    <p>在现有的 <code>Settings.vue</code> (系统设置面板) 增加一个专属的「第三方 API 设置」卡片。结合 <code>setting.ts</code> Pinia
+                        Store 实现数据的无缝双向绑定。</p>
+                </div>
+            </div>
+
+            <h3>数据流向图 (Data Flow)</h3>
+            <div class="diagram-container">
+                <div class="mermaid">
+                    sequenceDiagram
+                    participant Admin as 超级管理员
+                    participant Vue as Frontend (Settings.vue)
+                    participant API as API Server (admin.js)
+                    participant Store as Store (store.js)
+                    participant Code as 业务调用 (qrlogin, etc.)
+
+                    Admin->>Vue: 1. 进入设置页面，输入 WxApiKey 等信息
+                    Vue->>API: 2. POST /api/admin/third-party-api (需鉴权 admin)
+                    API->>Store: 3. setThirdPartyApiConfig(config)
+                    Store-->>Store: 4. 规范化并触发 防抖 saveGlobalConfig()
+                    Store-->>API: 5. 返回持久化后的最新配置
+                    API-->>Vue: 6. {ok: true, data}
+
+                    Note over Code,Store: 业务使用时动态读取
+                    Code->>Store: 7. getThirdPartyApiConfig()
+                    Store-->>Code: 8. 返回 {wxApiKey, wxAppId, wxApiUrl}
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>3. 影响分析 (Impact Analysis)</h2>
+            <p>本次改造主要涉及 Node.js 后端配置存储层、API 控制器以及对应的前端 Vue 组件，<strong>不涉及底层核心挂机引擎的运行逻辑</strong>，安全性与隔离性高。</p>
+
+            <table>
+                <thead>
+                    <tr>
+                        <th>文件路径</th>
+                        <th>变更类型</th>
+                        <th>影响细节 (Details)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><code>core/src/config/config.js</code></td>
+                        <td><span class="badge badge-modified">MODIFY</span></td>
+                        <td>移除 <code>wxApiKey</code>, <code>wxApiUrl</code>, <code>wxAppId</code> 等硬编码，作为初始化的降级 Fallback
+                            默认值提供。</td>
+                    </tr>
+                    <tr>
+                        <td><code>core/src/models/store.js</code></td>
+                        <td><span class="badge badge-added">ADD</span></td>
+                        <td>引入 <code>DEFAULT_THIRD_PARTY_API_CONFIG</code>，在全局对象 <code>globalConfig</code> 增加
+                            <code>thirdPartyApi</code> 领域，并提供 <code>get/set</code> 以及 <code>normalize</code> 函数，触发
+                            <code>json</code> 刷盘。</td>
+                    </tr>
+                    <tr>
+                        <td><code>core/src/controllers/admin.js</code></td>
+                        <td><span class="badge badge-modified">MODIFY</span></td>
+                        <td>新增 <code>GET /api/admin/third-party-api</code> 和
+                            <code>POST /api/admin/third-party-api</code> 路由。<br>将调用微信 API 进行扫码和确认等阶段的
+                            <code>CONFIG.wxApiKey</code> 替换为从 <code>store.getThirdPartyApiConfig()</code> 读取动态配置。</td>
+                    </tr>
+                    <tr>
+                        <td><code>web/src/stores/setting.ts</code></td>
+                        <td><span class="badge badge-modified">MODIFY</span></td>
+                        <td>新增拉取和保存第三方 API 配置的 <code>fetch/save thirdPartyApiConfig</code> 接口对接函数。</td>
+                    </tr>
+                    <tr>
+                        <td><code>web/src/views/Settings.vue</code></td>
+                        <td><span class="badge badge-modified">MODIFY</span></td>
+                        <td>仅当 <code>isAdmin</code> 为 <code>true</code> 时，展示"第三方API设置"专属区域面板。</td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <div class="alert alert-warning">
+                <strong>技术红线校验：</strong>
+                <ul>
+                    <li>由于微信二维码获取强依赖 <code>admin.js</code>，动态替换 API 参数后需要充分测试二维码拉取与验证的回调通路是否畅通。</li>
+                    <li>为了安全，前端只有获取到带有 <code>admin</code> role token 的超级管理员，后端才会吐出完整 API Key，这符合现有的 RBAC 防越权体系。</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>4. 下一步行动纲领 (Next Steps)</h2>
+            <p>基于当前计划，我们将分为三个实施阶段：</p>
+            <ul>
+                <li><strong>Step A (后端数据层改造)：</strong> 增加 Store 定义，完成配置读持久化及对外暴露的管理路由。</li>
+                <li><strong>Step B (后端调用层改造)：</strong> 去除微信扫码模块硬编码的依赖，由配置中心动态赋能。</li>
+                <li><strong>Step C (全栈打通及 UI 呈现)：</strong> 编写 Pinia Store 方法及 <code>Settings.vue</code> 无缝交互表单，联调验收。
+                </li>
+            </ul>
+        </div>
+    </div>
+</body>
+
+</html>

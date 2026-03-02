@@ -89,8 +89,8 @@ const loading = ref(false)
 const saving = ref(false)
 
 const config = ref<WorkflowConfig>({
-  farm: { enabled: false, minInterval: 2, maxInterval: 2, nodes: [] },
-  friend: { enabled: false, minInterval: 10, maxInterval: 10, nodes: [] },
+  farm: { enabled: false, minInterval: 30, maxInterval: 120, nodes: [] },
+  friend: { enabled: false, minInterval: 60, maxInterval: 300, nodes: [] },
 })
 
 const lastSavedConfig = ref<string>('')
@@ -489,14 +489,14 @@ async function loadData() {
       config.value = {
         farm: {
           enabled: !!wc.farm?.enabled,
-          minInterval: wc.farm?.minInterval || 2,
-          maxInterval: wc.farm?.maxInterval || 2,
+          minInterval: wc.farm?.minInterval || 30,
+          maxInterval: wc.farm?.maxInterval || 120,
           nodes: Array.isArray(wc.farm?.nodes) ? wc.farm.nodes : [],
         },
         friend: {
           enabled: !!wc.friend?.enabled,
-          minInterval: wc.friend?.minInterval || 10,
-          maxInterval: wc.friend?.maxInterval || 10,
+          minInterval: wc.friend?.minInterval || 60,
+          maxInterval: wc.friend?.maxInterval || 300,
           nodes: Array.isArray(wc.friend?.nodes) ? wc.friend.nodes : [],
         },
       }

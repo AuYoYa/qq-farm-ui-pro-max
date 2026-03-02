@@ -125,15 +125,39 @@ function createRuntimeEngine(options = {}) {
     }
   }
 
+  const sleep = (ms) => new Promise(r => setTimeout(r, ms))
+
   async function startAllAccounts() {
-    const data = await store.getAccounts()
-    const accounts = (data.accounts || [])
-    if (accounts.length > 0) {
-      log('系统', `发现 ${accounts.length} 个账号，正在启动...`)
-      accounts.forEach(acc => startWorker(acc))
+    let page = 1
+    const pageSize = 50
+    let hasMore = true
+    let totalStarted = 0
+
+    log('系统', `正在准备分批唤醒账号群...`)
+
+    while (hasMore) {
+      const data = await store.getAccountsFullPaged(page, pageSize)
+      const accounts = (data.accounts || [])
+
+      if (accounts.length > 0) {
+        log('系统', `[启动批次 ${page}] 正在拉起 ${accounts.length} 个账号...`)
+        accounts.forEach(acc => startWorker(acc))
+        totalStarted += accounts.length
+      }
+
+      if (data.total <= page * pageSize || accounts.length === 0) {
+        hasMore = false
+      } else {
+        page++
+        // Phase 3 优化：强制释放一小段时间使得主线程 Event Loop 舒缓，避免解析万条巨型 JSON 拥塞
+        await sleep(600)
+      }
     }
-    else {
+
+    if (totalStarted === 0) {
       log('系统', '未发现账号，请访问管理面板添加账号')
+    } else {
+      log('系统', `所有批次下发完成，共唤醒 ${totalStarted} 个账号！`)
     }
   }
 

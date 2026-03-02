@@ -1,39 +1,52 @@
-# Dependencies
+# 依赖
 node_modules/
-**/node_modules/
 .pnpm-store/
 
-# Lockfiles (pnpm workspace keeps pnpm-lock.yaml)
-package-lock.json
-**/package-lock.json
+# 敏感数据
+.env
+.env.local
+.env.*.local
+*.db
+*.db-wal
+*.db-shm
+data/*.json
+data/*.db
 
-# Build artifacts
-dist/
-**/dist/
-core/dist-*/
-core/dist-nest/
-web/stats.html
-*.tsbuildinfo
-
-# Runtime data
-/data/
-/core/data/
-
-# Logs
+# 日志
+logs/
 *.log
 npm-debug.log*
-pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
 
-# Env & local
-.env
-.env.*
-!.env.example
-*.local
+# AI 历史
+.llm-chat-history/
+.specstory/
+.agent/
 
-# Editor & OS
-.vscode/
+# IDE
 .idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.json
+.cursor/
+
+# 构建产物
+dist/
+build/
+*.exe
+*.app
+*.dmg
+
+# 临时文件
+*.tmp
+*.swp
 .DS_Store
 Thumbs.db
+
+# 特定敏感文件
+openviking-service/.env
+core/.env.ai
+core/data/*.json
+core/data/*.db

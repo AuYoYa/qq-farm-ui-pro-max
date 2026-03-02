@@ -12,17 +12,17 @@ services:
     image: smdk000/qq-farm-bot-ui:latest
     # 或者使用 GitHub Container Registry
     # image: ghcr.io/smdk000/qq-farm-bot-ui:latest
-    
+
     container_name: qq-farm-bot-ui
     hostname: qq-farm-bot
-    
+
     # 重启策略
     restart: unless-stopped
-    
+
     # 端口映射
     ports:
       - "3080:3000"
-    
+
     # 环境变量
     environment:
       # 管理员密码（请修改）
@@ -33,7 +33,13 @@ services:
       - NODE_ENV=production
       # 日志级别（可选：debug, info, warn, error）
       - LOG_LEVEL=info
-    
+      # Ipad860 微信协议服务地址（Docker 内部网络自动解析）
+      - IPAD860_URL=http://ipad860:8058
+
+    # 服务依赖
+    depends_on:
+      - ipad860
+
     # 数据卷
     volumes:
       # 核心数据（账号配置、数据库等）
@@ -42,7 +48,7 @@ services:
       - ./logs:/app/core/logs
       # 备份目录（可选）
       - ./backup:/app/core/backup
-    
+
     # 资源限制
     deploy:
       resources:
@@ -52,19 +58,19 @@ services:
         reservations:
           cpus: '0.5'
           memory: 256M
-    
+
     # 健康检查
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3000/api/ping"]
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:3000/api/ping" ]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 40s
-    
+
     # 网络配置
     networks:
       - qq-farm-network
-    
+
     # 日志配置
     logging:
       driver: "json-file"
@@ -72,6 +78,44 @@ services:
         max-size: "10m"
         max-file: "3"
         compress: "true"
+
+  # ========== Ipad860 微信协议服务 ==========
+  ipad860:
+    image: smdk000/ipad860:latest
+    platform: linux/amd64 # .so 共享库仅有 x86-64 版本，ARM 机器自动走 QEMU 模拟
+    container_name: ipad860
+    restart: unless-stopped
+    environment:
+      - TZ=Asia/Shanghai
+    depends_on:
+      - redis
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+    networks:
+      - qq-farm-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # ========== Redis (Ipad860 依赖) ==========
+  redis:
+    image: redis:7-alpine
+    container_name: ipad860-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    deploy:
+      resources:
+        limits:
+          memory: 128M
+    networks:
+      - qq-farm-network
 
 # 网络定义
 networks:
@@ -81,9 +125,11 @@ networks:
       config:
         - subnet: 172.28.0.0/16
 
-# 数据卷定义（可选，用于持久化）
+# 数据卷定义
 volumes:
   qq-farm-data:
     driver: local
   qq-farm-logs:
+    driver: local
+  redis-data:
     driver: local

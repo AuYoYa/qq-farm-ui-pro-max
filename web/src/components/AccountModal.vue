@@ -90,8 +90,11 @@ async function doQRCheck() {
       else if (status === 'Wait') {
         qrStatus.value = '等待扫码'
       }
+      else if (status === 'Check') {
+        qrStatus.value = `已扫码: ${res.data.data.nickname || ''}，请在手机确认`
+      }
       else {
-        qrStatus.value = `错误: ${res.data.data.error}`
+        qrStatus.value = `错误: ${res.data.data.error || '未知错误'}`
       }
     }
   }
@@ -118,7 +121,8 @@ async function loadQRCode() {
     const res = await api.post('/api/qr/create', { platform: qrPlatform.value })
     if (res.data.ok) {
       qrData.value = res.data.data
-      qrStatus.value = qrPlatform.value === 'wx' ? '请使用微信扫码' : '请使用手机QQ扫码'
+      const statusHintMap: Record<string, string> = { qq: '请使用手机QQ扫码', wx: '请使用微信扫码', wx_ipad: '请使用微信扫码（iPad协议）', wx_car: '请使用微信扫码（车机协议）' }
+      qrStatus.value = statusHintMap[qrPlatform.value] || '请扫码'
       startQRCheck()
     }
     else {
@@ -302,20 +306,34 @@ watch(() => props.show, (newVal) => {
         <!-- QR Tab -->
         <div v-if="activeTab === 'qr'" class="flex flex-col items-center justify-center py-4 space-y-4">
           <div class="w-full flex justify-center pb-2">
-            <div class="flex p-1 bg-gray-100/50 dark:bg-white/5 rounded-lg backdrop-blur-sm self-center">
+            <div class="flex flex-wrap gap-1 p-1 bg-gray-100/50 dark:bg-white/5 rounded-lg backdrop-blur-sm self-center">
               <button
-                class="px-5 py-1.5 rounded-md text-sm font-medium transition-all duration-200"
+                class="flex-1 whitespace-nowrap min-w-[64px] px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
                 :class="qrPlatform === 'qq' ? 'bg-white dark:bg-white/10 shadow-sm text-[#0099FF]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
                 @click="qrPlatform = 'qq'; loadQRCode()"
               >
-                QQ小程序
+                QQ
               </button>
               <button
-                class="px-5 py-1.5 rounded-md text-sm font-medium transition-all duration-200"
+                class="flex-1 whitespace-nowrap min-w-[64px] px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
                 :class="qrPlatform === 'wx' ? 'bg-white dark:bg-white/10 shadow-sm text-[#07C160]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
                 @click="qrPlatform = 'wx'; loadQRCode()"
               >
-                微信小程序
+                微信
+              </button>
+              <button
+                class="flex-1 whitespace-nowrap min-w-[64px] px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
+                :class="qrPlatform === 'wx_ipad' ? 'bg-white dark:bg-white/10 shadow-sm text-[#07C160]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                @click="qrPlatform = 'wx_ipad'; loadQRCode()"
+              >
+                iPad微信
+              </button>
+              <button
+                class="flex-1 whitespace-nowrap min-w-[64px] px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
+                :class="qrPlatform === 'wx_car' ? 'bg-white dark:bg-white/10 shadow-sm text-[#07C160]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                @click="qrPlatform = 'wx_car'; loadQRCode()"
+              >
+                车机微信
               </button>
             </div>
           </div>
@@ -373,6 +391,8 @@ watch(() => props.show, (newVal) => {
             :options="[
               { label: 'QQ小程序', value: 'qq' },
               { label: '微信小程序', value: 'wx' },
+              { label: 'iPad微信', value: 'wx_ipad' },
+              { label: '车机微信', value: 'wx_car' },
             ]"
           />
 

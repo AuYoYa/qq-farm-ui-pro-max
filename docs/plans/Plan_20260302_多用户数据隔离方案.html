@@ -1,0 +1,274 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>多用户数据隔离修复方案 - 20260302</title>
+    <style>
+        :root {
+            --bg-base: #1e1e2e;
+            --bg-card: #252536;
+            --bg-alert: #352528;
+            --text-main: #cdd6f4;
+            --text-muted: #a6adc8;
+            --accent-blue: #89b4fa;
+            --accent-green: #a6e3a1;
+            --accent-red: #f38ba8;
+            --accent-yellow: #f9e2af;
+            --border-color: #313244;
+            --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+        }
+
+        body {
+            background-color: var(--bg-base);
+            color: var(--text-main);
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            line-height: 1.6;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: var(--accent-blue);
+            border-bottom: 1px solid var(--border-color);
+            padding-bottom: 0.5rem;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+        }
+
+        h2 {
+            margin-top: 2rem;
+        }
+
+        .card {
+            background-color: var(--bg-card);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .alert {
+            background-color: var(--bg-alert);
+            border-left: 4px solid var(--accent-red);
+            padding: 1rem;
+            border-radius: 4px;
+            margin: 1rem 0;
+        }
+
+        .success {
+            border-left-color: var(--accent-green);
+            background-color: rgba(166, 227, 161, 0.1);
+        }
+
+        .warning {
+            border-left-color: var(--accent-yellow);
+            background-color: rgba(249, 226, 175, 0.1);
+        }
+
+        code {
+            background-color: var(--bg-base);
+            color: var(--accent-green);
+            font-family: var(--font-mono);
+            padding: 0.2rem 0.4rem;
+            border-radius: 4px;
+            font-size: 0.9em;
+        }
+
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+        }
+
+        pre {
+            background-color: #181825;
+            padding: 1rem;
+            border-radius: 8px;
+            overflow-x: auto;
+            font-family: var(--font-mono);
+            font-size: 0.9em;
+            border: 1px solid var(--border-color);
+        }
+
+        .diff-add {
+            color: var(--accent-green);
+        }
+
+        .diff-del {
+            color: var(--accent-red);
+        }
+
+        ul {
+            padding-left: 1.5rem;
+        }
+
+        li {
+            margin-bottom: 0.5rem;
+        }
+
+        .mermaid {
+            background-color: var(--bg-card);
+            padding: 1rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <!-- 引入 Mermaid -->
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>mermaid.initialize({ startOnLoad: true, theme: 'dark' });</script>
+</head>
+
+<body>
+
+    <h1>🚨 系统多用户数据隔离专项修复方案</h1>
+    <div class="card">
+        <p><strong>背景说明</strong>：当前系统在集成体验卡（多用户）后，仍然呈现“单租户”的数据表现。无论登录哪个账号，都能看到所有的微信和 QQ
+            账号数据，且可以对其进行各类游戏/自动化操作。此缺陷严重破坏了系统的数据安全性和多用户可用性，需要立即修复。</p>
+    </div>
+
+    <h2>一、 现状缺陷诊断 (Root Cause Analysis)</h2>
+    <div class="card">
+        <p>基于对 <code>core/src/controllers/admin.js</code> 和 <code>core/src/models/store.js</code> 的全面源码审查，确认以下 3
+            个核心隔离失效点：</p>
+
+        <ol>
+            <li>
+                <strong>源头缺失（创建与数据存储层）：</strong>
+                <p>在 <code>store.js</code> 的 <code>addOrUpdateAccount(acc)</code>
+                    中，新创建账号时，硬编码了写入字段（<code>id, name, code, platform, uin, qq, avatar</code>），<strong>没有保存所有者的
+                        <code>username</code></strong>。导致底层的 <code>store.json</code> 账号列表毫无归属标记。</p>
+            </li>
+            <li>
+                <strong>列表泄漏（读列表层）：</strong>
+                <p>在 <code>GET /api/accounts</code> 端点中，直接调用 <code>provider.getAccounts()</code> 并原样返回了全部数组，<strong>没有根据
+                        <code>req.currentUser.username</code> 进行过滤</strong>。</p>
+            </li>
+            <li>
+                <strong>越权操作（写操作与详情读取层）：</strong>
+                <p>虽然开发者在 <code>admin.js</code> 预写了 <code>accountOwnershipRequired</code> 中间件用于验证权限，但<strong
+                        style="color:var(--accent-red)">在所有涉及到单账号操作的路由上都没有挂载该中间件！</strong>任何人只要拦截或枚举
+                    <code>x-account-id</code> 获取到了别人的账号 ID，就可以堂而皇之地调用
+                    <code>/api/automation</code>、<code>/api/farm/operate</code> 甚至进行一键删除偷菜等高危操作。</p>
+            </li>
+        </ol>
+    </div>
+
+    <h2>二、 架构改造方案 (Architecture Design)</h2>
+
+    <div class="mermaid">
+        graph TD;
+        Client(客户端) -->|带 Token 请求| AuthLayer(Auth 拦截器)
+        AuthLayer --> |token 解析为 req.currentUser| Router(路由分发)
+
+        Router -->|非 ID 路由如 /api/accounts| ListFilter(列表结果过滤)
+        ListFilter --> |仅返回当前用户 username 匹配的行| DB(数据提供者)
+
+        Router -->|涉 ID 路由如 /api/status| OwnershipMiddleware(账号所有权校验层)
+        OwnershipMiddleware --> |拦截越权| 403[403 拒绝访问]
+        OwnershipMiddleware --> |放行校验通过| Executor(操作执行层)
+    </div>
+
+    <h2>三、 原子执行拆解 (Atomized Tasks)</h2>
+
+    <div class="card">
+        <h3>Step 1: 修复底层模型，保障 Username 的持久化 (Store 改造)</h3>
+        <ul>
+            <li><strong>目标</strong>：新增账号时打上数据标签。</li>
+            <li><strong>方案</strong>：
+                <br>1. <code>store.js</code> 中的 <code>addOrUpdateAccount</code> 修改传入参数，解析提取 <code>acc.username</code>。
+                <br>2. 数据组装 <code>data.accounts.push</code> 时补充存入 <code>username: acc.username || ''</code>。
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Step 2: 修复控制器，挂载全局所有权校验拦截 (Admin Controller 改造 1)</h3>
+        <ul>
+            <li><strong>目标</strong>：拦截恶意 ID 操作请求。</li>
+            <li><strong>方案</strong>：
+                <br>修改 <code>admin.js</code> 中的中间件 <code>accountOwnershipRequired</code>，增强判读逻辑：
+                <pre><code>// 如果账号旧记录没有 username 怎么办？(向下兼容)
+// 结论：没有 username 的统一视为 "admin" 的资产。
+if (!account.username && req.currentUser.role !== 'admin') {
+    return res.status(403).json({ ok: false, error: '无权操作系统公共账号' });
+}</code></pre>
+                <br>将中间件串联到**所有**具有用户强相关性的 API 上（如下）：
+                <ul>
+                    <li><code>GET /api/status</code>, <code>GET /api/lands</code>, <code>GET /api/friends</code>,
+                        <code>GET /api/settings</code></li>
+                    <li><code>POST /api/automation</code>, <code>POST /api/settings/save</code></li>
+                    <li><code>POST /api/accounts/:id/start|stop</code></li>
+                    <li><code>DELETE /api/accounts/:id</code></li>
+                    <li><code>POST /api/farm/operate</code></li>
+                </ul>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Step 3: 修复列表读取，实现视图数据隔离 (Admin Controller 改造 2)</h3>
+        <ul>
+            <li><strong>目标</strong>：在 <code>GET /api/accounts</code> 中进行数据清洗。</li>
+            <li><strong>方案</strong>：
+                <pre><code>app.get('/api/accounts', (req, res) => {
+    let data = provider.getAccounts();
+    // 数据深度拷贝以避免污染缓存引用
+    let accountList = [...data.accounts];
+    // 数据清洗过滤
+    if (req.currentUser && req.currentUser.role !== 'admin') {
+         accountList = accountList.filter(a => a.username === req.currentUser.username);
+    }
+    res.json({ ok: true, data: { ...data, accounts: accountList } });
+});</code></pre>
+            </li>
+        </ul>
+    </div>
+
+    <div class="card">
+        <h3>Step 4: 保存帐号时的用户名植入 (Admin Controller 改造 3)</h3>
+        <ul>
+            <li><strong>目标</strong>：通过 API 创建账号时植入所有权归属者。</li>
+            <li><strong>方案</strong>：
+                在 <code>POST /api/accounts</code> 端点中：
+                <pre><code>const payload = isUpdate ? { ...body, id: resolvedUpdateId } : body;
+// 强制注入数据归属者
+if (!isUpdate && req.currentUser) {
+    if (req.currentUser.role !== 'admin') {
+        payload.username = req.currentUser.username;
+    } else {
+        // admin创建的如果不特别指派，可以留给admin
+        payload.username = req.currentUser.username; 
+    }
+}</code></pre>
+            </li>
+        </ul>
+    </div>
+
+    <div class="alert warning">
+        <strong>向下兼容性提示与待决事项 (TODO)：</strong><br>
+        目前系统内之前录入的旧账号并不带有 <code>username</code> 标签，目前他们属于“无归属”状态。按照上面的底层防御计划，**这批历史数据在隔离开启后，只有
+        <code>admin</code>（管理员）能够看到并使用**。普通（体验卡）用户不可见、也不可用。<br>这个处理逻辑是最安全的，请您确认是否接受这种针对历史老数据的处理方式？
+    </div>
+
+    <h2>四、 验收标准 (Acceptance Criteria)</h2>
+    <div class="card">
+        <ul>
+            <li>✅ <strong>管理员通览</strong>：使用 <code>admin</code> 账号登录，账户列表中可正常看见所有账户并正常控制启停。</li>
+            <li>✅ <strong>数据隔离</strong>：使用体验卡账号 <code>userA</code> 登录，列表只会显示 <code>userA</code> 自己绑定的号。</li>
+            <li>✅ <strong>拦截测试</strong>：尝试使用 <code>userA</code> 的 Token 调用系统里别的账户ID 的 API （如获取状态、保存设置），应当精准被
+                <code>403 无权操作</code> 拒绝拦截。</li>
+        </ul>
+    </div>
+
+</body>
+
+</html>

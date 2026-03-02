@@ -152,7 +152,7 @@ async function autoBuyOrganicFertilizerViaMall() {
                 ticket = Math.max(0, ticket - (singlePrice * thisRoundBuy));
                 if (ticket < singlePrice) break;
             }
-            await sleep(120);
+            await sleep(300);
         } catch (e) {
             const msg = String((e && e.message) || '');
             if (msg.includes('余额不足') || msg.includes('点券不足') || msg.includes('code=1000019')) {

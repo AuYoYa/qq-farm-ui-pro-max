@@ -139,6 +139,7 @@ function createScheduler(namespace = 'default') {
         const delay = Math.max(1, toDelayMs(intervalMs, 1000));
         const preventOverlap = options.preventOverlap !== false;
         const runImmediately = !!options.runImmediately;
+
         const entry = {
             kind: 'interval',
             delayMs: delay,
@@ -149,15 +150,27 @@ function createScheduler(namespace = 'default') {
             running: false,
             preventOverlap,
             handle: null,
+            expectedNext: Date.now() + delay // 记录基准时间用于补偿漂移
         };
 
         const runner = async () => {
             const current = timers.get(key);
             if (!current) return;
-            if (preventOverlap && current.running) return;
+
+            // 用微小挂起把庞大的主线程执行切片让出（缓解低配 CPU 排队阻塞）
+            await new Promise(r => setImmediate(r));
+
+            if (preventOverlap && current.running) {
+                // 如果上个任务还在执行，放弃本次补偿，直接预约下一个周期
+                current.expectedNext += delay;
+                queueNext(delay);
+                return;
+            }
+
             current.running = true;
             current.lastRunAt = Date.now();
             current.runCount += 1;
+
             try {
                 await taskFn();
             } catch (e) {
@@ -171,19 +184,41 @@ function createScheduler(namespace = 'default') {
                 const updated = timers.get(key);
                 if (updated) {
                     updated.running = false;
-                    updated.nextRunAt = Date.now() + delay;
+
+                    // 核心逻辑: 日志漂移的时间补偿 (Time Drift Compensation)
+                    updated.expectedNext += delay;
+                    const now = Date.now();
+                    // 下一次真实的 delay 等于期待时间减去当前时间（但防超上限和跌入负数狂暴死循环）
+                    let nextDelay = updated.expectedNext - now;
+                    if (nextDelay < 0) {
+                        // 落后太多了，可能刚才 CPU 卡了几十秒钟，把期盼时间拽回现在，防止连发暴走
+                        updated.expectedNext = now + delay;
+                        nextDelay = delay;
+                    }
+
+                    updated.nextRunAt = now + nextDelay;
+                    queueNext(nextDelay);
                 }
             }
         };
 
+        const queueNext = (ms) => {
+            const current = timers.get(key);
+            if (current) {
+                current.handle = setTimeout(runner, ms);
+            }
+        };
+
         if (runImmediately) {
+            entry.expectedNext = Date.now();
             Promise.resolve().then(runner).catch(() => null);
+        } else {
+            entry.handle = setTimeout(runner, delay);
         }
 
-        const handle = setInterval(runner, delay);
-        entry.handle = handle;
         timers.set(key, entry);
-        return handle;
+        // 返回解绑函数签名适配
+        return entry.handle;
     }
 
     function has(taskName) {

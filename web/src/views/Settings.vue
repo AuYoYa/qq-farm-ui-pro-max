@@ -59,6 +59,14 @@ const trialDaysOptions = [
   { label: '永久', value: 0 },
 ]
 
+const thirdPartyApiConfig = ref({
+  wxApiKey: '',
+  wxApiUrl: '',
+  wxAppId: '',
+  ipad860Url: '',
+})
+const thirdPartyApiSaving = ref(false)
+
 const trialCooldownOptions = [
   { label: '1 小时', value: 3600000 },
   { label: '2 小时', value: 7200000 },
@@ -97,6 +105,37 @@ async function saveTrialConfig() {
   }
 }
 
+async function loadThirdPartyApiConfig() {
+  if (!isAdmin.value)
+    return
+  try {
+    const res = await api.get('/api/admin/third-party-api')
+    if (res.data.ok && res.data.data) {
+      thirdPartyApiConfig.value = { ...thirdPartyApiConfig.value, ...res.data.data }
+    }
+  }
+  catch { /* 静默 */ }
+}
+
+async function saveThirdPartyApiConfig() {
+  thirdPartyApiSaving.value = true
+  try {
+    const res = await api.post('/api/admin/third-party-api', thirdPartyApiConfig.value)
+    if (res.data.ok) {
+      showAlert('第三方 API 配置已保存')
+    }
+    else {
+      showAlert(`保存失败: ${res.data.error}`, 'danger')
+    }
+  }
+  catch (e: any) {
+    showAlert(`保存失败: ${e.message}`, 'danger')
+  }
+  finally {
+    thirdPartyApiSaving.value = false
+  }
+}
+
 const modalVisible = ref(false)
 const modalConfig = ref({
   title: '',
@@ -123,8 +162,8 @@ const currentAccountName = computed(() => {
 const localSettings = ref({
   plantingStrategy: 'preferred',
   preferredSeedId: 0,
-  intervals: { farmMin: 2, farmMax: 2, friendMin: 10, friendMax: 10 },
-  friendQuietHours: { enabled: false, start: '23:00', end: '07:00' },
+  intervals: { farmMin: 30, farmMax: 200, friendMin: 100, friendMax: 600 },
+  friendQuietHours: { enabled: true, start: '23:00', end: '07:00' },
   stakeoutSteal: { enabled: false, delaySec: 3 },
   automation: {
     farm: false,
@@ -357,6 +396,7 @@ async function loadData() {
   }
   // 管理员加载体验卡配置
   loadTrialConfig()
+  loadThirdPartyApiConfig()
 }
 
 onMounted(() => {
@@ -1161,10 +1201,65 @@ async function handleSaveOffline() {
             :loading="trialSaving"
             @click="saveTrialConfig"
           >
-            保存体验卡配置
+            保存体验卡设置
           </BaseButton>
         </div>
       </div>
+
+      <!-- Card 4: 第三方 API 配置（仅管理员可见） -->
+      <div v-if="isAdmin" class="card glass-panel h-full flex flex-col rounded-lg shadow lg:col-span-2">
+        <div class="border-b border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
+          <h3 class="glass-text-main flex items-center gap-2 text-base font-bold">
+            <div class="i-carbon-api-1" />
+            第三方 API 配置
+          </h3>
+        </div>
+
+        <div class="p-4 space-y-4">
+          <div class="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3">
+            <BaseInput
+              v-model="thirdPartyApiConfig.wxApiKey"
+              label="微信登录 API Key (wxApiKey)"
+              type="password"
+              placeholder="请输入与第三方授权约定的 ApiKey"
+            />
+            <BaseInput
+              v-model="thirdPartyApiConfig.wxAppId"
+              label="QQ农场 AppId (wxAppId)"
+              type="text"
+              placeholder="默认从接口获取，可覆盖定制"
+            />
+            <BaseInput
+              v-model="thirdPartyApiConfig.wxApiUrl"
+              label="微信登录请求网关 (wxApiUrl)"
+              type="text"
+              placeholder="一般为内部或三方中转代理服务地址"
+            />
+            <BaseInput
+              v-model="thirdPartyApiConfig.ipad860Url"
+              label="Ipad860 服务地址"
+              type="text"
+              placeholder="如 http://127.0.0.1:8058 或 http://ipad860:8058"
+            />
+          </div>
+          <div class="alert alert-warning mt-2 flex items-start gap-2 rounded-md bg-yellow-50 p-3 text-sm text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-200">
+            <div class="i-carbon-warning-alt mt-0.5 mt-0.5 shrink-0 text-base" />
+            <p>更改此项配置会立即刷新扫码中转服务器参数。如果改错导致扫码无反应，请重新设置正确的值，原环境变量已不再具有覆写能力。</p>
+          </div>
+        </div>
+
+        <div class="mt-auto flex justify-end border-t border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
+          <BaseButton
+            variant="primary"
+            size="sm"
+            :loading="thirdPartyApiSaving"
+            @click="saveThirdPartyApiConfig"
+          >
+            保存第三方 API 设置
+          </BaseButton>
+        </div>
+      </div>
+    </div>
 
       <!-- Card 4: 系统主题与背景（仅管理员可见） -->
       <div v-if="isAdmin" class="card glass-panel h-full flex flex-col rounded-lg shadow lg:col-span-2">
@@ -1222,7 +1317,6 @@ async function handleSaveOffline() {
           </div>
         </div>
       </div>
-    </div>
 
     <ConfirmModal
       :show="modalVisible"

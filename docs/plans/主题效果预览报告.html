@@ -1,0 +1,1049 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>QQ 农场助手 - 主题深度优化效果预览报告</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      line-height: 1.6;
+      color: #1f2937;
+      background: #f9fafb;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 40px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+      padding: 40px 20px;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      border-radius: 16px;
+      box-shadow: 0 20px 60px rgba(102, 126, 234, 0.3);
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+      font-weight: 700;
+    }
+
+    header p {
+      font-size: 1.1rem;
+      opacity: 0.95;
+    }
+
+    .section {
+      background: white;
+      border-radius: 16px;
+      padding: 40px;
+      margin-bottom: 40px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    }
+
+    .section h2 {
+      font-size: 2rem;
+      margin-bottom: 30px;
+      color: #111827;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .section h2::before {
+      content: '';
+      width: 6px;
+      height: 32px;
+      background: linear-gradient(180deg, #667eea, #764ba2);
+      border-radius: 3px;
+    }
+
+    /* Theme Cards */
+    .themes-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 30px;
+      margin-top: 30px;
+    }
+
+    .theme-card {
+      border-radius: 16px;
+      padding: 30px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      cursor: pointer;
+      border: 2px solid transparent;
+    }
+
+    .theme-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .theme-card.active {
+      border-color: currentColor;
+      box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.2);
+    }
+
+    .theme-card h3 {
+      font-size: 1.5rem;
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .theme-card .theme-key {
+      font-size: 0.85rem;
+      padding: 4px 12px;
+      background: rgba(0, 0, 0, 0.1);
+      border-radius: 20px;
+      font-weight: 500;
+    }
+
+    .theme-card .theme-desc {
+      font-size: 0.95rem;
+      margin-bottom: 20px;
+      opacity: 0.9;
+    }
+
+    .theme-card .color-palette {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+    }
+
+    .theme-card .color-swatch {
+      width: 40px;
+      height: 40px;
+      border-radius: 8px;
+      border: 2px solid rgba(0, 0, 0, 0.1);
+      transition: transform 0.2s;
+    }
+
+    .theme-card .color-swatch:hover {
+      transform: scale(1.1);
+    }
+
+    /* Theme Specific Styles */
+    .theme-sakura {
+      background: linear-gradient(135deg, #fff0f3 0%, #ffe4e8 50%, #ffc0cb 100%);
+      color: #9d174d;
+    }
+
+    .theme-sakura .color-swatch:nth-child(1) { background: #fff0f3; }
+    .theme-sakura .color-swatch:nth-child(2) { background: #ffc0cb; }
+    .theme-sakura .color-swatch:nth-child(3) { background: #f472b6; }
+    .theme-sakura .color-swatch:nth-child(4) { background: #fb7185; }
+    .theme-sakura .color-swatch:nth-child(5) { background: #9d174d; }
+
+    .theme-cyber {
+      background: linear-gradient(135deg, #0f0f23 0%, #2e1065 50%, #7c3aed 100%);
+      color: #fff;
+    }
+
+    .theme-cyber .color-swatch:nth-child(1) { background: #0f0f23; }
+    .theme-cyber .color-swatch:nth-child(2) { background: #7c3aed; }
+    .theme-cyber .color-swatch:nth-child(3) { background: #a855f7; }
+    .theme-cyber .color-swatch:nth-child(4) { background: #22d3ee; }
+    .theme-cyber .color-swatch:nth-child(5) { background: #0f0f23; }
+
+    .theme-elegant {
+      background: linear-gradient(135deg, #18181b 0%, #453810 50%, #ca8a04 100%);
+      color: #fef3c7;
+    }
+
+    .theme-elegant .color-swatch:nth-child(1) { background: #18181b; }
+    .theme-elegant .color-swatch:nth-child(2) { background: #ca8a04; }
+    .theme-elegant .color-swatch:nth-child(3) { background: #f59e0b; }
+    .theme-elegant .color-swatch:nth-child(4) { background: #d97706; }
+    .theme-elegant .color-swatch:nth-child(5) { background: #453810; }
+
+    .theme-ocean {
+      background: linear-gradient(135deg, #083344 0%, #0e7490 50%, #0ea5e9 100%);
+      color: #e0f2fe;
+    }
+
+    .theme-ocean .color-swatch:nth-child(1) { background: #083344; }
+    .theme-ocean .color-swatch:nth-child(2) { background: #0ea5e9; }
+    .theme-ocean .color-swatch:nth-child(3) { background: #38bdf8; }
+    .theme-ocean .color-swatch:nth-child(4) { background: #06b6d4; }
+    .theme-ocean .color-swatch:nth-child(5) { background: #0e7490; }
+
+    /* Component Preview */
+    .preview-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      margin-top: 30px;
+    }
+
+    .preview-item {
+      border: 2px solid #e5e7eb;
+      border-radius: 12px;
+      padding: 24px;
+      background: white;
+    }
+
+    .preview-item h4 {
+      font-size: 1.1rem;
+      margin-bottom: 16px;
+      color: #374151;
+    }
+
+    /* Button Preview */
+    .btn-preview {
+      display: inline-block;
+      padding: 12px 24px;
+      border-radius: 8px;
+      font-weight: 600;
+      margin: 8px;
+      transition: all 0.3s;
+      cursor: pointer;
+    }
+
+    .btn-sakura {
+      background: linear-gradient(135deg, #ffc0cb, #f472b6);
+      color: white;
+      box-shadow: 0 4px 15px rgba(244, 114, 182, 0.4);
+    }
+
+    .btn-sakura:hover {
+      box-shadow: 0 6px 25px rgba(244, 114, 182, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-cyber {
+      background: linear-gradient(135deg, #7c3aed, #a855f7);
+      color: white;
+      box-shadow: 0 4px 15px rgba(139, 92, 246, 0.4);
+    }
+
+    .btn-cyber:hover {
+      box-shadow: 0 6px 25px rgba(139, 92, 246, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-elegant {
+      background: linear-gradient(135deg, #ca8a04, #f59e0b);
+      color: white;
+      box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4);
+    }
+
+    .btn-elegant:hover {
+      box-shadow: 0 6px 25px rgba(234, 179, 8, 0.6);
+      transform: translateY(-2px);
+    }
+
+    .btn-ocean {
+      background: linear-gradient(135deg, #0ea5e9, #38bdf8);
+      color: white;
+      box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+    }
+
+    .btn-ocean:hover {
+      box-shadow: 0 6px 25px rgba(14, 165, 233, 0.6);
+      transform: translateY(-2px);
+    }
+
+    /* Card Preview */
+    .card-preview {
+      padding: 20px;
+      border-radius: 12px;
+      margin: 8px 0;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+
+    .card-sakura {
+      background: rgba(255, 255, 255, 0.75);
+      border: 2px solid rgba(255, 192, 203, 0.3);
+      box-shadow: 0 4px 12px rgba(255, 105, 180, 0.15);
+    }
+
+    .card-cyber {
+      background: rgba(15, 15, 35, 0.85);
+      border: 2px solid rgba(139, 92, 246, 0.4);
+      box-shadow: 0 4px 12px rgba(139, 92, 246, 0.3);
+      color: white;
+    }
+
+    .card-elegant {
+      background: rgba(24, 24, 27, 0.8);
+      border: 2px solid rgba(234, 179, 8, 0.3);
+      box-shadow: 0 4px 12px rgba(234, 179, 8, 0.2);
+      color: #fef3c7;
+    }
+
+    .card-ocean {
+      background: rgba(8, 51, 68, 0.75);
+      border: 2px solid rgba(14, 165, 233, 0.3);
+      box-shadow: 0 4px 12px rgba(14, 165, 233, 0.2);
+      color: #e0f2fe;
+    }
+
+    /* Input Preview */
+    .input-preview {
+      width: 100%;
+      padding: 12px 16px;
+      border-radius: 8px;
+      border: 2px solid;
+      margin: 8px 0;
+      font-size: 1rem;
+      transition: all 0.3s;
+    }
+
+    .input-sakura {
+      border-color: #ffc0cb;
+      background: rgba(255, 240, 243, 0.5);
+    }
+
+    .input-sakura:focus {
+      outline: none;
+      border-color: #f472b6;
+      box-shadow: 0 0 0 3px rgba(244, 114, 182, 0.2);
+    }
+
+    .input-cyber {
+      border-color: #7c3aed;
+      background: rgba(15, 15, 35, 0.8);
+      color: white;
+    }
+
+    .input-cyber:focus {
+      outline: none;
+      border-color: #a855f7;
+      box-shadow: 0 0 0 3px rgba(139, 92, 246, 0.3);
+    }
+
+    .input-elegant {
+      border-color: #ca8a04;
+      background: rgba(24, 24, 27, 0.8);
+      color: #fef3c7;
+    }
+
+    .input-elegant:focus {
+      outline: none;
+      border-color: #f59e0b;
+      box-shadow: 0 0 0 3px rgba(234, 179, 8, 0.2);
+    }
+
+    .input-ocean {
+      border-color: #0ea5e9;
+      background: rgba(8, 51, 68, 0.5);
+      color: #e0f2fe;
+    }
+
+    .input-ocean:focus {
+      outline: none;
+      border-color: #38bdf8;
+      box-shadow: 0 0 0 3px rgba(14, 165, 233, 0.2);
+    }
+
+    /* Animation Demo */
+    .animation-container {
+      position: relative;
+      height: 200px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 16px 0;
+    }
+
+    .animation-sakura {
+      background: linear-gradient(135deg, #fff0f3, #ffc0cb);
+    }
+
+    .animation-cyber {
+      background: linear-gradient(-45deg, #0f0f23, #2e1065, #7c3aed, #0f0f23);
+      background-size: 400% 400%;
+      animation: gradientFlow 10s ease infinite;
+    }
+
+    .animation-elegant {
+      background: linear-gradient(135deg, #18181b, #ca8a04);
+    }
+
+    .animation-ocean {
+      background: linear-gradient(-45deg, #083344, #0e7490, #0ea5e9, #083344);
+      background-size: 400% 400%;
+      animation: gradientFlow 12s ease infinite;
+    }
+
+    @keyframes gradientFlow {
+      0% { background-position: 0% 50%; }
+      50% { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+
+    .glow-orb {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: float 20s infinite ease-in-out;
+    }
+
+    .orb-1 {
+      width: 120px;
+      height: 120px;
+      top: 20%;
+      left: 10%;
+      animation-delay: 0s;
+    }
+
+    .orb-2 {
+      width: 150px;
+      height: 150px;
+      top: 50%;
+      right: 10%;
+      animation-delay: -7s;
+    }
+
+    .orb-3 {
+      width: 100px;
+      height: 100px;
+      bottom: 10%;
+      left: 30%;
+      animation-delay: -14s;
+    }
+
+    @keyframes float {
+      0%, 100% {
+        transform: translate(0, 0) scale(1);
+        opacity: 0.6;
+      }
+      33% {
+        transform: translate(30px, -40px) scale(1.1);
+        opacity: 0.8;
+      }
+      66% {
+        transform: translate(-20px, 30px) scale(0.9);
+        opacity: 0.7;
+      }
+    }
+
+    .sakura .orb-1 { background: #ffc0cb; }
+    .sakura .orb-2 { background: #f472b6; }
+    .sakura .orb-3 { background: #fb7185; }
+
+    .elegant .orb-1 { background: #ca8a04; }
+    .elegant .orb-2 { background: #f59e0b; }
+    .elegant .orb-3 { background: #d97706; }
+
+    /* Progress Bar */
+    .progress-section {
+      margin-top: 40px;
+    }
+
+    .progress-item {
+      margin-bottom: 24px;
+    }
+
+    .progress-label {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .progress-bar {
+      height: 12px;
+      background: #e5e7eb;
+      border-radius: 6px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 6px;
+      transition: width 1s ease;
+    }
+
+    .progress-sakura {
+      background: linear-gradient(90deg, #ffc0cb, #f472b6);
+    }
+
+    .progress-cyber {
+      background: linear-gradient(90deg, #7c3aed, #a855f7);
+    }
+
+    .progress-elegant {
+      background: linear-gradient(90deg, #ca8a04, #f59e0b);
+    }
+
+    .progress-ocean {
+      background: linear-gradient(90deg, #0ea5e9, #38bdf8);
+    }
+
+    /* Checklist */
+    .checklist {
+      list-style: none;
+      margin-top: 20px;
+    }
+
+    .checklist li {
+      padding: 12px 16px;
+      margin: 8px 0;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: #f9fafb;
+    }
+
+    .checklist li::before {
+      content: '✓';
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #10b981;
+      color: white;
+      border-radius: 50%;
+      font-weight: bold;
+      flex-shrink: 0;
+    }
+
+    /* Timeline */
+    .timeline {
+      position: relative;
+      padding-left: 40px;
+      margin-top: 30px;
+    }
+
+    .timeline::before {
+      content: '';
+      position: absolute;
+      left: 10px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: #e5e7eb;
+    }
+
+    .timeline-item {
+      position: relative;
+      margin-bottom: 30px;
+      padding: 20px;
+      background: white;
+      border-radius: 12px;
+      border: 2px solid #e5e7eb;
+    }
+
+    .timeline-item::before {
+      content: '';
+      position: absolute;
+      left: -36px;
+      top: 24px;
+      width: 16px;
+      height: 16px;
+      background: white;
+      border: 4px solid #667eea;
+      border-radius: 50%;
+    }
+
+    .timeline-item h4 {
+      font-size: 1.2rem;
+      margin-bottom: 8px;
+      color: #111827;
+    }
+
+    .timeline-item .time {
+      display: inline-block;
+      padding: 4px 12px;
+      background: #667eea;
+      color: white;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      margin-bottom: 12px;
+    }
+
+    /* Footer */
+    footer {
+      text-align: center;
+      padding: 40px 20px;
+      color: #6b7280;
+      border-top: 2px solid #e5e7eb;
+      margin-top: 60px;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      header h1 {
+        font-size: 1.8rem;
+      }
+
+      .section {
+        padding: 24px;
+      }
+
+      .themes-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <header>
+      <h1>🎨 QQ 农场助手 - 主题深度优化</h1>
+      <p>效果预览报告 & 开发实施计划</p>
+      <p style="margin-top: 10px; font-size: 0.95rem; opacity: 0.9;">
+        文档版本：v1.0 | 创建日期：2026 年 3 月 1 日
+      </p>
+    </header>
+
+    <!-- Section 1: 主题概览 -->
+    <div class="section">
+      <h2>主题概览</h2>
+      <p style="font-size: 1.1rem; color: #4b5563; margin-bottom: 20px;">
+        本次优化将为 4 个主题实现深度沉浸式体验，包括动态渐变背景、全组件联动、毛玻璃效果和主题专属特效。
+      </p>
+
+      <div class="themes-grid">
+        <!-- Sakura Theme -->
+        <div class="theme-card theme-sakura" onclick="selectTheme(this)">
+          <h3>
+            🌸 樱花粉黛
+            <span class="theme-key">sakura</span>
+          </h3>
+          <p class="theme-desc">
+            轻盈柔和的少女粉，如樱花般浪漫。猛男标配，点缀极简的玫瑰边框。
+          </p>
+          <div style="margin-top: 16px;">
+            <strong>视觉关键词：</strong> 轻盈 · 柔和 · 浪漫 · 少女感
+          </div>
+          <div class="color-palette">
+            <div class="color-swatch" title="极浅粉"></div>
+            <div class="color-swatch" title="樱花粉"></div>
+            <div class="color-swatch" title="玫瑰粉"></div>
+            <div class="color-swatch" title="珊瑚粉"></div>
+            <div class="color-swatch" title="深粉"></div>
+          </div>
+        </div>
+
+        <!-- Cyber Theme -->
+        <div class="theme-card theme-cyber" onclick="selectTheme(this)">
+          <h3>
+            ⚡ 全息赛博
+            <span class="theme-key">cyber</span>
+          </h3>
+          <p class="theme-desc">
+            高对比度的电竞荧光紫，搭配极夜背景，凸显极客执行力。
+          </p>
+          <div style="margin-top: 16px;">
+            <strong>视觉关键词：</strong> 电竞 · 未来 · 霓虹 · 高对比
+          </div>
+          <div class="color-palette">
+            <div class="color-swatch" title="极夜黑"></div>
+            <div class="color-swatch" title="霓虹紫"></div>
+            <div class="color-swatch" title="荧光紫"></div>
+            <div class="color-swatch" title="赛博青"></div>
+            <div class="color-swatch" title="深紫"></div>
+          </div>
+        </div>
+
+        <!-- Elegant Theme -->
+        <div class="theme-card theme-elegant" onclick="selectTheme(this)">
+          <h3>
+            👑 尊贵黯金
+            <span class="theme-key">elegant</span>
+          </h3>
+          <p class="theme-desc">
+            高端优雅，黄黑相间。适合长期挂机的大佬使用。
+          </p>
+          <div style="margin-top: 16px;">
+            <strong>视觉关键词：</strong> 高端 · 奢华 · 稳重 · 暗金
+          </div>
+          <div class="color-palette">
+            <div class="color-swatch" title="炭黑"></div>
+            <div class="color-swatch" title="琥珀金"></div>
+            <div class="color-swatch" title="琥珀橙"></div>
+            <div class="color-swatch" title="深金色"></div>
+            <div class="color-swatch" title="暗金棕"></div>
+          </div>
+        </div>
+
+        <!-- Ocean Theme -->
+        <div class="theme-card theme-ocean" onclick="selectTheme(this)">
+          <h3>
+            🌊 深海矩阵
+            <span class="theme-key">ocean</span>
+          </h3>
+          <p class="theme-desc">
+            冷静、理智的数据化浅蓝色调，带来流畅的数据监控体验。
+          </p>
+          <div style="margin-top: 16px;">
+            <strong>视觉关键词：</strong> 冷静 · 理智 · 数据化 · 流动
+          </div>
+          <div class="color-palette">
+            <div class="color-swatch" title="深海蓝"></div>
+            <div class="color-swatch" title="天空蓝"></div>
+            <div class="color-swatch" title="天蓝"></div>
+            <div class="color-swatch" title="青色"></div>
+            <div class="color-swatch" title="青蓝"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 2: 组件效果预览 -->
+    <div class="section">
+      <h2>组件效果预览</h2>
+      <p style="font-size: 1.1rem; color: #4b5563; margin-bottom: 20px;">
+        以下是各主题在核心组件上的视觉效果预览。所有组件将支持主题切换时的平滑过渡动画。
+      </p>
+
+      <div class="preview-grid">
+        <!-- Button Preview -->
+        <div class="preview-item">
+          <h4>🔘 按钮组件</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            渐变背景 + 悬停光晕 + 点击波纹
+          </p>
+          <div class="btn-preview btn-sakura">樱花主题</div>
+          <div class="btn-preview btn-cyber">赛博主题</div>
+          <div class="btn-preview btn-elegant">尊贵主题</div>
+          <div class="btn-preview btn-ocean">深海主题</div>
+        </div>
+
+        <!-- Card Preview -->
+        <div class="preview-item">
+          <h4>📦 卡片组件</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            毛玻璃背景 + 主题边框 + 柔和阴影
+          </p>
+          <div class="card-preview card-sakura">
+            <strong>樱花粉黛</strong>
+            <p style="font-size: 0.85rem; margin-top: 8px;">
+              轻盈柔和的卡片，如樱花般浪漫
+            </p>
+          </div>
+          <div class="card-preview card-cyber">
+            <strong>全息赛博</strong>
+            <p style="font-size: 0.85rem; margin-top: 8px;">
+              极夜背景搭配霓虹边框
+            </p>
+          </div>
+          <div class="card-preview card-elegant">
+            <strong>尊贵黯金</strong>
+            <p style="font-size: 0.85rem; margin-top: 8px;">
+              暗金质感，高端奢华
+            </p>
+          </div>
+          <div class="card-preview card-ocean">
+            <strong>深海矩阵</strong>
+            <p style="font-size: 0.85rem; margin-top: 8px;">
+              冷静理智的数据化风格
+            </p>
+          </div>
+        </div>
+
+        <!-- Input Preview -->
+        <div class="preview-item">
+          <h4>📝 输入框组件</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            聚焦光晕 + 主题边框 + 半透明背景
+          </p>
+          <input class="input-preview input-sakura" placeholder="樱花主题 - 点击聚焦">
+          <input class="input-preview input-cyber" placeholder="赛博主题 - 点击聚焦">
+          <input class="input-preview input-elegant" placeholder="尊贵主题 - 点击聚焦">
+          <input class="input-preview input-ocean" placeholder="深海主题 - 点击聚焦">
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 3: 背景动画演示 -->
+    <div class="section">
+      <h2>背景动画演示</h2>
+      <p style="font-size: 1.1rem; color: #4b5563; margin-bottom: 20px;">
+        每个主题拥有独特的背景动画方案，包括 Animated Gradient 和 Mesh Gradient 两种技术实现。
+      </p>
+
+      <div class="preview-grid">
+        <!-- Sakura Animation -->
+        <div class="preview-item">
+          <h4>🌸 樱花粉黛 - Mesh Gradient</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            3 个粉色光球缓慢浮动（20s 循环）
+          </p>
+          <div class="animation-container animation-sakura sakura">
+            <div class="glow-orb orb-1"></div>
+            <div class="glow-orb orb-2"></div>
+            <div class="glow-orb orb-3"></div>
+          </div>
+          <div style="font-size: 0.85rem; color: #6b7280; margin-top: 12px;">
+            <strong>特效：</strong> 樱花飘落粒子（可选）
+          </div>
+        </div>
+
+        <!-- Cyber Animation -->
+        <div class="preview-item">
+          <h4>⚡ 全息赛博 - Animated Gradient</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            快速流动的紫蓝渐变（10s 循环）
+          </p>
+          <div class="animation-container animation-cyber"></div>
+          <div style="font-size: 0.85rem; color: #6b7280; margin-top: 12px;">
+            <strong>特效：</strong> 网格线条 overlay + 霓虹闪烁
+          </div>
+        </div>
+
+        <!-- Elegant Animation -->
+        <div class="preview-item">
+          <h4>👑 尊贵黯金 - Mesh Gradient</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            极慢速的金色光球（30s 循环）
+          </p>
+          <div class="animation-container animation-elegant elegant">
+            <div class="glow-orb orb-1"></div>
+            <div class="glow-orb orb-2"></div>
+            <div class="glow-orb orb-3"></div>
+          </div>
+          <div style="font-size: 0.85rem; color: #6b7280; margin-top: 12px;">
+            <strong>特效：</strong> 金粉闪烁 + 边框流动
+          </div>
+        </div>
+
+        <!-- Ocean Animation -->
+        <div class="preview-item">
+          <h4>🌊 深海矩阵 - Animated Gradient</h4>
+          <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 12px;">
+            波浪状青蓝渐变（12s 循环）
+          </p>
+          <div class="animation-container animation-ocean"></div>
+          <div style="font-size: 0.85rem; color: #6b7280; margin-top: 12px;">
+            <strong>特效：</strong> 气泡浮动 + 水波纹点击
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 4: 开发进度 -->
+    <div class="section progress-section">
+      <h2>开发进度计划</h2>
+      <p style="font-size: 1.1rem; color: #4b5563; margin-bottom: 20px;">
+        整个开发周期预计 8-12 小时，分为 4 个阶段实施。
+      </p>
+
+      <div class="timeline">
+        <div class="timeline-item">
+          <span class="time">2-3 小时</span>
+          <h4>阶段一：CSS 变量系统升级</h4>
+          <p style="color: #6b7280; margin-bottom: 12px;">
+            为 4 个主题定义完整的 CSS 变量调色盘，包括渐变背景、氛围色、强调色等。
+          </p>
+          <ul class="checklist">
+            <li>扩展 theme-sakura 变量组</li>
+            <li>扩展 theme-cyber 变量组</li>
+            <li>扩展 theme-elegant 变量组</li>
+            <li>扩展 theme-ocean 变量组</li>
+            <li>添加全局动画 Keyframes</li>
+            <li>添加毛玻璃工具类</li>
+          </ul>
+        </div>
+
+        <div class="timeline-item">
+          <span class="time">3-4 小时</span>
+          <h4>阶段二：动态背景系统</h4>
+          <p style="color: #6b7280; margin-bottom: 12px;">
+            实现 Animated Gradient 和 Mesh Gradient 两种背景方案，并集成到 App.vue。
+          </p>
+          <ul class="checklist">
+            <li>创建 ThemeBackground 组件</li>
+            <li>实现 Animated Gradient（Cyber/Ocean）</li>
+            <li>实现 Mesh Gradient（Sakura/Elegant）</li>
+            <li>集成到 App.vue</li>
+            <li>移动端性能降级策略</li>
+          </ul>
+        </div>
+
+        <div class="timeline-item">
+          <span class="time">4-5 小时</span>
+          <h4>阶段三：组件联动改造</h4>
+          <p style="color: #6b7280; margin-bottom: 12px;">
+            对核心组件进行深度主题化改造，实现全组件联动效果。
+          </p>
+          <ul class="checklist">
+            <li>Sidebar.vue 深度优化</li>
+            <li>Dashboard.vue 卡片改造</li>
+            <li>BaseButton 渐变 + 光晕</li>
+            <li>BaseInput 聚焦特效</li>
+            <li>LandCard 主题边框</li>
+            <li>FarmPanel 毛玻璃背景</li>
+          </ul>
+        </div>
+
+        <div class="timeline-item">
+          <span class="time">2-3 小时</span>
+          <h4>阶段四：特效增强</h4>
+          <p style="color: #6b7280; margin-bottom: 12px;">
+            为每个主题添加专属特效，并进行性能优化。
+          </p>
+          <ul class="checklist">
+            <li>Sakura：樱花飘落粒子</li>
+            <li>Cyber：网格线条 + 霓虹闪烁</li>
+            <li>Elegant：金粉闪烁</li>
+            <li>Ocean：气泡浮动</li>
+            <li>移动端适配优化</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Section 5: 完成度对比 -->
+    <div class="section">
+      <h2>主题完成度对比</h2>
+      <p style="font-size: 1.1rem; color: #4b5563; margin-bottom: 30px;">
+        当前状态 vs 优化目标
+      </p>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>樱花粉黛 (Sakura)</span>
+          <span>当前 30% → 目标 100%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-sakura" style="width: 30%;"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>全息赛博 (Cyber)</span>
+          <span>当前 30% → 目标 100%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-cyber" style="width: 30%;"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>尊贵黯金 (Elegant)</span>
+          <span>当前 30% → 目标 100%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-elegant" style="width: 30%;"></div>
+        </div>
+      </div>
+
+      <div class="progress-item">
+        <div class="progress-label">
+          <span>深海矩阵 (Ocean)</span>
+          <span>当前 30% → 目标 100%</span>
+        </div>
+        <div class="progress-bar">
+          <div class="progress-fill progress-ocean" style="width: 30%;"></div>
+        </div>
+      </div>
+
+      <div style="margin-top: 30px; padding: 20px; background: #f0fdf4; border-radius: 12px; border-left: 4px solid #10b981;">
+        <h4 style="color: #065f46; margin-bottom: 8px;">✅ 御农翠绿 (默认主题)</h4>
+        <p style="color: #059669;">
+          当前完成度 100%，本次优化将保持现状，不做改动。
+        </p>
+      </div>
+    </div>
+
+    <!-- Section 6: 验收标准 -->
+    <div class="section">
+      <h2>验收标准</h2>
+      
+      <div class="preview-grid">
+        <div class="preview-item">
+          <h4>🎯 功能测试</h4>
+          <ul class="checklist">
+            <li>主题切换平滑无闪烁</li>
+            <li>背景动画流畅（FPS > 50）</li>
+            <li>深色模式正常显示</li>
+            <li>组件颜色同步切换</li>
+            <li>localStorage 状态保持</li>
+          </ul>
+        </div>
+
+        <div class="preview-item">
+          <h4>🎨 视觉测试</h4>
+          <ul class="checklist">
+            <li>渐变平滑无色块分界</li>
+            <li>光晕效果柔和不刺眼</li>
+            <li>毛玻璃模糊适中</li>
+            <li>边框渐变方向统一</li>
+            <li>动画流畅度达标</li>
+          </ul>
+        </div>
+
+        <div class="preview-item">
+          <h4>⚡ 性能测试</h4>
+          <ul class="checklist">
+            <li>首屏加载 FCP < 2s</li>
+            <li>动画帧率 FPS > 50</li>
+            <li>内存占用 < 200MB</li>
+            <li>CPU 占用 < 30%</li>
+            <li>移动端 FPS > 40</li>
+          </ul>
+        </div>
+
+        <div class="preview-item">
+          <h4>📱 兼容性测试</h4>
+          <ul class="checklist">
+            <li>Chrome 90+</li>
+            <li>Firefox 88+</li>
+            <li>Safari 14+</li>
+            <li>Edge 90+</li>
+            <li>iOS Safari 14+</li>
+            <li>Android Chrome 90+</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+      <p><strong>QQ 农场助手 - 主题深度优化项目</strong></p>
+      <p>开发负责人：smdk000 | QQ 群：227916149</p>
+      <p style="margin-top: 12px; font-size: 0.9rem;">
+        相关文档：《主题深度优化开发文档.md》
+      </p>
+    </footer>
+  </div>
+
+  <script>
+    function selectTheme(card) {
+      // Remove active class from all cards
+      document.querySelectorAll('.theme-card').forEach(c => {
+        c.classList.remove('active');
+      });
+      
+      // Add active class to clicked card
+      card.classList.add('active');
+      
+      // Show theme details (optional enhancement)
+      const themeKey = card.querySelector('.theme-key').textContent;
+      console.log('Selected theme:', themeKey);
+    }
+
+    // Auto-select first theme on load
+    window.addEventListener('load', () => {
+      const firstCard = document.querySelector('.theme-card');
+      if (firstCard) {
+        firstCard.classList.add('active');
+      }
+    });
+  </script>
+</body>
+</html>

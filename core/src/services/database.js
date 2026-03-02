@@ -41,9 +41,19 @@ async function closeDatabase() {
     }
 }
 
-async function transaction(fn) {
+async function transaction(fn, retries = 1) {
     const pool = getPool();
-    const connection = await pool.getConnection();
+    let connection;
+    try {
+        connection = await pool.getConnection();
+    } catch (err) {
+        if (retries > 0 && (err.code === 'ECONNRESET' || err.code === 'PROTOCOL_CONNECTION_LOST' || err.code === 'ETIMEDOUT')) {
+            logger.warn(`[database] 获取事务连接抛出 ${err.code}，尝试重试 (剩余: ${retries})`);
+            return transaction(fn, retries - 1);
+        }
+        throw err;
+    }
+
     await connection.beginTransaction();
     try {
         const result = await fn(connection);
@@ -51,9 +61,17 @@ async function transaction(fn) {
         return result;
     } catch (e) {
         await connection.rollback();
+        // 如果在事务查询中依然遇到断链，同样消耗重试并重新发配
+        if (retries > 0 && (e.code === 'ECONNRESET' || e.code === 'PROTOCOL_CONNECTION_LOST' || e.code === 'ETIMEDOUT')) {
+            logger.warn(`[database] 事务执行中抛出断链 ${e.code}，回滚并尝试整体重试 (剩余: ${retries})`);
+            connection.release(); // 先释放坏链
+            return transaction(fn, retries - 1);
+        }
         throw e;
     } finally {
-        connection.release();
+        if (connection && connection.release) {
+            try { connection.release(); } catch (ignore) { }
+        }
     }
 }
 

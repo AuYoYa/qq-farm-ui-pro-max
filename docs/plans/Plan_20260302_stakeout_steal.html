@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <title>蹲守偷菜功能实现计划</title>
+    <style>
+        body {
+            background-color: #0f111a;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            padding: 30px 40px;
+            max-width: 1000px;
+            margin: auto;
+            line-height: 1.6;
+        }
+
+        h1,
+        h2,
+        h3 {
+            color: #58a6ff;
+            border-bottom: 1px solid #30363d;
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+
+        h1 {
+            font-size: 2.2em;
+            text-align: center;
+            border-bottom: 2px solid #58a6ff;
+        }
+
+        code {
+            background-color: #161b22;
+            padding: 3px 6px;
+            border-radius: 6px;
+            color: #ff7b72;
+            font-family: monospace;
+            font-size: 0.9em;
+        }
+
+        pre {
+            background-color: #161b22;
+            padding: 15px;
+            border-radius: 8px;
+            overflow-x: auto;
+            color: #e6edf3;
+            border: 1px solid #30363d;
+        }
+
+        .mermaid {
+            background-color: #0d1117;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+            border: 1px solid #30363d;
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+        }
+
+        ul,
+        ol {
+            padding-left: 20px;
+        }
+
+        li {
+            margin-bottom: 8px;
+        }
+
+        .alert {
+            background-color: #1c2128;
+            border-left: 4px solid #d29922;
+            padding: 15px;
+            margin: 15px 0;
+            border-radius: 0 6px 6px 0;
+        }
+
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin: 20px 0;
+            font-size: 0.95em;
+        }
+
+        th,
+        td {
+            border: 1px solid #30363d;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #161b22;
+            color: #58a6ff;
+        }
+
+        .success-text {
+            color: #3fb950;
+            font-weight: bold;
+        }
+
+        .danger-text {
+            color: #f85149;
+            font-weight: bold;
+        }
+
+        .layer {
+            background-color: #161b22;
+            border: 1px solid #30363d;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+        }
+    </style>
+    <script type="module">
+        import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+        mermaid.initialize({ startOnLoad: true, theme: 'dark' });
+    </script>
+</head>
+
+<body>
+
+    <h1>🚀 增强计划：蹲守偷菜模式 (Stay-And-Steal)</h1>
+    <div class="alert">
+        <strong>概述：</strong> 当前的自动偷菜受限于固定间隔的轮询扫描，容易在下一次轮询到来前被其他玩家“秒偷”。本方案旨在实现精准预判与定时触达：在日常扫田时记录好友农场所有作物的成熟倒计时，建立“提前上线踩点
+        -> 无感等待 -> 成熟后防风控延迟 -> 精准收割”的智能调度机制。
+    </div>
+
+    <h2>🧩 核心数据流转</h2>
+    <div class="mermaid">
+        graph TD
+        A[日常扫描: checkFriends] -->|遇到未成熟且可偷作物| B(计算 matureInSec);
+        B -->|筛选过滤名单并合批| C{时间判定 < 4小时?}; C -- 是 --> D[注册本地 Timer 调度: stakeout_FriendX];
+            C -- 否 --> X[忽略, 留给后续日常扫描解决];
+            D -->|Timer 到点触发 (提前踩点)| E((自动执行));
+            E --> F[进入好友农场 API];
+            F --> G[Sleep 挂起等待精确时间];
+            G --> H[触发 收获 Harvest API];
+            H --> I[记录操作日志];
+            I --> J[离开农场 API];
+    </div>
+
+    <h2>⚙️ 架构变更详述</h2>
+
+    <div class="layer">
+        <h3>1. 前端 UI (Settings 面板优化)</h3>
+        <p>在目前的 <code>StealSettings.vue</code> 增加 <strong>“高级偷菜与蹲守策略”</strong> 控制区：</p>
+        <ul>
+            <li><code>stakeoutEnabled</code>：控制是否进行潜伏式蹲点。</li>
+            <li><code>stakeoutDelaySec</code>：控制作物成熟后，等待多少秒再发起收割动作。支持最小 1 秒，以对抗防外挂机制防检测零秒秒偷。</li>
+        </ul>
+        <p>数据通过既有框架同步到 <code>localSettings.automation</code> 并落盘云端，无破坏性后端表结构变更。</p>
+    </div>
+
+    <div class="layer">
+        <h3>2. 核心分析增强 (analyzeFriendLands)</h3>
+        <p>目前 <code>friend.js -> analyzeFriendLands</code> 只分析 <code><span class="success-text">MATURE</span></code> 和
+            <code><span class="danger-text">DEAD</span></code> 状态。<br />
+            增加对 <code>GROWING</code> 期且即将成熟（有 <code>matureInSec > 0</code>）作物的提取，并加入返回值 <code>upcomingMature</code>
+            数组中。<br />
+            <b>规则保障：</b> 在提取时同样先经过黑名单与白名单判定（<code>shouldStealPlant</code> / <code>shouldStealFriend</code>），避免无效调度。
+        </p>
+    </div>
+
+    <div class="layer">
+        <h3>3. 智能定时器调度 (Smart Scheduler)</h3>
+        <p>在现有系统中的 <code>scheduler.js</code> (使用 <code>setTimeoutTask</code>) 中创建和管理定时任务：</p>
+        <div class="mermaid">
+            sequenceDiagram
+            participant Loop as 巡查循环
+            participant Mem as 内存调度堆栈
+            participant Execution as 执行引擎
+            Loop->>Mem: 发现好友A有地块(1,2) 延时50s成熟
+            Mem-->>Mem: 覆盖或建立 Task(stake_A, delay: 50s-3s)
+            Mem-->>Execution: 等待 47s
+            Execution->>Execution: [踩点进入] await enterFriendFarm()
+            Execution->>Execution: [安全防风控延迟] await sleep(3 + 设定延迟s)
+            Execution->>Execution: 发起偷取请求 stealHarvest()并记录
+        </div>
+        <p><b>处理同好友多地块合批：</b> 为了防御大量地块接近同时成熟导致多次请求被封，当多个地块成熟时间差在 <span class="danger-text">5~10 秒内</span>
+            时，进行同组归并，由一个定时蹲守一并处理。</p>
+    </div>
+
+    <h2>💥 影响面分析 (Impact Analysis)</h2>
+    <table>
+        <tr>
+            <th>模块</th>
+            <th>影响面</th>
+            <th>风险与缓解方案</th>
+        </tr>
+        <tr>
+            <td>API 限流防封</td>
+            <td>增加并发的 <code>enterFarm</code> 和 <code>harvest</code> 请求。</td>
+            <td>已经有全局 Token 桶控制 <code>sendMsgAsync</code>；且蹲守任务只对有效过滤作物品发力，并与普通巡田做时序隔离（踩点后 Sleep 时挂起当前
+                Worker，此时其他队列在等候）。</td>
+        </tr>
+        <tr>
+            <td>UI 与配置中心</td>
+            <td>只增加新属性，不会覆盖或造成老属性失效。</td>
+            <td><code>Object.assign</code> 或者解构赋值完美向后兼容，若原本没有 <code>stakeout_steal</code> 默认为 <code>false</code>。</td>
+        </tr>
+        <tr>
+            <td>内存与开销</td>
+            <td>会增加一部分 Node.js setTimeout 句柄。</td>
+            <td>设定最长生效窗口期（如 4 小时），如果 4 小时还不成熟就不注册 timer（或等下次扫描重新注册），能充分减少死 Timer 对象滞留。</td>
+        </tr>
+    </table>
+
+    <div class="alert">
+        <strong>行动指引：</strong> 本计划无需修改数据库表结构，将对 <code>core/src/services/friend.js</code> 及
+        <code>web/src/views/StealSettings.vue</code> 进行非侵入性扩展。所有行为通过用户手工配置开关管控。请审阅可行性与逻辑严密性后继续执行 Atomize 和 Automate 动作。
+    </div>
+
+</body>
+
+</html>

@@ -5,7 +5,7 @@
 const protobuf = require('protobufjs');
 const { CONFIG, PlantPhase, PHASE_NAMES } = require('../config/config');
 const { getPlantNameBySeedId, getPlantName, getPlantExp, formatGrowTime, getPlantGrowTime, getAllSeeds, getPlantById, getSeedImageBySeedId } = require('../config/gameConfig');
-const { isAutomationOn, getPreferredSeed, getAutomation, getPlantingStrategy } = require('../models/store');
+const { isAutomationOn, getPreferredSeed, getAutomation, getPlantingStrategy, recordSuspendUntil } = require('../models/store');
 const { sendMsgAsync, sendMsgAsyncUrgent, getUserState, networkEvents, getWsErrorState } = require('../utils/network');
 const { types } = require('../utils/proto');
 const { toLong, toNum, getServerTimeSec, toTimeSec, log, logWarn, sleep } = require('../utils/utils');
@@ -18,6 +18,7 @@ let isCheckingFarm = false;
 let isFirstFarmCheck = true;
 let farmLoopRunning = false;
 let externalSchedulerMode = false;
+let lastGhostingEndedAt = 0; // Ghosting 打盹上次结束时间（独立于 suspendUntil，避免语义混淆）
 const farmScheduler = createScheduler('farm');
 
 // Promise 级别的高频并发合并缓存 (针对防偷抢收的极速侦测请求起削峰作用)
@@ -432,7 +433,8 @@ async function plantSeeds(seedId, landIds) {
         } catch (e) {
             logWarn('种植', `土地#${landId} 失败: ${e.message}`);
         }
-        // 令牌桶已在底层做了 334ms 间隔限流，无需额外 sleep
+        // Phase 3: 种植动作增加随机抖动 (200ms - 500ms) 防查
+        await sleep(200 + Math.floor(Math.random() * 300));
     }
     return successCount;
 }
@@ -957,8 +959,46 @@ function analyzeLands(lands) {
     return result;
 }
 
+let consecutiveErrors = 0; // Phase 3: 指数退避计数
+
 async function checkFarm() {
     const state = getUserState();
+
+    // Phase 2: 检测休眠锁
+    if (state.suspendUntil && Date.now() < state.suspendUntil) {
+        const resetMinutes = Math.ceil((state.suspendUntil - Date.now()) / 60000);
+        logWarn('农场', `账号风控自愈休眠中，跳过本次巡田 (剩余约 ${resetMinutes} 分钟)...`);
+        return false;
+    }
+
+    // ======== Ghosting 打盹：主动随机触发休眠，模拟人类离开 ========
+    // 触发条件：每次巡查 ~2% 概率 + 距上次打盹结束至少 4 小时冷却
+    // 休眠时长：随机 30~90 分钟
+    // 冷却基准：使用独立变量 lastGhostingEndedAt 而非 suspendUntil，
+    //           因为 suspendUntil 语义为"休眠到期时间戳"，可能代表未来时间
+    const GHOSTING_COOLDOWN_MS = 4 * 60 * 60 * 1000; // 4 小时最小冷却期
+    const GHOSTING_PROBABILITY = 0.02;                // 2% 触发率
+    const GHOSTING_MIN_MIN = 30;                      // 最短打盹 30 分钟
+    const GHOSTING_MAX_MIN = 90;                      // 最长打盹 90 分钟
+    if (Math.random() < GHOSTING_PROBABILITY) {
+        const timeSinceLastGhosting = Date.now() - lastGhostingEndedAt;
+        if (lastGhostingEndedAt === 0 || timeSinceLastGhosting > GHOSTING_COOLDOWN_MS) {
+            const napMinutes = GHOSTING_MIN_MIN + Math.floor(Math.random() * (GHOSTING_MAX_MIN - GHOSTING_MIN_MIN + 1));
+            state.suspendUntil = Date.now() + napMinutes * 60 * 1000;
+            // 预记录本次打盹的结束时间，供下次冷却判断
+            lastGhostingEndedAt = state.suspendUntil;
+            if (CONFIG.accountId) {
+                recordSuspendUntil(CONFIG.accountId, state.suspendUntil);
+            }
+            log('风控', `🛏️ Ghosting 打盹触发：模拟人类离开，休眠 ${napMinutes} 分钟`, {
+                module: 'farm', event: 'ghosting_nap', result: 'triggered',
+                napMinutes, resumeAt: new Date(state.suspendUntil).toLocaleTimeString(),
+            });
+            return false;
+        }
+    }
+    // ======== Ghosting 打盹 END ========
+
     if (isCheckingFarm || !state.gid || !isAutomationOn('farm')) return false;
     isCheckingFarm = true;
 
@@ -966,9 +1006,16 @@ async function checkFarm() {
         // 复用手动操作逻辑
         const result = await runFarmOperation('all');
         isFirstFarmCheck = false;
+        if (result && result.hadWork) {
+            consecutiveErrors = 0; // 有效工作复位退避次数
+        } else if (result && !result.hadWork && consecutiveErrors > 0) {
+            // 虽然没产出，但是如果没报错也复位，毕竟网络是畅通的
+            consecutiveErrors = 0;
+        }
         return !!(result && result.hadWork);
     } catch (err) {
         logWarn('巡田', `检查失败: ${err.message}`);
+        consecutiveErrors++;
         return false;
     } finally {
         isCheckingFarm = false;
@@ -1103,7 +1150,8 @@ async function runFarmOperation(opType) {
                         module: 'farm', event: 'unlock_land', result: 'error', landId
                     });
                 }
-                await sleep(200);
+                // Phase 3: 操作间隔 Jitter (200~600ms)
+                await sleep(200 + Math.floor(Math.random() * 400));
             }
             if (unlocked > 0) {
                 actions.push(`解锁${unlocked}`);
@@ -1125,7 +1173,8 @@ async function runFarmOperation(opType) {
                         module: 'farm', event: 'upgrade_land', result: 'error', landId
                     });
                 }
-                await sleep(200);
+                // Phase 3: 操作间隔 Jitter (200~600ms)
+                await sleep(200 + Math.floor(Math.random() * 400));
             }
             if (upgraded > 0) {
                 actions.push(`升级${upgraded}`);
@@ -1147,7 +1196,22 @@ async function runFarmOperation(opType) {
 function scheduleNextFarmCheck(delayMs = CONFIG.farmCheckInterval) {
     if (externalSchedulerMode) return;
     if (!farmLoopRunning) return;
-    farmScheduler.setTimeoutTask('farm_check_loop', Math.max(0, delayMs), async () => {
+
+    let finalDelay = delayMs;
+
+    // Phase 3: 根据连续报错情况计算退避。前3次不退避，第4次开始成倍激增
+    if (consecutiveErrors > 3) {
+        const backoff = Math.min(300000, 5000 * Math.pow(2, consecutiveErrors - 3));
+        finalDelay = Math.max(finalDelay, backoff);
+        logWarn('系统', `连续 ${consecutiveErrors} 次异常，启动风控退避，下次巡田延迟 ${Math.round(finalDelay / 1000)} 秒`);
+    }
+
+    // Phase 3: Jitter 随机抖动防查 (针对下一次定时的间隔时间做 2% ~ 8% 的随机浮动扩大)
+    // 避免所有人同时同一秒唤醒
+    const jitter = Math.floor((Math.random() * 0.06 + 0.02) * finalDelay);
+    finalDelay += jitter;
+
+    farmScheduler.setTimeoutTask('farm_check_loop', Math.max(0, finalDelay), async () => {
         if (!farmLoopRunning) return;
         await checkFarm();
         if (!farmLoopRunning) return;

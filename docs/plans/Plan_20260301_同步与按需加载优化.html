@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>架构优化计划：端云仲裁与组件级懒加载</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --panel-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --border-color: #334155;
+            --primary: #3b82f6;
+            --primary-hover: #60a5fa;
+            --success: #10b981;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            line-height: 1.6;
+            margin: 0;
+            padding: 2rem;
+        }
+
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .header {
+            border-bottom: 2px solid var(--border-color);
+            padding-bottom: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 2rem;
+            color: var(--primary-hover);
+        }
+
+        .header p {
+            color: var(--text-muted);
+            margin-top: 0.5rem;
+        }
+
+        .card {
+            background-color: var(--panel-bg);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card h2 {
+            margin-top: 0;
+            color: var(--primary-hover);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+
+        .badge.p0 {
+            background-color: rgba(239, 68, 68, 0.2);
+            color: var(--danger);
+        }
+
+        .badge.p1 {
+            background-color: rgba(59, 130, 246, 0.2);
+            color: var(--primary);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+
+        th,
+        td {
+            padding: 0.75rem;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        th {
+            background-color: rgba(0, 0, 0, 0.2);
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        .mermaid-container {
+            background-color: #1a2234;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            margin: 1rem 0;
+            display: flex;
+            justify-content: center;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+    <script>
+        mermaid.initialize({
+            theme: 'dark',
+            startOnLoad: true
+        });
+    </script>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛠️ 系统架构进阶计划</h1>
+            <p><strong>代号:</strong> Phase 4 - Cloud Sync Arbitration & Asset Chunking</p>
+            <p><strong>日期:</strong> 2026-03-01</p>
+        </div>
+
+        <div class="card">
+            <h2>一、背景与目标 (Background & Goals)</h2>
+            <p>随着 QQ 农场智能助手逐渐发展为高颜值的现代化架构，前台交互数据的状态复杂度和体积与日俱增。本项目旨在完成最后两块体验体验飞升的拼图：</p>
+            <ul>
+                <li><strong>状态一致性 (UI Sync Arbitration)</strong>：解决多设备、多标签页引发的状态争用和冲突覆盖难题。</li>
+                <li><strong>加载性能 (Asset Chunking)</strong>：对长链、重型组件实施切片按需加载（Lazy Loading），防止包体积随业务增长而崩塌。</li>
+            </ul>
+        </div>
+
+        <div class="card">
+            <h2>二、系统设计与时序流 (Architecture Design)</h2>
+
+            <h3>1. 端云时间戳仲裁策略 (State Hash Arbitration)</h3>
+            <div class="mermaid-container">
+                <div class="mermaid">
+                    sequenceDiagram
+                    participant C1 as Client A (本地)
+                    participant S as Server (后端)
+                    participant C2 as Client B (远程)
+
+                    Note over C1: 修改色系为[赛博紫]
+                    C1->>C1: 更新 local_ui_timestamp = T1
+                    C1->>S: POST /api/settings/theme {ui, t: T1}
+                    S->>S: 判断 T1 &gt; db_timestamp
+                    S-->>C1: 200 OK (且更新 db_timestamp = T1)
+
+                    Note over C2: 用户在设备B启动系统
+                    C2->>S: GET /api/settings
+                    S-->>C2: 返回配置含 db_timestamp (T1)
+                    C2->>C2: 发现 T1 &gt; local_ui_timestamp (T0)
+                    C2->>C2: 接纳[赛博紫]并更新视图
+
+                    Note over C2: 发生离线冲突操作
+                    C2->>C2: 离线时修改为[樱花粉], T2
+                    C2->>S: 恢复网络后推送 t: T2
+                    S->>S: 发现 T2 &gt; T1, 允许覆盖
+                </div>
+            </div>
+
+            <h3>2. 异步组件挂载树 (Async Component Chunking)</h3>
+            <div class="mermaid-container">
+                <div class="mermaid">
+                    graph TD
+                    App[App.vue] --> Base[核心态组件: Sidebar / 常规弹窗]
+                    App -->|defineAsyncComponent| HeavyA[数据分析面板 Analytics.vue]
+                    App -->|defineAsyncComponent| HeavyB[通知中心 NotificationModal.vue]
+                    App -->|defineAsyncComponent| HeavyC[ECharts 包装器 / 图表内核]
+
+                    style App fill:#3b82f6,stroke:#1e3a8a,stroke-width:2px
+                    style Base fill:#10b981,stroke:#064e3b,stroke-width:2px
+                    style HeavyA fill:#f59e0b,stroke:#78350f,stroke-width:2px,stroke-dasharray: 5 5
+                    style HeavyB fill:#f59e0b,stroke:#78350f,stroke-width:2px,stroke-dasharray: 5 5
+                    style HeavyC fill:#f59e0b,stroke:#78350f,stroke-width:2px,stroke-dasharray: 5 5
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2>三、原子化拆解任务 (Atomic Tasks)</h2>
+
+            <h3><span class="badge p0">Task 1</span> 端云极速仲裁机制 (状态拉扯解决)</h3>
+            <table>
+                <tr>
+                    <th width="120">区域</th>
+                    <th>动作描述</th>
+                </tr>
+                <tr>
+                    <td><strong>Web</strong></td>
+                    <td>修改 <code>stores/app.ts</code>，在保存 <code>colorTheme</code> 等属性时，附加一个 <code>timestamp</code> 并通过
+                        <code>useStorage('app_ui_sync_time')</code> 记录。</td>
+                </tr>
+                <tr>
+                    <td><strong>Web</strong></td>
+                    <td>修改 <code>api/auth/me</code> 或登录后获取配置的回调钩子。如果发现后端下发的 <code>uiConfig.timestamp</code> 大于本机的
+                        <code>timestamp</code>，才执行覆盖变更。</td>
+                </tr>
+                <tr>
+                    <td><strong>Core</strong></td>
+                    <td>修改 <code>store.js</code> 及 <code>data-provider.js</code>，在 <code>setUITheme</code>
+                        数据结构中落库记录该时间戳。若无时间戳则视为强制覆盖。</td>
+                </tr>
+            </table>
+
+            <h3><span class="badge p1">Task 2</span> 懒加载与代码切片 (包体积优化)</h3>
+            <table>
+                <tr>
+                    <th width="120">区域</th>
+                    <th>动作描述</th>
+                </tr>
+                <tr>
+                    <td><strong>Web</strong></td>
+                    <td>将现有的非首屏必需品（如 <code>NotificationModal.vue</code>、<code>StealSettings.vue</code>）改为通过
+                        <code>defineAsyncComponent</code> 导入。</td>
+                </tr>
+                <tr>
+                    <td><strong>Web</strong></td>
+                    <td>配置 <code>vite.config.ts</code> 中的 <code>manualChunks</code>（如果有必要），将 <code>vendor</code> (vue /
+                        vue-router / pinia) 大体积核心件锁定，业务层实现自然分割（<code>.js.gz</code> 碎片化）。</td>
+                </tr>
+                <tr>
+                    <td><strong>Web</strong></td>
+                    <td>引入一层异步加载期的占位 (Loading / Skeleton)，确保网速慢时用户感知平滑不留白。</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="card">
+            <h2>四、影响面与风险评估 (Impact & Risks)</h2>
+            <table>
+                <tr>
+                    <th width="150">潜在风险点</th>
+                    <th>缓解预案 (Mitigation)</th>
+                </tr>
+                <tr>
+                    <td><strong>浏览器本地时间不准</strong></td>
+                    <td>在首次鉴权接口获取服务器提供的绝对基准时间差，统一使用 <code>Date.now() + offset</code> 作为防伪时间戳。</td>
+                </tr>
+                <tr>
+                    <td><strong>按需加载失败(网络闪断)</strong></td>
+                    <td>Vue <code>defineAsyncComponent</code> 自带容错参数设置。可以配备 <code>errorComponent</code> 或者重试闭包函数进行防御。
+                    </td>
+                </tr>
+                <tr>
+                    <td><strong>状态无缝合并的类型安全</strong></td>
+                    <td>TS 接口需允许 <code>timestamp</code> 为 <code>Optional</code> (向后兼容旧账本中无时间戳的用户)。</td>
+                </tr>
+            </table>
+        </div>
+    </div>
+</body>
+
+</html>
