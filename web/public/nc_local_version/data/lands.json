@@ -1,0 +1,1502 @@
+{
+  "1": {
+    "distribution": {
+      "1": 6,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 6,
+    "level": 1,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "2": {
+    "distribution": {
+      "1": 6,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 6,
+    "level": 2,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "3": {
+    "distribution": {
+      "1": 6,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 6,
+    "level": 3,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "4": {
+    "distribution": {
+      "1": 6,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 6,
+    "level": 4,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "5": {
+    "distribution": {
+      "1": 7,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 7,
+    "level": 5,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "6": {
+    "distribution": {
+      "1": 7,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 7,
+    "level": 6,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "7": {
+    "distribution": {
+      "1": 8,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 8,
+    "level": 7,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "8": {
+    "distribution": {
+      "1": 8,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 8,
+    "level": 8,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "9": {
+    "distribution": {
+      "1": 9,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 9,
+    "level": 9,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "10": {
+    "distribution": {
+      "1": 9,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 9,
+    "level": 10,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "11": {
+    "distribution": {
+      "1": 10,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 10,
+    "level": 11,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "12": {
+    "distribution": {
+      "1": 10,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 10,
+    "level": 12,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "13": {
+    "distribution": {
+      "1": 11,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 11,
+    "level": 13,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "14": {
+    "distribution": {
+      "1": 11,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 11,
+    "level": 14,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "15": {
+    "distribution": {
+      "1": 12,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 12,
+    "level": 15,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "16": {
+    "distribution": {
+      "1": 12,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 12,
+    "level": 16,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "17": {
+    "distribution": {
+      "1": 13,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 13,
+    "level": 17,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "18": {
+    "distribution": {
+      "1": 13,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 13,
+    "level": 18,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "19": {
+    "distribution": {
+      "1": 14,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 14,
+    "level": 19,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "20": {
+    "distribution": {
+      "1": 14,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 14,
+    "level": 20,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "21": {
+    "distribution": {
+      "1": 15,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 15,
+    "level": 21,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "22": {
+    "distribution": {
+      "1": 15,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 15,
+    "level": 22,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "23": {
+    "distribution": {
+      "1": 16,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 16,
+    "level": 23,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "24": {
+    "distribution": {
+      "1": 16,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 16,
+    "level": 24,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "25": {
+    "distribution": {
+      "1": 17,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 17,
+    "level": 25,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "26": {
+    "distribution": {
+      "1": 17,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 17,
+    "level": 26,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "27": {
+    "distribution": {
+      "1": 18,
+      "2": 0,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "普通土地",
+    "lands": 18,
+    "level": 27,
+    "max2": 0,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 1
+  },
+  "28": {
+    "distribution": {
+      "1": 17,
+      "2": 1,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 18,
+    "level": 28,
+    "max2": 1,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "29": {
+    "distribution": {
+      "1": 17,
+      "2": 2,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 19,
+    "level": 29,
+    "max2": 2,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "30": {
+    "distribution": {
+      "1": 16,
+      "2": 3,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 19,
+    "level": 30,
+    "max2": 3,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "31": {
+    "distribution": {
+      "1": 16,
+      "2": 4,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 20,
+    "level": 31,
+    "max2": 4,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "32": {
+    "distribution": {
+      "1": 15,
+      "2": 5,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 20,
+    "level": 32,
+    "max2": 5,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "33": {
+    "distribution": {
+      "1": 15,
+      "2": 6,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 21,
+    "level": 33,
+    "max2": 6,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "34": {
+    "distribution": {
+      "1": 14,
+      "2": 7,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 21,
+    "level": 34,
+    "max2": 7,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "35": {
+    "distribution": {
+      "1": 14,
+      "2": 8,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 22,
+    "level": 35,
+    "max2": 8,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "36": {
+    "distribution": {
+      "1": 13,
+      "2": 9,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 22,
+    "level": 36,
+    "max2": 9,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "37": {
+    "distribution": {
+      "1": 13,
+      "2": 10,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 23,
+    "level": 37,
+    "max2": 10,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "38": {
+    "distribution": {
+      "1": 12,
+      "2": 11,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 23,
+    "level": 38,
+    "max2": 11,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "39": {
+    "distribution": {
+      "1": 12,
+      "2": 12,
+      "3": 0,
+      "4": 0
+    },
+    "landLevelName": "红土地",
+    "lands": 24,
+    "level": 39,
+    "max2": 12,
+    "max3": 0,
+    "max4": 0,
+    "maxLandLevel": 2
+  },
+  "40": {
+    "distribution": {
+      "1": 11,
+      "2": 12,
+      "3": 1,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 40,
+    "max2": 13,
+    "max3": 1,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "41": {
+    "distribution": {
+      "1": 10,
+      "2": 12,
+      "3": 2,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 41,
+    "max2": 14,
+    "max3": 2,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "42": {
+    "distribution": {
+      "1": 9,
+      "2": 12,
+      "3": 3,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 42,
+    "max2": 15,
+    "max3": 3,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "43": {
+    "distribution": {
+      "1": 8,
+      "2": 12,
+      "3": 4,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 43,
+    "max2": 16,
+    "max3": 4,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "44": {
+    "distribution": {
+      "1": 7,
+      "2": 12,
+      "3": 5,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 44,
+    "max2": 17,
+    "max3": 5,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "45": {
+    "distribution": {
+      "1": 6,
+      "2": 12,
+      "3": 6,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 45,
+    "max2": 18,
+    "max3": 6,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "46": {
+    "distribution": {
+      "1": 6,
+      "2": 11,
+      "3": 7,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 46,
+    "max2": 18,
+    "max3": 7,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "47": {
+    "distribution": {
+      "1": 5,
+      "2": 11,
+      "3": 8,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 47,
+    "max2": 19,
+    "max3": 8,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "48": {
+    "distribution": {
+      "1": 5,
+      "2": 10,
+      "3": 9,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 48,
+    "max2": 19,
+    "max3": 9,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "49": {
+    "distribution": {
+      "1": 4,
+      "2": 10,
+      "3": 10,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 49,
+    "max2": 20,
+    "max3": 10,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "50": {
+    "distribution": {
+      "1": 4,
+      "2": 9,
+      "3": 11,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 50,
+    "max2": 20,
+    "max3": 11,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "51": {
+    "distribution": {
+      "1": 3,
+      "2": 9,
+      "3": 12,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 51,
+    "max2": 21,
+    "max3": 12,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "52": {
+    "distribution": {
+      "1": 3,
+      "2": 8,
+      "3": 13,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 52,
+    "max2": 21,
+    "max3": 13,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "53": {
+    "distribution": {
+      "1": 2,
+      "2": 8,
+      "3": 14,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 53,
+    "max2": 22,
+    "max3": 14,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "54": {
+    "distribution": {
+      "1": 2,
+      "2": 7,
+      "3": 15,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 54,
+    "max2": 22,
+    "max3": 15,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "55": {
+    "distribution": {
+      "1": 1,
+      "2": 7,
+      "3": 16,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 55,
+    "max2": 23,
+    "max3": 16,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "56": {
+    "distribution": {
+      "1": 1,
+      "2": 6,
+      "3": 17,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 56,
+    "max2": 23,
+    "max3": 17,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "57": {
+    "distribution": {
+      "1": 0,
+      "2": 6,
+      "3": 18,
+      "4": 0
+    },
+    "landLevelName": "黑土地",
+    "lands": 24,
+    "level": 57,
+    "max2": 24,
+    "max3": 18,
+    "max4": 0,
+    "maxLandLevel": 3
+  },
+  "58": {
+    "distribution": {
+      "1": 0,
+      "2": 6,
+      "3": 17,
+      "4": 1
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 58,
+    "max2": 24,
+    "max3": 18,
+    "max4": 1,
+    "maxLandLevel": 4
+  },
+  "59": {
+    "distribution": {
+      "1": 0,
+      "2": 5,
+      "3": 17,
+      "4": 2
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 59,
+    "max2": 24,
+    "max3": 19,
+    "max4": 2,
+    "maxLandLevel": 4
+  },
+  "60": {
+    "distribution": {
+      "1": 0,
+      "2": 5,
+      "3": 16,
+      "4": 3
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 60,
+    "max2": 24,
+    "max3": 19,
+    "max4": 3,
+    "maxLandLevel": 4
+  },
+  "61": {
+    "distribution": {
+      "1": 0,
+      "2": 4,
+      "3": 16,
+      "4": 4
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 61,
+    "max2": 24,
+    "max3": 20,
+    "max4": 4,
+    "maxLandLevel": 4
+  },
+  "62": {
+    "distribution": {
+      "1": 0,
+      "2": 4,
+      "3": 15,
+      "4": 5
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 62,
+    "max2": 24,
+    "max3": 20,
+    "max4": 5,
+    "maxLandLevel": 4
+  },
+  "63": {
+    "distribution": {
+      "1": 0,
+      "2": 3,
+      "3": 15,
+      "4": 6
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 63,
+    "max2": 24,
+    "max3": 21,
+    "max4": 6,
+    "maxLandLevel": 4
+  },
+  "64": {
+    "distribution": {
+      "1": 0,
+      "2": 3,
+      "3": 14,
+      "4": 7
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 64,
+    "max2": 24,
+    "max3": 21,
+    "max4": 7,
+    "maxLandLevel": 4
+  },
+  "65": {
+    "distribution": {
+      "1": 0,
+      "2": 2,
+      "3": 14,
+      "4": 8
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 65,
+    "max2": 24,
+    "max3": 22,
+    "max4": 8,
+    "maxLandLevel": 4
+  },
+  "66": {
+    "distribution": {
+      "1": 0,
+      "2": 2,
+      "3": 13,
+      "4": 9
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 66,
+    "max2": 24,
+    "max3": 22,
+    "max4": 9,
+    "maxLandLevel": 4
+  },
+  "67": {
+    "distribution": {
+      "1": 0,
+      "2": 1,
+      "3": 13,
+      "4": 10
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 67,
+    "max2": 24,
+    "max3": 23,
+    "max4": 10,
+    "maxLandLevel": 4
+  },
+  "68": {
+    "distribution": {
+      "1": 0,
+      "2": 1,
+      "3": 12,
+      "4": 11
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 68,
+    "max2": 24,
+    "max3": 23,
+    "max4": 11,
+    "maxLandLevel": 4
+  },
+  "69": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 12,
+      "4": 12
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 69,
+    "max2": 24,
+    "max3": 24,
+    "max4": 12,
+    "maxLandLevel": 4
+  },
+  "70": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 11,
+      "4": 13
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 70,
+    "max2": 24,
+    "max3": 24,
+    "max4": 13,
+    "maxLandLevel": 4
+  },
+  "71": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 10,
+      "4": 14
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 71,
+    "max2": 24,
+    "max3": 24,
+    "max4": 14,
+    "maxLandLevel": 4
+  },
+  "72": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 9,
+      "4": 15
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 72,
+    "max2": 24,
+    "max3": 24,
+    "max4": 15,
+    "maxLandLevel": 4
+  },
+  "73": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 8,
+      "4": 16
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 73,
+    "max2": 24,
+    "max3": 24,
+    "max4": 16,
+    "maxLandLevel": 4
+  },
+  "74": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 7,
+      "4": 17
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 74,
+    "max2": 24,
+    "max3": 24,
+    "max4": 17,
+    "maxLandLevel": 4
+  },
+  "75": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 6,
+      "4": 18
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 75,
+    "max2": 24,
+    "max3": 24,
+    "max4": 18,
+    "maxLandLevel": 4
+  },
+  "76": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 6,
+      "4": 18
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 76,
+    "max2": 24,
+    "max3": 24,
+    "max4": 18,
+    "maxLandLevel": 4
+  },
+  "77": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 5,
+      "4": 19
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 77,
+    "max2": 24,
+    "max3": 24,
+    "max4": 19,
+    "maxLandLevel": 4
+  },
+  "78": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 5,
+      "4": 19
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 78,
+    "max2": 24,
+    "max3": 24,
+    "max4": 19,
+    "maxLandLevel": 4
+  },
+  "79": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 4,
+      "4": 20
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 79,
+    "max2": 24,
+    "max3": 24,
+    "max4": 20,
+    "maxLandLevel": 4
+  },
+  "80": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 4,
+      "4": 20
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 80,
+    "max2": 24,
+    "max3": 24,
+    "max4": 20,
+    "maxLandLevel": 4
+  },
+  "81": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 3,
+      "4": 21
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 81,
+    "max2": 24,
+    "max3": 24,
+    "max4": 21,
+    "maxLandLevel": 4
+  },
+  "82": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 3,
+      "4": 21
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 82,
+    "max2": 24,
+    "max3": 24,
+    "max4": 21,
+    "maxLandLevel": 4
+  },
+  "83": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 2,
+      "4": 22
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 83,
+    "max2": 24,
+    "max3": 24,
+    "max4": 22,
+    "maxLandLevel": 4
+  },
+  "84": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 2,
+      "4": 22
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 84,
+    "max2": 24,
+    "max3": 24,
+    "max4": 22,
+    "maxLandLevel": 4
+  },
+  "85": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 1,
+      "4": 23
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 85,
+    "max2": 24,
+    "max3": 24,
+    "max4": 23,
+    "maxLandLevel": 4
+  },
+  "86": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 1,
+      "4": 23
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 86,
+    "max2": 24,
+    "max3": 24,
+    "max4": 23,
+    "maxLandLevel": 4
+  },
+  "87": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 87,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "88": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 88,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "89": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 89,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "90": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 90,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "91": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 91,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "92": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 92,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "93": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 93,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "94": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 94,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "95": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 95,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "96": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 96,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "97": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 97,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "98": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 98,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "99": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 99,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  },
+  "100": {
+    "distribution": {
+      "1": 0,
+      "2": 0,
+      "3": 0,
+      "4": 24
+    },
+    "landLevelName": "金土地",
+    "lands": 24,
+    "level": 100,
+    "max2": 24,
+    "max3": 24,
+    "max4": 24,
+    "maxLandLevel": 4
+  }
+}

@@ -1,4 +1,5 @@
 const crypto = require('node:crypto');
+const farmCalculator = require('../services/farm-calculator');
 /**
  * 管理面板 HTTP 服务
  * 改写为接收 DataProvider 模式，并集成多用户系统
@@ -233,6 +234,47 @@ function startAdminServer(dataProvider) {
                 }
             }
         });
+    });
+
+    // Farm Tools 原生集成 API
+    app.get('/api/time_crops', (req, res) => {
+        try {
+            res.json(farmCalculator.calculate_time_crops());
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
+    });
+
+    app.get('/api/lands_for_level', (req, res) => {
+        try {
+            res.json(farmCalculator.calculate_lands_for_level(req.query.level || 1));
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
+    });
+
+    app.get('/api/calculator', (req, res) => {
+        try {
+            res.json(farmCalculator.calculate_main(req.query));
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
+    });
+
+    app.get('/api/level_exp_calc', (req, res) => {
+        try {
+            res.json(farmCalculator.calculate_exp_plan({ ...req.query, _path: req.path }));
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
+    });
+
+    app.get('/api/level_exp_calc_save', (req, res) => {
+        try {
+            res.json(farmCalculator.calculate_exp_plan({ ...req.query, _path: req.path }));
+        } catch (e) {
+            res.status(500).json({ ok: false, error: e.message });
+        }
     });
 
     app.use('/api', (req, res, next) => {

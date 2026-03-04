@@ -1,0 +1,3500 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./static/植物.ico">
+  <title>🌾 经验&金币&时间计算器 · QQ经典农场</title>
+  <script src="./static/js/tailwindcss-3.4.17.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'rgba(var(--color-primary-50), <alpha-value>)',
+              100: 'rgba(var(--color-primary-100), <alpha-value>)',
+              200: 'rgba(var(--color-primary-200), <alpha-value>)',
+              300: 'rgba(var(--color-primary-300), <alpha-value>)',
+              400: 'rgba(var(--color-primary-400), <alpha-value>)',
+              500: 'rgba(var(--color-primary-500), <alpha-value>)',
+              600: 'rgba(var(--color-primary-600), <alpha-value>)',
+              700: 'rgba(var(--color-primary-700), <alpha-value>)',
+              800: 'rgba(var(--color-primary-800), <alpha-value>)',
+              900: 'rgba(var(--color-primary-900), <alpha-value>)',
+              950: 'rgba(var(--color-primary-950), <alpha-value>)',
+            },
+            farm: {
+              50: 'rgba(var(--color-primary-100), 0.2)', 100: 'rgba(var(--color-primary-200), 0.3)', 200: 'rgba(var(--color-primary-300), 0.4)',
+              300: 'rgb(var(--color-primary-300))', 400: 'rgb(var(--color-primary-400))', 500: 'rgb(var(--color-primary-500))',
+              600: 'rgb(var(--color-primary-600))', 700: 'rgb(var(--color-primary-700))', 800: 'rgb(var(--color-primary-800))', 900: '#14532d',
+            },
+            soil: { 400: '#a16207', 500: '#854d0e', 600: '#713f12' }
+          },
+          fontFamily: { sans: ['"Microsoft YaHei"', 'Segoe UI', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* =========== 深色模式自给自足覆盖 =========== */
+    /* 当 FarmTools.vue 注入 dark 类后，即使 --glass-bg 变量未及时同步，也能正确显示 */
+    html.dark body,
+    html.dark .home-container,
+    html.dark main {
+      background: transparent !important;
+      color: #f0f9ff !important;
+    }
+
+    html.dark .calc-input-panel,
+    html.dark .calc-mode-tabs,
+    html.dark .result-card,
+    html.dark .stat-box,
+    html.dark .phase-timeline,
+    html.dark .crop-table,
+    html.dark .crop-detail-card,
+    html.dark .sim-card,
+    html.dark .info-popup-content,
+    html.dark .tc-input-panel,
+    html.dark .tc-timeline-card,
+    html.dark .tc-summary-card {
+      background: rgba(15, 23, 42, 0.75) !important;
+      border-color: rgba(148, 163, 184, 0.15) !important;
+      color: #f0f9ff !important;
+    }
+
+    html.dark input,
+    html.dark select {
+      background: rgba(30, 41, 59, 0.8) !important;
+      border-color: rgba(148, 163, 184, 0.2) !important;
+      color: #f0f9ff !important;
+    }
+
+    html.dark label,
+    html.dark .input-field label,
+    html.dark .fert-label,
+    html.dark .fert-desc,
+    html.dark .stat-label,
+    html.dark .stat-val,
+    html.dark p,
+    html.dark span,
+    html.dark td,
+    html.dark th {
+      color: #e2e8f0 !important;
+    }
+
+    html.dark .calc-mode-tab {
+      color: #94a3b8 !important;
+    }
+
+    html.dark .calc-mode-tab.active {
+      color: #fff !important;
+    }
+
+    html.dark .tc-phase-row:hover {
+      background: rgba(30, 41, 59, 0.6) !important;
+    }
+
+    html.dark .fert-toggle input[type="checkbox"]::after {
+      background: #CBD5E1 !important;
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--glass-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* 侧边栏链接激活态 */
+    .nav-item.active {
+      background: var(--glass-bg);
+    }
+
+    .nav-item.active .nav-dot {
+      opacity: 1;
+    }
+
+    .nav-dot {
+      opacity: 0;
+      width: 4px;
+      border-radius: 2px;
+      background: rgb(var(--color-primary-400));
+    }
+
+    /* 卡片悬浮 */
+    .card-hover {
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+    }
+
+    /* 渐变文字 */
+    .grad-text {
+      background: linear-gradient(135deg, rgb(var(--color-primary-500)), rgb(var(--color-primary-600)));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* 道具图标容器 */
+    .item-icon {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--glass-bg), var(--glass-border));
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .item-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .item-icon .no-img {
+      font-size: 1.8rem;
+    }
+
+    /* 稀有度颜色 */
+    .rarity-1 {
+      color: #9ca3af;
+    }
+
+    .rarity-2 {
+      color: rgb(var(--color-primary-500));
+    }
+
+    .rarity-3 {
+      color: #3b82f6;
+    }
+
+    .rarity-4 {
+      color: #a855f7;
+    }
+
+    .rarity-5 {
+      color: #f59e0b;
+    }
+
+    /* 动画 */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeInUp .35s ease both;
+    }
+
+    /* 植物卡片图片区 */
+    .plant-img-wrap {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, rgba(var(--color-primary-200), 0.3), rgba(var(--color-primary-300), 0.4));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .plant-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* ══ 冻结导航项 ══ */
+    .frozen-nav {
+      color: var(--text-muted) !important;
+      cursor: not-allowed !important;
+      opacity: 0.45;
+    }
+
+    .frozen-nav:hover {
+      background: transparent !important;
+    }
+
+    .frozen-nav .frozen-name {
+      text-decoration: line-through;
+      text-decoration-color: var(--text-muted);
+      text-decoration-thickness: 1px;
+    }
+
+    .frozen-nav .frozen-emoji {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    /* ══ Toast 提示 ══ */
+    #toast-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-bg);
+      color: var(--glass-bg);
+      padding: 0.65rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-1rem) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-1rem) scale(0.95);
+      }
+    }
+  </style>
+
+  <style>
+    /* ── 计算器专属样式 ── */
+    .calc-hero {
+      background: linear-gradient(135deg, rgba(var(--color-primary-200), 0.3) 0%, rgba(var(--color-primary-100), 0.2) 50%, var(--glass-bg) 100%);
+      padding: 2rem 1.5rem 1.5rem;
+      border-bottom: 1px solid rgba(var(--color-primary-300), 0.4);
+    }
+
+    .calc-hero h1 {
+      font-size: 1.5rem;
+      font-weight: 800;
+      color: rgb(var(--color-primary-800));
+      margin-bottom: 0.25rem;
+    }
+
+    .calc-hero p {
+      font-size: 0.875rem;
+      color: rgb(var(--color-primary-400));
+      font-weight: 500;
+    }
+
+    .calc-input-panel {
+      background: var(--glass-bg);
+      border-radius: 1rem;
+      padding: 1.5rem;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, .06);
+      border: 1px solid var(--glass-border);
+    }
+
+    .input-row {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      align-items: flex-start;
+    }
+
+    .input-field {
+      flex: 1;
+      min-width: 140px;
+    }
+
+    .input-field label {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.2rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      margin-bottom: 0.35rem;
+      white-space: nowrap;
+    }
+
+    .input-field input,
+    .input-field select {
+      width: 100%;
+      padding: 0.55rem 0.75rem;
+      border: 1.5px solid var(--glass-border);
+      border-radius: 0.6rem;
+      font-size: 0.95rem;
+      background: var(--glass-bg);
+      transition: border-color 0.2s;
+      outline: none;
+    }
+
+    .input-field input:focus {
+      border-color: rgb(var(--color-primary-500));
+      box-shadow: 0 0 0 3px rgba(var(--color-primary-500), 0.12);
+    }
+
+    .land-info {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-size: 0.8rem;
+      color: rgb(var(--color-primary-600));
+      font-weight: 600;
+      background: rgba(var(--color-primary-100), 0.2);
+      padding: 0.35rem 0.75rem;
+      border-radius: 0.5rem;
+      margin-top: 0.5rem;
+      transition: all 0.3s;
+    }
+
+    .fert-toggle {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 0;
+    }
+
+    .fert-toggle input[type="checkbox"] {
+      width: 2.5rem;
+      height: 1.35rem;
+      -webkit-appearance: none;
+      appearance: none;
+      background: #94a3b8;
+      border-radius: 999px;
+      position: relative;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .fert-toggle input[type="checkbox"]::after {
+      content: '';
+      position: absolute;
+      left: 2px;
+      top: 2px;
+      width: calc(1.35rem - 4px);
+      height: calc(1.35rem - 4px);
+      background: #fff;
+      border-radius: 50%;
+      transition: transform 0.3s;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
+    }
+
+    .fert-toggle input[type="checkbox"]:checked {
+      background: rgb(var(--color-primary-500));
+    }
+
+    .fert-toggle input[type="checkbox"]:checked::after {
+      transform: translateX(calc(2.5rem - 1.35rem));
+    }
+
+    .fert-toggle span {
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    .btn-calc {
+      padding: 0.6rem 1.5rem;
+      background: linear-gradient(135deg, rgb(var(--color-primary-500)), rgb(var(--color-primary-600)));
+      color: #fff;
+      font-weight: 700;
+      font-size: 0.9rem;
+      border: none;
+      border-radius: 0.65rem;
+      cursor: pointer;
+      transition: all 0.25s;
+      box-shadow: 0 2px 8px rgba(var(--color-primary-500), 0.35);
+      white-space: nowrap;
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-calc:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(var(--color-primary-500), 0.45);
+    }
+
+    .btn-calc:active {
+      transform: translateY(0);
+    }
+
+    /* 推荐卡 */
+    .rec-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+
+    @media (max-width: 640px) {
+      .rec-cards {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .rec-card {
+      background: var(--glass-bg);
+      border-radius: 1rem;
+      padding: 1.25rem;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, .05);
+      border: 1px solid var(--glass-border);
+      transition: transform 0.25s;
+    }
+
+    .rec-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .08);
+    }
+
+    .rec-card.card-no-fert {
+      border-left: 4px solid rgb(var(--color-primary-500));
+    }
+
+    .rec-card.card-fert {
+      border-left: 4px solid #f59e0b;
+    }
+
+    .rec-card .card-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .rec-card .card-name {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: var(--text-main);
+      margin: 0.25rem 0 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .rec-card .card-name img {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+    }
+
+    .rec-card .stat-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.5rem;
+    }
+
+    .rec-card .stat-item {
+      text-align: center;
+      padding: 0.4rem;
+      background: var(--glass-bg);
+      border-radius: 0.5rem;
+    }
+
+    .rec-card .stat-label {
+      font-size: 0.65rem;
+      color: var(--text-muted);
+    }
+
+    .rec-card .stat-val {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text-main);
+    }
+
+    .rec-card .stat-val.highlight {
+      color: rgb(var(--color-primary-500));
+    }
+
+    /* 进度对比 */
+    .progress-section {
+      margin-top: 1.5rem;
+    }
+
+    .progress-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .progress-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .progress-label {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      min-width: 80px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+
+    .progress-label img {
+      width: 18px;
+      height: 18px;
+      object-fit: contain;
+      flex-shrink: 0;
+    }
+
+    .progress-track {
+      flex: 1;
+      height: 18px;
+      background: var(--glass-bg);
+      border-radius: 999px;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .progress-fill {
+      height: 100%;
+      border-radius: 999px;
+      transition: width 0.6s ease;
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 6px;
+      font-size: 0.6rem;
+      font-weight: 600;
+      color: var(--glass-bg);
+      min-width: 30px;
+    }
+
+    .progress-value {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      min-width: 70px;
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .fill-green {
+      background: linear-gradient(90deg, rgb(var(--color-primary-300)), rgb(var(--color-primary-500)));
+    }
+
+    .fill-orange {
+      background: linear-gradient(90deg, var(--text-main), #f59e0b);
+    }
+
+    .fill-purple {
+      background: linear-gradient(90deg, #ddd6fe, #a855f7);
+    }
+
+    .fill-blue {
+      background: linear-gradient(90deg, #bfdbfe, #3b82f6);
+    }
+
+    .fill-pink {
+      background: linear-gradient(90deg, #fbcfe8, #ec4899);
+    }
+
+    /* 排行表 */
+    .rank-table {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+    }
+
+    .rank-table th {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      text-transform: uppercase;
+      padding: 0.5rem 0.75rem;
+      text-align: left;
+      border-bottom: 2px solid var(--glass-bg);
+      position: sticky;
+      top: 0;
+      background: var(--glass-bg);
+      z-index: 1;
+    }
+
+    .rank-table td {
+      padding: 0.55rem 0.75rem;
+      font-size: 0.8rem;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--glass-bg);
+    }
+
+    .rank-table tr:hover td {
+      background: rgba(var(--color-primary-100), 0.2);
+    }
+
+    .rank-medal {
+      font-size: 1.1rem;
+    }
+
+    .rank-name-cell {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      font-weight: 600;
+    }
+
+    .rank-name-cell img {
+      width: 22px;
+      height: 22px;
+      object-fit: contain;
+    }
+
+    .rank-bar-wrap {
+      width: 80px;
+      height: 6px;
+      background: var(--glass-bg);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .rank-bar-fill {
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, rgb(var(--color-primary-300)), rgb(var(--color-primary-500)));
+      transition: width 0.5s;
+    }
+
+    /* 条件摘要 */
+    .calc-summary {
+      background: rgba(var(--color-primary-100), 0.2);
+      border: 1px solid rgba(var(--color-primary-300), 0.4);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.8rem;
+      color: rgb(var(--color-primary-800));
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem 1.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .calc-summary .sum-item {
+      display: flex;
+      align-items: center;
+      gap: 0.3rem;
+    }
+
+    /* 隐藏/显示 */
+    .hidden {
+      display: none !important;
+    }
+
+    /* 表格容器 滚动 */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 0.75rem;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 1px 4px rgba(0, 0, 0, .04);
+    }
+
+    /* 排行切换 Tab */
+    .rank-tabs {
+      display: flex;
+      gap: 0.5rem;
+      margin-bottom: 1rem;
+    }
+
+    .rank-tab {
+      padding: 0.4rem 1rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--glass-border);
+      background: var(--glass-bg);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .rank-tab:hover {
+      border-color: rgb(var(--color-primary-500));
+      color: rgb(var(--color-primary-600));
+    }
+
+    .rank-tab.active {
+      background: rgb(var(--color-primary-500));
+      color: #fff;
+      border-color: rgb(var(--color-primary-500));
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .spinner {
+      display: inline-block;
+      width: 18px;
+      height: 18px;
+      border: 2.5px solid var(--glass-bg);
+      border-top-color: var(--glass-bg);
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* 提示框 */
+    .fert-hint {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 0.25rem;
+      line-height: 1.4;
+    }
+
+    /* 说明弹窗（通过标题后的 ⓘ 打开） */
+    .info-btn {
+      background: transparent;
+      border: none;
+      border-radius: 6px;
+      width: 22px;
+      height: 22px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-weight: 700;
+      color: var(--text-muted);
+      font-size: 0.8rem;
+      transition: background 0.12s, color 0.12s;
+      padding: 0;
+      line-height: 1;
+    }
+
+    .info-btn:hover {
+      background: rgba(var(--color-primary-500), 0.1);
+      color: rgb(var(--color-primary-600));
+    }
+
+    /* 更醒目的智能施肥提示颜色（默认仅改变文字色，hover 为浅橙背景） */
+    .info-btn[data-info-key="smart-fert"] {
+      color: rgb(var(--color-primary-600));
+    }
+
+    .info-btn[data-info-key="smart-fert"]:hover {
+      background: rgba(var(--color-primary-500), 0.12);
+      color: rgb(var(--color-primary-700));
+    }
+
+    .info-popup {
+      position: absolute;
+      z-index: 9999;
+      width: 340px;
+      max-width: 92%;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 0.75rem;
+      box-shadow: 0 12px 36px rgba(2, 6, 23, 0.12);
+      padding: 0.75rem 0.9rem;
+      font-size: 0.9rem;
+      color: var(--text-main);
+    }
+
+    .info-popup .info-close {
+      float: right;
+      background: transparent;
+      border: none;
+      font-size: 1rem;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+
+    .info-popup h4 {
+      margin: 0 0 0.35rem 0;
+      font-size: 1rem;
+      color: var(--text-main);
+    }
+
+    .info-popup ul {
+      margin: 0.4rem 0 0 1rem;
+      padding: 0;
+      color: var(--text-muted);
+    }
+
+    /* ── 验算过程弹窗 ── */
+    .verify-overlay {
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.45);
+      backdrop-filter: blur(4px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .verify-overlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .verify-panel {
+      background: var(--glass-bg);
+      border-radius: 1.25rem;
+      width: 92%;
+      max-width: 860px;
+      max-height: 88vh;
+      overflow-y: auto;
+      padding: 2rem 2rem 1.5rem;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
+      transform: translateY(30px);
+      transition: transform 0.3s;
+    }
+
+    .verify-overlay.show .verify-panel {
+      transform: translateY(0);
+    }
+
+    .verify-close {
+      float: right;
+      background: var(--glass-bg);
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+
+    .verify-close:hover {
+      background: var(--glass-border);
+    }
+
+    .verify-panel h2 {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: var(--text-main);
+      margin-bottom: 1rem;
+    }
+
+    .verify-panel h3 {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: rgb(var(--color-primary-800));
+      margin: 1.25rem 0 0.6rem;
+      padding-bottom: 0.3rem;
+      border-bottom: 2px solid rgba(var(--color-primary-200), 0.3);
+    }
+
+    .verify-panel h4 {
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--text-muted);
+      margin: 0.8rem 0 0.4rem;
+    }
+
+    .v-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 0.5rem 0;
+      font-size: 0.82rem;
+    }
+
+    .v-table th {
+      background: var(--glass-bg);
+      padding: 0.45rem 0.65rem;
+      text-align: left;
+      font-weight: 600;
+      color: var(--text-muted);
+      border-bottom: 2px solid var(--glass-border);
+    }
+
+    .v-table td {
+      padding: 0.4rem 0.65rem;
+      border-bottom: 1px solid var(--glass-bg);
+      color: var(--text-main);
+    }
+
+    .v-table tr:hover td {
+      background: rgba(var(--color-primary-100), 0.2);
+    }
+
+    .v-formula {
+      background: rgba(var(--color-primary-100), 0.2);
+      border: 1px solid rgba(var(--color-primary-300), 0.4);
+      border-radius: 0.6rem;
+      padding: 0.65rem 1rem;
+      margin: 0.5rem 0;
+      font-size: 0.82rem;
+      color: rgb(var(--color-primary-800));
+      line-height: 1.7;
+      font-family: 'Courier New', monospace;
+    }
+
+    .v-formula .v-eq {
+      color: rgb(var(--color-primary-500));
+      font-weight: 700;
+    }
+
+    .v-formula .v-ans {
+      color: #dc2626;
+      font-weight: 700;
+      font-size: 0.95rem;
+    }
+
+    .v-note {
+      background: var(--text-main);
+      border: 1px solid var(--text-main);
+      border-radius: 0.6rem;
+      padding: 0.55rem 0.85rem;
+      margin: 0.5rem 0;
+      font-size: 0.78rem;
+      color: #92400e;
+      line-height: 1.6;
+    }
+
+    .v-step-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+      background: rgb(var(--color-primary-500));
+      color: var(--glass-bg);
+      border-radius: 50%;
+      font-size: 0.7rem;
+      font-weight: 700;
+      margin-right: 0.35rem;
+      flex-shrink: 0;
+    }
+
+    .v-crop-header {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: linear-gradient(135deg, rgba(var(--color-primary-200), 0.3), rgba(var(--color-primary-100), 0.2));
+      padding: 0.75rem 1rem;
+      border-radius: 0.75rem;
+      margin: 1rem 0 0.6rem;
+    }
+
+    .v-crop-header img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+    }
+
+    .v-crop-header .v-crop-title {
+      font-size: 1.1rem;
+      font-weight: 800;
+      color: rgb(var(--color-primary-800));
+    }
+
+    .v-crop-tabs {
+      display: flex;
+      gap: 0.4rem;
+      margin: 0.75rem 0;
+      flex-wrap: wrap;
+    }
+
+    .v-crop-tab {
+      padding: 0.35rem 0.85rem;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: 1.5px solid var(--glass-border);
+      background: var(--glass-bg);
+      color: var(--text-muted);
+      transition: all 0.2s;
+    }
+
+    .v-crop-tab:hover {
+      border-color: rgb(var(--color-primary-500));
+      color: rgb(var(--color-primary-600));
+    }
+
+    .v-crop-tab.v-active {
+      background: rgb(var(--color-primary-500));
+      color: #fff;
+      border-color: rgb(var(--color-primary-500));
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .v-crop-detail {
+      display: none;
+    }
+
+    .v-crop-detail.v-show {
+      display: block;
+    }
+
+    .btn-verify {
+      padding: 0.35rem 0.85rem;
+      background: linear-gradient(135deg, rgb(var(--color-primary-400)), rgb(var(--color-primary-600)));
+      color: #fff;
+      font-weight: 600;
+      font-size: 0.78rem;
+      border: none;
+      border-radius: 999px;
+      cursor: pointer;
+      transition: all 0.25s;
+      white-space: nowrap;
+      box-shadow: 0 2px 8px rgba(var(--color-primary-500), 0.3);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn-verify:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 4px 12px rgba(var(--color-primary-500), 0.4);
+    }
+
+    /* 按钮容器，便于垂直居中及移动端适配 */
+    .calc-action {
+      flex: 0 0 auto;
+      display: flex;
+      align-items: center;
+    }
+
+    .calc-action .btn-calc {
+      min-width: 120px;
+      padding: 0.6rem 1.25rem;
+      border-radius: 0.7rem;
+    }
+
+    @media (max-width: 640px) {
+      .input-row {
+        align-items: stretch;
+      }
+
+      .calc-action {
+        width: 100%;
+        margin-top: 0.5rem;
+      }
+
+      .calc-action .btn-calc {
+        width: 100%;
+        padding: 0.75rem;
+        font-size: 1rem;
+      }
+    }
+
+    /* ══ 计算器模式切换选项卡 ══ */
+    .calc-mode-tabs {
+      display: flex;
+      gap: 0.35rem;
+      background: var(--glass-bg);
+      padding: 0.3rem;
+      border-radius: 0.75rem;
+      margin-bottom: 1rem;
+    }
+
+    .calc-mode-tab {
+      flex: 1;
+      padding: 0.55rem 1rem;
+      border-radius: 0.6rem;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all 0.25s;
+      text-align: center;
+    }
+
+    .calc-mode-tab.active {
+      background: rgb(var(--color-primary-500));
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(var(--color-primary-500), 0.25);
+      text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+    }
+
+    .calc-mode-tab:hover:not(.active) {
+      color: rgb(var(--color-primary-600));
+      background: rgba(var(--color-primary-500), 0.08);
+    }
+
+    /* ══ 时间计算器样式 ══ */
+    .tc-search-wrap {
+      position: relative;
+    }
+
+    .tc-dropdown {
+      position: absolute;
+      z-index: 100;
+      left: 0;
+      right: 0;
+      top: 100%;
+      max-height: 240px;
+      overflow-y: auto;
+      background: var(--glass-bg);
+      border: 1.5px solid var(--glass-border);
+      border-radius: 0.6rem;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
+      margin-top: 2px;
+    }
+
+    .tc-dropdown-item {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      font-size: 0.85rem;
+      color: var(--text-main);
+      border-bottom: 1px solid var(--glass-bg);
+      transition: background 0.15s;
+    }
+
+    .tc-dropdown-item:hover {
+      background: rgba(var(--color-primary-100), 0.2);
+    }
+
+    .tc-dropdown-item img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .tc-dropdown-item .tc-dd-level {
+      font-size: 0.7rem;
+      color: var(--text-muted);
+      margin-left: auto;
+    }
+
+    .tc-selected-crop {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      background: rgba(var(--color-primary-100), 0.2);
+      border: 1px solid rgba(var(--color-primary-300), 0.4);
+      border-radius: 0.75rem;
+      padding: 0.75rem 1rem;
+    }
+
+    .tc-selected-crop img {
+      width: 48px;
+      height: 48px;
+      object-fit: contain;
+    }
+
+    .tc-selected-crop .tc-crop-name {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: rgb(var(--color-primary-800));
+    }
+
+    .tc-selected-crop .tc-crop-meta {
+      font-size: 0.78rem;
+      color: var(--text-muted);
+      margin-top: 0.15rem;
+    }
+
+    .tc-toggle-row {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+      padding: 0.5rem 0;
+    }
+
+    .tc-info-tip {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: 0.5rem;
+      padding: 0;
+      line-height: 1.4;
+      max-height: 0;
+      overflow: hidden;
+      opacity: 0;
+      transition: max-height 0.3s, opacity 0.3s, padding 0.3s;
+    }
+
+    .tc-info-tip.show {
+      max-height: 100px;
+      opacity: 1;
+      padding: 0.4rem 0.7rem;
+    }
+
+    .tc-fert-phases {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+
+    .tc-fert-phase-btn {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.4rem 0.7rem;
+      border-radius: 0.5rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      border: 1.5px solid var(--glass-border);
+      background: var(--glass-bg);
+      color: var(--text-muted);
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .tc-fert-phase-btn img {
+      width: 24px;
+      height: 24px;
+      object-fit: contain;
+    }
+
+    .tc-fert-phase-btn.selected {
+      border-color: rgb(var(--color-primary-500));
+      background: rgba(var(--color-primary-500), 0.15);
+      color: rgb(var(--color-primary-700));
+      font-weight: 600;
+    }
+
+    .tc-fert-phase-btn:hover {
+      border-color: rgb(var(--color-primary-300));
+    }
+
+    .tc-land-times {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 0.5rem;
+      padding: 0.75rem;
+      background: var(--glass-bg);
+      border-radius: 0.6rem;
+      border: 1px solid var(--glass-border);
+    }
+
+    .tc-land-time-item {
+      display: flex;
+      align-items: center;
+      gap: 0.35rem;
+    }
+
+    .tc-land-time-item label {
+      font-size: 0.75rem;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    .tc-land-time-item input[type="time"] {
+      padding: 0.35rem 0.5rem;
+      border: 1.5px solid var(--glass-border);
+      border-radius: 0.5rem;
+      font-size: 0.85rem;
+      background: var(--glass-bg);
+    }
+
+    /* 时间结果卡片 */
+    .tc-results {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1rem;
+    }
+
+    @media (min-width: 768px) {
+      .tc-results {
+        grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+      }
+    }
+
+    .tc-land-card {
+      background: var(--glass-bg);
+      border-radius: 1rem;
+      box-shadow: 0 1px 8px rgba(0, 0, 0, 0.05);
+      border: 1px solid var(--glass-border);
+      overflow: hidden;
+    }
+
+    .tc-land-card[data-land="1"] {
+      border-top: 3px solid var(--text-muted);
+    }
+
+    .tc-land-card[data-land="2"] {
+      border-top: 3px solid #ef4444;
+    }
+
+    .tc-land-card[data-land="3"] {
+      border-top: 3px solid var(--text-muted);
+    }
+
+    .tc-land-card[data-land="4"] {
+      border-top: 3px solid #f59e0b;
+    }
+
+    .tc-land-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      font-weight: 700;
+      font-size: 0.88rem;
+      border-bottom: 1px solid var(--glass-bg);
+      flex-wrap: wrap;
+      gap: 0.25rem;
+    }
+
+    .tc-land-header .tc-harvest-time {
+      font-size: 0.82rem;
+      color: rgb(var(--color-primary-500));
+    }
+
+    .tc-season-divider {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      background: var(--glass-bg);
+      font-size: 0.78rem;
+      font-weight: 600;
+      color: #7c3aed;
+    }
+
+    .tc-phase-row {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.45rem 1rem;
+      border-bottom: 1px solid var(--glass-bg);
+      transition: background 0.15s;
+    }
+
+    .tc-phase-row:hover {
+      background: #fafbfc;
+    }
+
+    .tc-phase-row.skipped {
+      opacity: 0.6;
+      background: var(--text-main);
+    }
+
+    .tc-phase-row.mature {
+      background: rgba(var(--color-primary-100), 0.2);
+    }
+
+    .tc-phase-img {
+      width: 36px;
+      height: 36px;
+      object-fit: contain;
+      border-radius: 0.4rem;
+      background: var(--glass-bg);
+      padding: 3px;
+      flex-shrink: 0;
+    }
+
+    .tc-phase-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .tc-phase-name {
+      font-weight: 600;
+      font-size: 0.82rem;
+      color: var(--text-main);
+    }
+
+    .tc-phase-dur {
+      font-size: 0.72rem;
+      color: var(--text-muted);
+    }
+
+    .tc-phase-clock {
+      font-family: 'Courier New', monospace;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-muted);
+      white-space: nowrap;
+    }
+
+    .tc-fert-badge {
+      display: inline-block;
+      font-size: 0.63rem;
+      font-weight: 600;
+      background: var(--glass-bg);
+      color: var(--text-main);
+      padding: 0.08rem 0.35rem;
+      border-radius: 999px;
+      margin-left: 0.2rem;
+    }
+
+    .tc-mature-badge {
+      display: inline-block;
+      font-size: 0.63rem;
+      font-weight: 600;
+      background: rgba(var(--color-primary-200), 0.3);
+      color: rgb(var(--color-primary-600));
+      padding: 0.08rem 0.35rem;
+      border-radius: 999px;
+      margin-left: 0.2rem;
+    }
+
+    @media (max-width: 640px) {
+      .tc-phase-clock {
+        font-size: 0.7rem;
+      }
+
+      .tc-phase-img {
+        width: 30px;
+        height: 30px;
+      }
+
+      .tc-phase-row {
+        padding: 0.4rem 0.75rem;
+        gap: 0.5rem;
+      }
+
+      .tc-land-header {
+        font-size: 0.8rem;
+        padding: 0.6rem 0.75rem;
+      }
+    }
+  </style>
+
+</head>
+
+<body class="bg-transparent text-slate-800 dark:text-slate-200 font-sans">
+
+  <!-- Toast 容器 -->
+  <div id="toast-container"></div>
+
+  <!-- ════ 移动端顶部导航栏 ════ -->
+  <header
+    class="lg:hidden sticky top-0 z-50 bg-slate-900 text-white flex items-center justify-between px-4 h-14 flex-shrink-0 shadow-lg">
+    <button id="menu-btn" onclick="openSidebar()"
+      class="p-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition" aria-label="菜单">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    <a href="./index.html" class="flex items-center gap-2">
+      <span class="text-xl">🌾</span>
+      <span class="font-bold text-sm">QQ经典农场</span>
+    </a>
+    <div class="w-9"></div>
+  </header>
+
+  <!-- 移动端侧边栏遮罩 -->
+  <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/50 hidden" onclick="closeSidebar()"></div>
+
+  <div class="flex lg:h-screen lg:overflow-hidden">
+
+    <!-- ════ 侧边栏 ════ -->
+    <aside id="sidebar"
+      class="fixed lg:static inset-y-0 left-0 z-40 w-72 lg:w-60 bg-slate-900 text-white flex flex-col flex-shrink-0 overflow-y-auto -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+      <!-- Logo -->
+      <div class="px-5 py-5 border-b border-slate-700/50">
+        <a href="./index.html" class="flex items-center gap-3 group">
+          <span class="text-2xl">🌾</span>
+          <div>
+            <div class="font-bold text-base leading-tight grad-text">QQ经典农场</div>
+            <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">道具图鉴</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- 导航 -->
+      <nav class="flex-1 px-3 py-4 space-y-1">
+        <a href="./index.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🏠</span><span class="text-sm font-medium">首页</span>
+        </a>
+        <a href="./calculator.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition active"
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🧮</span><span class="text-sm font-medium">经验计算器</span>
+        </a>
+        <a href="./levels.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">💰</span><span class="text-sm font-medium">氪金计算器</span>
+        </a>
+
+        <div class="pt-3 pb-1 px-3">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            图鉴</div>
+        </div>
+        <a href="javascript:void(0)"
+          class="nav-item frozen-nav flex items-center gap-3 px-3 py-2.5 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg frozen-emoji">📋</span><span class="text-sm font-medium frozen-name">总览</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="./plants.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🌿</span><span class="text-sm font-medium">作物图鉴</span>
+        </a>
+        <a href="./lands.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🏞️</span><span class="text-sm font-medium">土地图鉴</span>
+        </a>
+
+        <!-- 道具分类 -->
+        <div class="pt-3 pb-1 px-3">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+            商店道具</div>
+        </div>
+
+
+        <a href="./items/05.html"
+          class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none">🌱</span>
+          <span class="text-sm truncate">种子</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🔑</span>
+          <span class="text-sm truncate frozen-name">种子解锁卡</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎁</span>
+          <span class="text-sm truncate frozen-name">礼包与宝箱</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎀</span>
+          <span class="text-sm truncate frozen-name">自选礼包</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">💰</span>
+          <span class="text-sm truncate frozen-name">货币与计数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🛠️</span>
+          <span class="text-sm truncate frozen-name">操作工具</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🧪</span>
+          <span class="text-sm truncate frozen-name">化肥道具</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎨</span>
+          <span class="text-sm truncate frozen-name">头像框与装饰</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🐕</span>
+          <span class="text-sm truncate frozen-name">狗与看门犬</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🦴</span>
+          <span class="text-sm truncate frozen-name">狗粮</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">📖</span>
+          <span class="text-sm truncate frozen-name">图鉴点数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🔧</span>
+          <span class="text-sm truncate frozen-name">系统占位</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">⭐</span>
+          <span class="text-sm truncate frozen-name">经验与成长</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">⚡</span>
+          <span class="text-sm truncate frozen-name">活跃点数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">💎</span>
+          <span class="text-sm truncate frozen-name">充值货币</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+      </nav>
+
+
+    </aside>
+
+    <!-- ════ 主内容 ════ -->
+    <main class="flex-1 min-h-screen lg:min-h-0 overflow-y-auto bg-transparent w-full">
+
+
+      <!-- 顶部 Hero -->
+      <!-- <div class="calc-hero">
+  <h1>🧮 经验 & 金币计算器</h1>
+  <p>输入等级智能推荐最优种植方案</p>
+</div> -->
+
+      <div class="px-4 sm:px-8 py-6 space-y-6">
+
+        <!-- ═══ 模式切换选项卡 ═══ -->
+        <div class="calc-mode-tabs">
+          <button class="calc-mode-tab active" onclick="switchCalcMode('exp')">🧮 经验计算器</button>
+          <button class="calc-mode-tab" onclick="switchCalcMode('time')">⏰ 时间计算器</button>
+        </div>
+
+        <div id="expCalcMode">
+          <!-- ═══ 输入面板 ═══ -->
+          <div class="calc-input-panel">
+            <div class="input-row">
+              <div class="input-field">
+                <label>🎯 账号等级 <button class="info-btn" data-info-key="level" aria-label="说明">ⓘ</button></label>
+                <input type="number" id="inputLevel" min="1" max="140" step="1" value="27" placeholder="1~140">
+                <!-- 说明已移至标题后的 ⓘ 弹窗 -->
+              </div>
+              <div class="input-field hidden" style="min-width:100px; flex:0.5;">
+                <label>🏡 土地数量</label>
+                <div class="land-info" id="landInfo">🏡 计算中...</div>
+              </div>
+              <div class="input-field" style="min-width:360px; flex:2;">
+                <label>🌟 土地等级分布（自动计算，可手动调低）<button class="info-btn" data-info-key="land-dist"
+                    aria-label="说明">ⓘ</button></label>
+                <div style="display:flex; gap:0.5rem; flex-wrap:wrap; align-items:center;">
+                  <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span style="font-size:0.75rem; color:#f59e0b; font-weight:600; white-space:nowrap;">🥇金</span>
+                    <input type="number" id="landGold" min="0" max="24" value="0"
+                      style="width:48px; padding:0.35rem 0.4rem; border:1.5px solid var(--text-main); border-radius:0.5rem; font-size:0.85rem; background:var(--text-main); text-align:center;">
+                  </div>
+                  <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span
+                      style="font-size:0.75rem; color:var(--text-muted); font-weight:600; white-space:nowrap;">🥈黑</span>
+                    <input type="number" id="landBlack" min="0" max="24" value="0"
+                      style="width:48px; padding:0.35rem 0.4rem; border:1.5px solid var(--text-muted); border-radius:0.5rem; font-size:0.85rem; background:var(--glass-bg); text-align:center;">
+                  </div>
+                  <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span style="font-size:0.75rem; color:#ef4444; font-weight:600; white-space:nowrap;">🥉红</span>
+                    <input type="number" id="landRed" min="0" max="24" value="0"
+                      style="width:48px; padding:0.35rem 0.4rem; border:1.5px solid var(--text-main); border-radius:0.5rem; font-size:0.85rem; background:var(--text-main); text-align:center;">
+                  </div>
+                  <div style="display:flex; align-items:center; gap:0.25rem;">
+                    <span style="font-size:0.75rem; color:#6b7280; font-weight:600; white-space:nowrap;">🌱普</span>
+                    <input type="number" id="landNormal" min="0" max="24" value="0"
+                      style="width:48px; padding:0.35rem 0.4rem; border:1.5px solid var(--text-main); border-radius:0.5rem; font-size:0.85rem; background:var(--glass-bg); text-align:center;"
+                      readonly>
+                  </div>
+                  <!-- <span id="landDistTotal" style="font-size:0.7rem; color:rgb(var(--color-primary-600)); font-weight:600; white-space:nowrap;">=24块</span> -->
+                </div>
+                <!-- 说明已移至标题后的 ⓘ 弹窗 -->
+              </div>
+              <div class="input-field" style="min-width:180px;">
+                <label>🧪 智能施肥 <button class="info-btn" data-info-key="smart-fert" aria-label="说明">ⓘ</button></label>
+                <div class="fert-toggle">
+                  <input type="checkbox" id="useSmartFert">
+                  <span id="smartFertLabel">已关闭</span>
+                </div>
+                <!-- 说明已移至标题后的 ⓘ 弹窗 -->
+              </div>
+              <div class="input-field" style="min-width:160px;">
+                <label>✨ 理想模式 <button class="info-btn" data-info-key="ideal-mode" aria-label="说明">ⓘ</button></label>
+                <div class="fert-toggle">
+                  <input type="checkbox" id="useIdeal">
+                  <span id="idealLabel">已关闭</span>
+                </div>
+                <!-- 说明已移至标题后的 ⓘ 弹窗 -->
+              </div>
+              <div class="input-field" style="min-width:180px;" id="s2FertField">
+                <label>🌿 普通化肥·第二季 <button class="info-btn" data-info-key="s2-fert" aria-label="说明">ⓘ</button></label>
+                <div class="fert-toggle">
+                  <input type="checkbox" id="useS2Fert" disabled>
+                  <span id="s2FertLabel" style="color:var(--text-muted);">条件未满足</span>
+                </div>
+              </div>
+              <div class="calc-action">
+                <button class="btn-calc" id="btnCalc" onclick="doCalc()">🚀 开始计算</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- ═══ 计算结果区（初始隐藏） ═══ -->
+          <div id="resultArea" class="hidden">
+
+            <!-- 条件摘要 -->
+            <div class="calc-summary" id="calcSummary"></div>
+
+            <!-- 推荐卡 -->
+            <div class="rec-cards" id="recCards" style="grid-template-columns: repeat(2, 1fr);"></div>
+
+            <!-- 金币推荐卡 -->
+            <div style="margin-top: 1rem;">
+              <h3 class="text-base font-bold text-slate-700 dark:text-slate-300 mb-3">💰 金币效率推荐</h3>
+              <div class="rec-cards" id="recGoldCards" style="grid-template-columns: repeat(2, 1fr);"></div>
+            </div>
+
+            <!-- Top 5 进度对比 -->
+            <div class="progress-section">
+              <div class="rec-card" style="border-left: none;">
+                <div class="progress-title" id="progressTitle">📊 效率 Top 5</div>
+                <div id="progressBars"></div>
+              </div>
+            </div>
+
+            <!-- 排行榜 -->
+            <div style="margin-top: 1.5rem;">
+              <h3 class="text-base font-bold text-slate-700 dark:text-slate-300 mb-3">🏆 排行榜</h3>
+              <div class="rank-tabs">
+                <button class="rank-tab active" id="tabNoFert" onclick="switchTab('noFert', this)">🌾 经验·不施肥</button>
+                <button class="rank-tab" id="tabFert" onclick="switchTab('fert', this)">🧪 经验·施肥</button>
+                <button class="rank-tab" id="tabGoldNoFert" onclick="switchTab('goldNoFert', this)">💰 金币·不施肥</button>
+                <button class="rank-tab" id="tabGoldFert" onclick="switchTab('goldFert', this)">🪙 金币·施肥</button>
+              </div>
+              <div class="table-wrap">
+                <table class="rank-table" id="rankTable">
+                  <thead id="rankHead">
+                    <tr>
+                      <th style="width:45px;">排名</th>
+                      <th>作物</th>
+                      <th>等级</th>
+                      <th>生长时间</th>
+                      <th>每小时经验</th>
+                      <th style="width:90px;">效率</th>
+                    </tr>
+                  </thead>
+                  <tbody id="rankBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- 验算过程弹窗 -->
+          <div class="verify-overlay" id="verifyOverlay" onclick="if(event.target===this)closeVerify()">
+            <div class="verify-panel" id="verifyPanel">
+              <button class="verify-close" onclick="closeVerify()">✕</button>
+              <div id="verifyContent"></div>
+            </div>
+          </div>
+
+          <!-- 等待计算占位 -->
+          <div id="placeholder" class="text-center py-16">
+            <div class="text-5xl mb-4">🌱</div>
+            <h3 class="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">🌾 等待计算</h3>
+            <p class="text-sm text-slate-400 dark:text-slate-500">输入你的等级，点击「开始计算」查看最优种植方案</p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+              <span class="bg-transparent px-3 py-1 rounded-full">🎯 支持 Lv1~140</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">🧪 可对比施肥效率</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">📊 自动推荐最优作物</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">🏡 自动计算土地数量</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">💰 金币效率对比</span>
+            </div>
+          </div>
+
+        </div><!-- /expCalcMode -->
+
+        <!-- ═══ 时间计算器 ═══ -->
+        <div id="timeCalcMode" class="hidden">
+
+          <!-- 输入面板 -->
+          <div class="calc-input-panel" style="margin-bottom:1rem;">
+            <div class="input-row" style="margin-bottom:0.75rem;">
+              <div class="input-field" style="min-width:100px; flex:0.6;">
+                <label>🎯 等级</label>
+                <input type="number" id="tcLevel" min="16" max="100" step="1" value="27" placeholder="16~100">
+              </div>
+              <div class="input-field tc-search-wrap" style="min-width:200px; flex:1.5;">
+                <label>🌱 作物名称（模糊搜索）</label>
+                <input type="text" id="tcCropSearch" placeholder="输入作物名搜索..." autocomplete="off">
+                <div id="tcDropdown" class="tc-dropdown hidden"></div>
+              </div>
+              <div class="input-field" style="min-width:120px; flex:0.6;">
+                <label>🕐 种植时间</label>
+                <input type="time" id="tcPlantTime" value="08:00"
+                  style="width:100%; padding:0.55rem 0.75rem; border:1.5px solid var(--glass-border); border-radius:0.6rem; font-size:0.95rem; background:var(--glass-bg);">
+              </div>
+            </div>
+
+            <!-- 时间一致 & 化肥 toggle -->
+            <div class="tc-toggle-row">
+              <div class="fert-toggle">
+                <input type="checkbox" id="tcSameTime" checked>
+                <span id="tcSameTimeLabel" style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">⏱️
+                  时间一致</span>
+              </div>
+              <button class="info-btn"
+                onclick="event.stopPropagation(); document.getElementById('tcSameTimeInfo').classList.toggle('show')"
+                aria-label="说明">ⓘ</button>
+
+              <div class="fert-toggle" style="margin-left:1rem;">
+                <input type="checkbox" id="tcUseFert">
+                <span id="tcUseFertLabel" style="font-size:0.85rem; color:var(--text-muted); font-weight:500;">🧪
+                  使用化肥（第一季）</span>
+              </div>
+              <button class="info-btn"
+                onclick="event.stopPropagation(); document.getElementById('tcFertInfo').classList.toggle('show')"
+                aria-label="说明">ⓘ</button>
+
+              <div class="fert-toggle" style="margin-left:1rem;" id="tcS2FertToggleWrap" hidden>
+                <input type="checkbox" id="tcUseFertS2">
+                <span id="tcUseFertS2Label" style="font-size:0.85rem; color:var(--text-main); font-weight:500;">🔄
+                  第二季化肥</span>
+              </div>
+              <button class="info-btn" id="tcS2FertInfoBtn" hidden
+                onclick="event.stopPropagation(); document.getElementById('tcS2FertInfo').classList.toggle('show')"
+                aria-label="说明">ⓘ</button>
+            </div>
+            <div id="tcSameTimeInfo" class="tc-info-tip">
+              ⏱️ 启用「时间一致」后，所有土地统一使用上方的种植时间。关闭后可为每种土地类型分别输入不同的种植时间。
+            </div>
+            <div id="tcS2FertInfo" class="tc-info-tip">
+              🔄 两季作物第二季也可以使用化肥。第二季走最后两个成长阶段，可选择跳过其中的阶段来加速。
+            </div>
+            <div id="tcFertInfo" class="tc-info-tip">
+              🧪 启用后可选择跳过的成长阶段（化肥效果），默认自动选择最长阶段，最多可同时跳过2个阶段。
+            </div>
+
+            <!-- 不同土地时间输入 -->
+            <div id="tcLandTimes" class="tc-land-times hidden">
+              <div class="tc-land-time-item">
+                <label style="color:var(--text-muted);">🌱 普通/红</label>
+                <input type="time" id="tcTimeLand1" value="08:00">
+              </div>
+              <div class="tc-land-time-item">
+                <label style="color:var(--text-muted);">🥈 黑土地</label>
+                <input type="time" id="tcTimeLand3" value="08:00">
+              </div>
+              <div class="tc-land-time-item">
+                <label style="color:#f59e0b;">🥇 金土地</label>
+                <input type="time" id="tcTimeLand4" value="08:00">
+              </div>
+            </div>
+
+            <!-- 化肥阶段选择（第一季） -->
+            <div id="tcFertPanel" class="hidden" style="margin-top:0.75rem;">
+              <div style="font-size:0.8rem; font-weight:600; color:var(--text-muted); margin-bottom:0.35rem;">
+                🧪 第一季：选择化肥跳过的阶段（最多2个，默认选最长时间的阶段）
+              </div>
+              <div id="tcFertPhases" class="tc-fert-phases"></div>
+            </div>
+
+            <!-- 化肥阶段选择（第二季） -->
+            <div id="tcFertPanelS2" class="hidden" style="margin-top:0.5rem;">
+              <div style="font-size:0.8rem; font-weight:600; color:var(--text-main); margin-bottom:0.35rem;">
+                🔄 第二季：选择化肥跳过的阶段（最多2个，默认选最长时间的阶段）
+              </div>
+              <div id="tcFertPhasesS2" class="tc-fert-phases"></div>
+            </div>
+
+            <!-- 已选中的作物展示 -->
+            <div id="tcSelectedCrop" class="tc-selected-crop hidden" style="margin-top:0.75rem;">
+              <img id="tcCropImg" src="" alt="">
+              <div>
+                <div class="tc-crop-name" id="tcCropName"></div>
+                <div class="tc-crop-meta" id="tcCropMeta"></div>
+              </div>
+            </div>
+
+            <!-- 查询按钮 -->
+            <div class="calc-action" style="margin-top:0.75rem;">
+              <button class="btn-calc" id="btnTimeCalc" onclick="doTimeCalc()">🔍 查询收获时间</button>
+            </div>
+          </div>
+
+          <!-- 时间计算结果区 -->
+          <div id="tcResultArea" class="hidden"></div>
+
+          <!-- 等待计算占位 -->
+          <div id="tcPlaceholder" class="text-center py-16">
+            <div class="text-5xl mb-4">⏰</div>
+            <h3 class="text-lg font-bold text-slate-600 dark:text-slate-400 mb-2">⏰ 时间计算器</h3>
+            <p class="text-sm text-slate-400 dark:text-slate-500">输入等级或作物名称，查询不同土地上的收获时间</p>
+            <div class="mt-4 flex flex-wrap justify-center gap-2 text-xs text-slate-400 dark:text-slate-500">
+              <span class="bg-transparent px-3 py-1 rounded-full">🎯 自动匹配作物</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">🌱 模糊搜索作物</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">🧪 化肥跳阶计算</span>
+              <span class="bg-transparent px-3 py-1 rounded-full">🔄 两季作物支持</span>
+            </div>
+          </div>
+
+        </div><!-- /timeCalcMode -->
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    // Toast 提示
+    function showFrozenToast() {
+      var container = document.getElementById('toast-container');
+      if (container.children.length > 0) return;
+      var toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      toast.innerHTML = '🚧 整改中，暂停访问';
+      container.appendChild(toast);
+      setTimeout(function () { toast.remove(); }, 2000);
+    }
+
+    // 侧边栏激活状态
+    document.querySelectorAll('.nav-item').forEach(el => {
+      const href = el.getAttribute('href');
+      if (!href) return;
+      const path = window.location.pathname;
+      if ((href === '/' && path === '/') ||
+        (href !== '/' && path.startsWith(href))) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    });
+
+    // 移动端侧边栏
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    // 大屏时确保侧边栏可见
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        document.getElementById('sidebar-backdrop').classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+
+
+  <script>
+    const IMG_BASE = './images/';
+    let calcResult = null;
+    let currentTab = 'noFert';
+    let autoLandLevel = true; // 是否自动跟随等级选土地分布
+
+    // 土地等级名称映射
+    const LAND_LEVEL_NAMES = { 1: '普通土地', 2: '红土地', 3: '黑土地', 4: '金土地' };
+    const LAND_LEVEL_EMOJI = { 4: '🥇', 3: '🥈', 2: '🥉', 1: '🌱' };
+
+    // ── DOM 引用 ──
+    const levelInput = document.getElementById('inputLevel');
+    const landInfo = document.getElementById('landInfo');
+    const landGoldInput = document.getElementById('landGold');
+    const landBlackInput = document.getElementById('landBlack');
+    const landRedInput = document.getElementById('landRed');
+    const landNormalInput = document.getElementById('landNormal');
+    const landDistTotal = document.getElementById('landDistTotal');
+    const smartFertToggle = document.getElementById('useSmartFert');
+    const smartFertLabel = document.getElementById('smartFertLabel');
+    const idealToggle = document.getElementById('useIdeal');
+    const idealLabel = document.getElementById('idealLabel');
+    const s2FertToggle = document.getElementById('useS2Fert');
+    const s2FertLabel = document.getElementById('s2FertLabel');
+
+    // ── 土地分布状态 ──
+    let landDistData = { lands: 6, max4: 0, max3: 0, max2: 0, distribution: { 4: 0, 3: 0, 2: 0, 1: 6 } };
+
+    // ── 等级 → 更新土地分布 ──
+    async function updateLandCount() {
+      const lv = Math.max(1, Math.min(140, parseInt(levelInput.value) || 1));
+      try {
+        const resp = await fetch(`/api/lands_for_level?level=${lv}`);
+        const data = await resp.json();
+        landDistData = data;
+        landInfo.textContent = `🏡 ${data.lands} 块地`;
+        // 自动填充默认最大分布
+        if (autoLandLevel) {
+          const dist = data.distribution || {};
+          landGoldInput.value = dist['4'] || 0;
+          landBlackInput.value = dist['3'] || 0;
+          landRedInput.value = dist['2'] || 0;
+          landNormalInput.value = dist['1'] || 0;
+          // 设置输入框的绝对理论上限为当前等级总土地数，让用户可以模拟极限情况
+          landGoldInput.max = data.lands;
+          landBlackInput.max = data.lands;
+          landRedInput.max = data.lands;
+          updateDistTotal();
+        }
+      } catch (e) {
+        landInfo.textContent = '🏡 --';
+      }
+    }
+
+    // 更新总数显示
+    function updateDistTotal() {
+      const g = parseInt(landGoldInput.value) || 0;
+      const b = parseInt(landBlackInput.value) || 0;
+      const r = parseInt(landRedInput.value) || 0;
+      const n = parseInt(landNormalInput.value) || 0;
+      const total = g + b + r + n;
+      if (landDistTotal) {
+        landDistTotal.textContent = `=${total}块`;
+        landDistTotal.style.color = total === landDistData.lands ? 'rgb(var(--color-primary-600))' : '#ef4444';
+      }
+    }
+
+    // ── 级联调整：允许玩家自由模拟，不受当前等级最大值限制，最多不超过总土地数 ──
+    let autoCalcTimer = null;
+    let pendingCalc = false;
+    function autoRecalc() {
+      if (calcResult && document.getElementById('resultArea').classList.contains('hidden') === false) {
+        clearTimeout(autoCalcTimer);
+        autoCalcTimer = setTimeout(() => {
+          const btn = document.getElementById('btnCalc');
+          if (btn.disabled) {
+            pendingCalc = true;
+          } else {
+            doCalc();
+          }
+        }, 300);
+      }
+    }
+
+    function onGoldChange() {
+      autoLandLevel = false;
+      const total = landDistData.lands;
+      let g = Math.max(0, Math.min(total, parseInt(landGoldInput.value) || 0));
+      landGoldInput.value = g;
+
+      let bMax = total - g;
+      let b = Math.max(0, Math.min(bMax, parseInt(landBlackInput.value) || 0));
+      landBlackInput.value = b;
+
+      let rMax = total - g - b;
+      let r = Math.max(0, Math.min(rMax, parseInt(landRedInput.value) || 0));
+      landRedInput.value = r;
+
+      let n = Math.max(0, total - g - b - r);
+      landNormalInput.value = n;
+      updateDistTotal();
+      autoRecalc();
+    }
+
+    function onBlackChange() {
+      autoLandLevel = false;
+      const total = landDistData.lands;
+      const g = parseInt(landGoldInput.value) || 0;
+
+      let bMax = total - g;
+      let b = Math.max(0, Math.min(bMax, parseInt(landBlackInput.value) || 0));
+      landBlackInput.value = b;
+
+      let rMax = total - g - b;
+      let r = Math.max(0, Math.min(rMax, parseInt(landRedInput.value) || 0));
+      landRedInput.value = r;
+
+      let n = Math.max(0, total - g - b - r);
+      landNormalInput.value = n;
+      updateDistTotal();
+      autoRecalc();
+    }
+
+    function onRedChange() {
+      autoLandLevel = false;
+      const total = landDistData.lands;
+      const g = parseInt(landGoldInput.value) || 0;
+      const b = parseInt(landBlackInput.value) || 0;
+
+      let rMax = total - g - b;
+      let r = Math.max(0, Math.min(rMax, parseInt(landRedInput.value) || 0));
+      landRedInput.value = r;
+
+      let n = Math.max(0, total - g - b - r);
+      landNormalInput.value = n;
+      updateDistTotal();
+      autoRecalc();
+    }
+
+    levelInput.addEventListener('input', async () => {
+      autoLandLevel = true;
+      updateS2FertState();
+      await updateLandCount();
+      autoRecalc();
+    });
+    landGoldInput.addEventListener('input', onGoldChange);
+    landBlackInput.addEventListener('input', onBlackChange);
+    landRedInput.addEventListener('input', onRedChange);
+    updateLandCount();
+
+    smartFertToggle.addEventListener('change', () => {
+      smartFertLabel.textContent = smartFertToggle.checked ? '已开启' : '已关闭';
+      updateS2FertState();
+      autoRecalc();
+    });
+    idealToggle.addEventListener('change', () => {
+      idealLabel.textContent = idealToggle.checked ? '已开启' : '已关闭';
+      autoRecalc();
+    });
+
+    // ── 二季施肥按钮启用/禁用逻辑 ──
+    function updateS2FertState() {
+      const lv = parseInt(levelInput.value) || 1;
+      const canEnable = lv > 60 && smartFertToggle.checked;
+      s2FertToggle.disabled = !canEnable;
+      if (!canEnable) {
+        s2FertToggle.checked = false;
+        s2FertLabel.textContent = '条件未满足';
+        s2FertLabel.style.color = 'var(--text-muted)';
+      } else {
+        s2FertLabel.textContent = s2FertToggle.checked ? '已开启' : '已关闭';
+        s2FertLabel.style.color = '';
+      }
+    }
+
+    s2FertToggle.addEventListener('change', () => {
+      s2FertLabel.textContent = s2FertToggle.checked ? '已开启' : '已关闭';
+      s2FertLabel.style.color = '';
+      autoRecalc();
+    });
+
+    // ── 获取作物图片 ──
+    function cropImg(row, size) {
+      size = size || 24;
+      if (row.thumb) {
+        return `<img src="${IMG_BASE}${row.thumb}" alt="${row.name}" style="width:${size}px;height:${size}px;object-fit:contain;" onerror="this.style.display='none'">`;
+      }
+      return '🌱';
+    }
+
+    // ── 施肥阶段提示 ──
+    function fertPhaseHint(row) {
+      // 智能施肥模式下，显示建议施肥阶段
+      if (calcResult && calcResult.smartFert && row.fertBestPhaseNames && row.fertBestPhaseNames.length > 0) {
+        const orders = row.fertBestPhaseOrders;
+        const names = row.fertBestPhaseNames;
+        if (row.fertPhasesAllSame) {
+          return `<div style="font-size:0.7rem;color:rgb(var(--color-primary-600));margin-top:0.4rem;background:rgba(var(--color-primary-100), 0.2);padding:0.3rem 0.6rem;border-radius:0.4rem;border:1px solid rgba(var(--color-primary-300), 0.4);">✅ 各阶段时长相同，施肥任意阶段效果一致（${formatSec(row.fertBestPhaseSec)}）</div>`;
+        }
+        let phaseText;
+        if (names.length === 1) {
+          phaseText = `第${orders[0]}阶段「${names[0]}」`;
+        } else {
+          phaseText = names.map((n, i) => `第${orders[i]}阶段「${n}」`).join(' 或 ');
+        }
+        return `<div style="font-size:0.7rem;color:#f59e0b;margin-top:0.4rem;background:var(--text-main);padding:0.3rem 0.6rem;border-radius:0.4rem;border:1px solid var(--text-main);">💡 建议将化肥用在${phaseText}（${formatSec(row.fertBestPhaseSec)}）</div>`;
+      }
+      return '';
+    }
+    function fertPhaseHintShort(row) {
+      if (calcResult && calcResult.smartFert && row.fertBestPhaseNames && row.fertBestPhaseNames.length > 0) {
+        if (row.fertPhasesAllSame) {
+          return `<div style="font-size:0.6rem;color:rgb(var(--color-primary-600));">✅ 任意阶段</div>`;
+        }
+        const names = row.fertBestPhaseNames;
+        const text = names.length === 1 ? `第${row.fertBestPhaseOrders[0]}阶段「${names[0]}」` : names.map((n, i) => `「${n}」`).join('/');
+        return `<div style="font-size:0.6rem;color:#f59e0b;">💡施肥${text}</div>`;
+      }
+      return '';
+    }
+
+    function formatSec(sec) {
+      if (sec < 60) return sec + '秒';
+      const m = Math.floor(sec / 60);
+      if (m < 60) return m + '分钟';
+      const h = Math.floor(m / 60);
+      const mm = m % 60;
+      return mm > 0 ? h + '小时' + mm + '分' : h + '小时';
+    }
+
+    // ── 生成土地分布摘要文本 ──
+    function landDistSummaryHtml(r) {
+      const dist = r.landDist || {};
+      const parts = [];
+      if (dist['4'] > 0) parts.push(`<span style="color:#f59e0b;font-weight:600;">🥇金×${dist['4']}</span>`);
+      if (dist['3'] > 0) parts.push(`<span style="color:var(--text-muted);font-weight:600;">🥈黑×${dist['3']}</span>`);
+      if (dist['2'] > 0) parts.push(`<span style="color:#ef4444;font-weight:600;">🥉红×${dist['2']}</span>`);
+      if (dist['1'] > 0) parts.push(`<span style="color:#6b7280;font-weight:600;">🌱普×${dist['1']}</span>`);
+      return parts.join(' + ') || '无';
+    }
+
+    // ── 计算 ──
+    async function doCalc() {
+      const btn = document.getElementById('btnCalc');
+      btn.innerHTML = '<span class="spinner"></span> 计算中';
+      btn.disabled = true;
+
+      const lv = Math.max(1, Math.min(140, parseInt(levelInput.value) || 27));
+      const smart = smartFertToggle.checked ? 1 : 0;
+      const ideal = idealToggle.checked ? 1 : 0;
+      const s2fert = s2FertToggle.checked ? 1 : 0;
+      const g = parseInt(landGoldInput.value) || 0;
+      const b = parseInt(landBlackInput.value) || 0;
+      const r = parseInt(landRedInput.value) || 0;
+      const n = parseInt(landNormalInput.value) || 0;
+
+      try {
+        const resp = await fetch(`/api/calculator?level=${lv}&fert=1&ideal=${ideal}&smart=${smart}&gold=${g}&black=${b}&red=${r}&normal=${n}&s2fert=${s2fert}`);
+        calcResult = await resp.json();
+        renderResult();
+      } catch (e) {
+        console.error(e);
+        alert('计算失败，请重试');
+      } finally {
+        btn.innerHTML = '🚀 开始计算';
+        btn.disabled = false;
+        if (pendingCalc) {
+          pendingCalc = false;
+          autoRecalc();
+        }
+      }
+    }
+
+    function renderResult() {
+      const r = calcResult;
+      if (!r || r.totalCrops === 0) return;
+
+      document.getElementById('placeholder').classList.add('hidden');
+      document.getElementById('resultArea').classList.remove('hidden');
+
+      // 摘要
+      const summary = document.getElementById('calcSummary');
+      const modeText = r.ideal ? '✨ 理想模式（仅计纯生长时间）' : `⚙️ 实际模式（种植 ${r.plantSecNoFert}s + 施肥操作 ${r.fertActionSec}s）`;
+      const smartText = r.smartFert ? '🧠 智能施肥（选最长阶段）' : '🧪 普通施肥（第一阶段）';
+      const s2FertText = r.secondSeasonFert ? ' + <span style="color:#f59e0b;font-weight:600;">🌿 二季普通化肥</span>' : '';
+      const landText = `🌟 ${landDistSummaryHtml(r)}`;
+      summary.innerHTML = `
+    <span class="sum-item">🎯 Lv${r.level}</span>
+    <span class="sum-item">🏡 ${r.lands} 块地</span>
+    <span class="sum-item">${landText}</span>
+    <span class="sum-item">${smartText}${s2FertText}</span>
+    <span class="sum-item">${modeText}</span>
+    <span class="sum-item">📊 共 ${r.totalCrops} 种可用作物</span>
+    <span class="sum-item" style="margin-left:auto;"><button class="btn-verify" onclick="openVerify()">📝 查看验算过程</button></span>
+  `;
+
+      // 推荐卡
+      const cards = document.getElementById('recCards');
+      let html = '';
+      if (r.bestNoFert) {
+        const b = r.bestNoFert;
+        const tsBadge = b.twoSeasonDiff ? ' <span style="font-size:0.6rem;color:var(--text-main);background:var(--glass-bg);padding:0.1rem 0.35rem;border-radius:999px;font-weight:600;">🔄两季</span>' : '';
+        const growDisplay = b.twoSeasonDiff ? b.fullCycleGrowStr : b.growTimeStr;
+        const twoSeasonNote = b.twoSeasonDiff ? `<div style="font-size:0.7rem;color:var(--text-main);margin-top:0.4rem;background:var(--glass-bg);padding:0.3rem 0.6rem;border-radius:0.4rem;border:1px solid #e9d5ff;">🔄 两季作物：一季 ${b.growTimeStr} + 二季 ${b.secondSeasonGrowStr} = ${b.fullCycleGrowStr}，收获×2。未考虑土地时间缩减（下版本优化）</div>` : '';
+        html += `
+    <div class="rec-card card-no-fert">
+      <div class="card-label">🌾 不施肥推荐</div>
+      <div class="card-name">${cropImg(b, 32)} ${b.name}${tsBadge}</div>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="stat-label">每小时经验</div><div class="stat-val">${b.expPerHourNoFert.toFixed(2)}</div></div>
+        <div class="stat-item"><div class="stat-label">每日经验</div><div class="stat-val">${Math.round(b.expPerDayNoFert).toLocaleString()}</div></div>
+        <div class="stat-item"><div class="stat-label">生长时间</div><div class="stat-val">${growDisplay}</div></div>
+        <div class="stat-item"><div class="stat-label">需要等级</div><div class="stat-val">Lv ${b.requiredLevel}</div></div>
+      </div>
+      ${twoSeasonNote}
+    </div>`;
+      }
+      if (r.bestFert) {
+        const b = r.bestFert;
+        const tsBadge = b.twoSeasonDiff ? ' <span style="font-size:0.6rem;color:var(--text-main);background:var(--glass-bg);padding:0.1rem 0.35rem;border-radius:999px;font-weight:600;">🔄两季</span>' : '';
+        const fertGrowDisplay = b.twoSeasonDiff ? b.fullCycleGrowFertWithS2Str : b.growTimeFertStr;
+        const s2Note = b.secondSeasonFertActive
+          ? `<div style="font-size:0.7rem;color:#f59e0b;margin-top:0.25rem;background:var(--text-main);padding:0.3rem 0.6rem;border-radius:0.4rem;border:1px solid var(--text-main);">🌿 二季也用普通化肥：跳过最长阶段，二季仅需 ${b.secondSeasonGrowFertStr}</div>`
+          : '';
+        const twoSeasonNote = b.twoSeasonDiff ? `<div style="font-size:0.7rem;color:var(--text-main);margin-top:0.4rem;background:var(--glass-bg);padding:0.3rem 0.6rem;border-radius:0.4rem;border:1px solid #e9d5ff;">🔄 两季作物：一季施肥后 ${b.growTimeFertStr} + 二季${b.secondSeasonFertActive ? '施肥后 ' + b.secondSeasonGrowFertStr : '不施肥 ' + b.secondSeasonGrowStr} = ${b.fullCycleGrowFertWithS2Str}，收获×2。未考虑土地时间缩减（下版本优化）</div>${s2Note}` : '';
+        html += `
+    <div class="rec-card card-fert">
+      <div class="card-label">🧪 施肥推荐</div>
+      <div class="card-name">${cropImg(b, 32)} ${b.name}${tsBadge}</div>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="stat-label">每小时经验</div><div class="stat-val">${b.expPerHourFert.toFixed(2)}</div></div>
+        <div class="stat-item"><div class="stat-label">每日经验</div><div class="stat-val">${Math.round(b.expPerDayFert).toLocaleString()}</div></div>
+        <div class="stat-item"><div class="stat-label">肥后生长</div><div class="stat-val">${fertGrowDisplay}</div></div>
+        <div class="stat-item"><div class="stat-label">提升比例</div><div class="stat-val highlight">+${b.gainPercent.toFixed(2)}%</div></div>
+      </div>
+      ${fertPhaseHint(b)}
+      ${twoSeasonNote}
+    </div>`;
+      }
+      cards.innerHTML = html;
+
+      // 金币推荐卡
+      const goldCards = document.getElementById('recGoldCards');
+      let goldHtml = '';
+      if (r.bestGoldNoFert) {
+        const b = r.bestGoldNoFert;
+        goldHtml += `
+    <div class="rec-card card-no-fert">
+      <div class="card-label">🌾 不施肥·金币推荐</div>
+      <div class="card-name">${cropImg(b, 32)} ${b.name}</div>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="stat-label">每小时金币</div><div class="stat-val" style="color:#f59e0b;">${b.goldPerHourNoFert.toFixed(2)}</div></div>
+        <div class="stat-item"><div class="stat-label">每日金币</div><div class="stat-val" style="color:#f59e0b;">${Math.round(b.goldPerDayNoFert).toLocaleString()}</div></div>
+        <div class="stat-item"><div class="stat-label">单果售价</div><div class="stat-val">${b.fruitSellPrice}</div></div>
+        <div class="stat-item"><div class="stat-label">每季产量</div><div class="stat-val">${b.effectiveFruitCount}${b.effectiveFruitCount !== b.fruitCount ? ' <span style="font-size:0.65rem;color:rgb(var(--color-primary-600));">(+' + (b.effectiveFruitCount - b.fruitCount) + ')</span>' : ''}</div></div>
+      </div>
+    </div>`;
+      }
+      if (r.bestGoldFert) {
+        const b = r.bestGoldFert;
+        goldHtml += `
+    <div class="rec-card card-fert">
+      <div class="card-label">🧪 施肥·金币推荐</div>
+      <div class="card-name">${cropImg(b, 32)} ${b.name}</div>
+      <div class="stat-grid">
+        <div class="stat-item"><div class="stat-label">每小时金币</div><div class="stat-val" style="color:#f59e0b;">${b.goldPerHourFert.toFixed(2)}</div></div>
+        <div class="stat-item"><div class="stat-label">每日金币</div><div class="stat-val" style="color:#f59e0b;">${Math.round(b.goldPerDayFert).toLocaleString()}</div></div>
+        <div class="stat-item"><div class="stat-label">单果售价</div><div class="stat-val">${b.fruitSellPrice}</div></div>
+        <div class="stat-item"><div class="stat-label">提升比例</div><div class="stat-val highlight">+${b.goldGainPercent.toFixed(2)}%</div></div>
+      </div>
+      ${fertPhaseHint(b)}
+    </div>`;
+      }
+      if (!goldHtml) { goldHtml = '<div class="text-sm text-slate-400 dark:text-slate-500">暂无可售果实的作物</div>'; }
+      goldCards.innerHTML = goldHtml;
+
+      // 进度条 Top 5
+      renderProgress();
+
+      // 排行榜
+      renderRanking();
+    }
+
+    function renderProgress() {
+      const r = calcResult;
+      const container = document.getElementById('progressBars');
+      const colors = ['fill-green', 'fill-orange', 'fill-purple', 'fill-blue', 'fill-pink'];
+
+      function buildBars(list, key, title) {
+        const top5 = list.slice(0, 5);
+        if (!top5.length) return '';
+        const maxVal = top5[0][key];
+        if (maxVal <= 0) return '';
+        const unit = key.includes('gold') || key.includes('Gold') ? '💰/h' : '/h';
+        let html = `<div style="font-size:0.75rem;font-weight:600;color:var(--text-muted);margin:0.6rem 0 0.35rem;">${title}</div>`;
+        top5.forEach((row, i) => {
+          const val = row[key];
+          const pct = (val / maxVal * 100).toFixed(1);
+          html += `
+      <div class="progress-row">
+        <span class="progress-label">${cropImg(row, 18)} ${row.name}</span>
+        <div class="progress-track">
+          <div class="progress-fill ${colors[i]}" style="width:${pct}%">${pct}%</div>
+        </div>
+        <span class="progress-value">${val.toFixed(2)} ${unit}</span>
+      </div>`;
+        });
+        return html;
+      }
+
+      let html = buildBars(r.rowsNoFert, 'expPerHourNoFert', '🌾 经验·不施肥 Top 5');
+      html += `<div style="height:0.75rem;"></div>`;
+      html += buildBars(r.rowsFert, 'expPerHourFert', '🧪 经验·施肥 Top 5');
+      html += `<div style="height:0.75rem;"></div>`;
+      html += buildBars(r.rowsGoldNoFert, 'goldPerHourNoFert', '💰 金币·不施肥 Top 5');
+      html += `<div style="height:0.75rem;"></div>`;
+      html += buildBars(r.rowsGoldFert, 'goldPerHourFert', '💎 金币·施肥 Top 5');
+      container.innerHTML = html;
+    }
+
+    function switchTab(tab, btn) {
+      currentTab = tab;
+      document.querySelectorAll('.rank-tab').forEach(t => t.classList.remove('active'));
+      btn.classList.add('active');
+      renderRanking();
+    }
+
+    function renderRanking() {
+      const r = calcResult;
+      if (!r) return;
+      const body = document.getElementById('rankBody');
+      const head = document.getElementById('rankHead');
+      const isGold = currentTab.startsWith('gold');
+      const isFert = currentTab === 'fert' || currentTab === 'goldFert';
+
+      let list, key, growKey, headerLabel;
+      if (currentTab === 'fert') {
+        list = r.rowsFert; key = 'expPerHourFert'; growKey = 'growTimeFertStr'; headerLabel = '每小时经验';
+      } else if (currentTab === 'noFert') {
+        list = r.rowsNoFert; key = 'expPerHourNoFert'; growKey = 'growTimeStr'; headerLabel = '每小时经验';
+      } else if (currentTab === 'goldFert') {
+        list = r.rowsGoldFert; key = 'goldPerHourFert'; growKey = 'growTimeFertStr'; headerLabel = '每小时金币';
+      } else {
+        list = r.rowsGoldNoFert; key = 'goldPerHourNoFert'; growKey = 'growTimeStr'; headerLabel = '每小时金币';
+      }
+
+      // 更新表头
+      head.innerHTML = `<tr>
+    <th style="width:45px;">排名</th>
+    <th>作物</th>
+    <th>等级</th>
+    <th>生长时间</th>
+    <th>${isGold ? '单果售价' : ''}</th>
+    <th>${isGold ? '每季产量' : ''}</th>
+    <th>${headerLabel}</th>
+    <th style="width:90px;">效率</th>
+  </tr>`;
+
+      const top20 = list.slice(0, 20);
+      if (!top20.length) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">没有数据</td></tr>'; return; }
+      const maxVal = top20[0][key];
+      if (maxVal <= 0) { body.innerHTML = '<tr><td colspan="8" style="text-align:center;color:var(--text-muted);padding:2rem;">没有数据</td></tr>'; return; }
+      const medals = ['🥇', '🥈', '🥉'];
+
+      let html = '';
+      top20.forEach((row, i) => {
+        const rank = i + 1;
+        const medal = medals[i] || rank;
+        const val = row[key];
+        const pct = (val / maxVal * 100).toFixed(1);
+        const valColor = isGold ? 'color:#f59e0b;' : '';
+        const fertHint = (isFert && calcResult && calcResult.smartFert) ? fertPhaseHintShort(row) : '';
+        const tsBadge2 = row.twoSeasonDiff ? ' <span style="font-size:0.55rem;color:var(--text-main);background:var(--glass-bg);padding:0.05rem 0.25rem;border-radius:999px;">🔄两季</span>' : '';
+        const growTimeCell = row.twoSeasonDiff
+          ? (isFert ? row.fullCycleGrowFertStr : row.fullCycleGrowStr) + tsBadge2
+          : row[growKey];
+        html += `
+    <tr>
+      <td><span class="rank-medal">${medal}</span></td>
+      <td><span class="rank-name-cell">${cropImg(row, 22)} ${row.name}${fertHint}</span></td>
+      <td>Lv${row.requiredLevel}</td>
+      <td>${growTimeCell}</td>
+      <td>${isGold ? row.fruitSellPrice : ''}</td>
+      <td>${isGold ? row.effectiveFruitCount : ''}</td>
+      <td style="font-weight:600;${valColor}">${val.toFixed(2)}</td>
+      <td><div class="rank-bar-wrap"><div class="rank-bar-fill" style="width:${pct}%${isGold ? ';background:linear-gradient(90deg,var(--text-main),#f59e0b)' : ''}"></div></div></td>
+    </tr>`;
+      });
+      body.innerHTML = html;
+    }
+
+    // ── 验算过程 ──
+    const LAND_NAMES = { 4: '金土地', 3: '黑土地', 2: '红土地', 1: '普通土地' };
+    const LAND_EMOJI = { 4: '🥇', 3: '🥈', 2: '🥉', 1: '🌱' };
+    const LAND_BONUSES = {
+      1: { 产量加成: '0%', 时间缩减: '0%', 经验加成: '0%', yield: 0, timeReduce: 0, expBonus: 0 },
+      2: { 产量加成: '+100%', 时间缩减: '0%', 经验加成: '0%', yield: 1.0, timeReduce: 0, expBonus: 0 },
+      3: { 产量加成: '+200%', 时间缩减: '10%', 经验加成: '0%', yield: 2.0, timeReduce: 0.10, expBonus: 0 },
+      4: { 产量加成: '+300%', 时间缩减: '20%', 经验加成: '+20%', yield: 3.0, timeReduce: 0.20, expBonus: 0.20 },
+    };
+
+    function openVerify() {
+      if (!calcResult) return;
+      document.getElementById('verifyContent').innerHTML = buildVerifyHtml();
+      document.getElementById('verifyOverlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeVerify() {
+      document.getElementById('verifyOverlay').classList.remove('show');
+      document.body.style.overflow = '';
+    }
+
+    function fmtSec(s) {
+      s = Math.round(s);
+      if (s < 60) return s + '秒';
+      const m = Math.floor(s / 60), r = s % 60;
+      if (m < 60) return r > 0 ? m + '分' + r + '秒' : m + '分钟';
+      const h = Math.floor(m / 60), mm = m % 60;
+      return mm > 0 ? h + '小时' + mm + '分' : h + '小时';
+    }
+    function fmtNum(n, d) { return Number(n).toFixed(d === undefined ? 2 : d); }
+
+    function buildVerifyHtml() {
+      const r = calcResult;
+      const dist = r.landDist || {};
+      const lands = r.lands;
+
+      // 找到有数量的最低土地等级
+      const activeLvs = [4, 3, 2, 1].filter(l => (dist[l] || 0) > 0);
+      const minLv = activeLvs.length ? Math.min(...activeLvs) : 1;
+      const timeReduce = LAND_BONUSES[minLv].timeReduce;
+
+      let html = `<h2>📝 详细验算过程</h2>`;
+
+      // ===== 第一部分：全局参数 =====
+      html += `<h3><span class="v-step-num">1</span> 全局计算参数</h3>`;
+      html += `<h4>📋 计算条件</h4>`;
+      html += `<table class="v-table"><tbody>`;
+      html += `<tr><td style="font-weight:600;">账号等级</td><td>Lv${r.level}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">土地总数</td><td>${lands} 块</td></tr>`;
+      // 土地分布
+      let distParts = [];
+      [4, 3, 2, 1].forEach(lv => { if ((dist[lv] || 0) > 0) distParts.push(`${LAND_EMOJI[lv]}${LAND_NAMES[lv]} × ${dist[lv]}`); });
+      html += `<tr><td style="font-weight:600;">土地等级分布</td><td>${distParts.join(' + ')}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">施肥模式</td><td>${r.smartFert ? '🧠 智能施肥（选最长阶段）' : '🧪 普通施肥（第一阶段）'}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">计算模式</td><td>${r.ideal ? '✨ 理想模式（仅计纯生长时间）' : '⚙️ 实际模式（含操作耗时）'}</td></tr>`;
+      html += `</tbody></table>`;
+
+      // 土地加成表
+      html += `<h4>🏡 土地等级加成表</h4>`;
+      html += `<table class="v-table"><thead><tr><th>等级</th><th>产量加成</th><th>时间缩减</th><th>经验加成</th></tr></thead><tbody>`;
+      [1, 2, 3, 4].forEach(lv => {
+        const b = LAND_BONUSES[lv];
+        const active = (dist[lv] || 0) > 0;
+        const style = active ? 'font-weight:600;' : 'color:var(--text-muted);';
+        html += `<tr style="${style}"><td>${LAND_EMOJI[lv]} ${LAND_NAMES[lv]}${active ? ' (×' + dist[lv] + ')' : ''}</td><td>${b.产量加成}</td><td>${b.时间缩减}</td><td>${b.经验加成}</td></tr>`;
+      });
+      html += `</tbody></table>`;
+
+      // 时间缩减解释
+      html += `<div class="v-note">⚠️ <b>木桶效应</b>：生长时间缩减取所有有作物的土地中<b>最低等级</b>来决定。当前最低等级为 ${LAND_EMOJI[minLv]}${LAND_NAMES[minLv]}，时间缩减 = <b>${(timeReduce * 100).toFixed(0)}%</b></div>`;
+
+      // 操作耗时
+      if (!r.ideal) {
+        html += `<h4>⏱️ 操作耗时常量</h4>`;
+        html += `<table class="v-table"><tbody>`;
+        html += `<tr><td style="font-weight:600;">不施肥种植速度</td><td>2秒种18块 = 9块/秒</td></tr>`;
+        html += `<tr><td style="font-weight:600;">施肥时种植速度</td><td>2秒种12块 = 6块/秒</td></tr>`;
+        html += `<tr><td style="font-weight:600;">施肥操作耗时</td><td>每块地 0.1秒</td></tr>`;
+        html += `<tr><td style="font-weight:600;">不施肥种完全场</td><td>${lands} ÷ 9 = <b>${fmtNum(lands / 9, 4)}</b> 秒</td></tr>`;
+        html += `<tr><td style="font-weight:600;">施肥种完全场</td><td>${lands} ÷ 6 = <b>${fmtNum(lands / 6, 4)}</b> 秒</td></tr>`;
+        html += `<tr><td style="font-weight:600;">施肥操作全场</td><td>${lands} × 0.1 = <b>${fmtNum(lands * 0.1, 1)}</b> 秒</td></tr>`;
+        html += `</tbody></table>`;
+      } else {
+        html += `<div class="v-note">✨ <b>理想模式</b>下不计算种植操作耗时和施肥操作耗时，循环时间 = 纯生长时间</div>`;
+      }
+
+      // ===== 第二部分：各作物详细计算 =====
+      html += `<h3><span class="v-step-num">2</span> 作物详细验算</h3>`;
+      html += `<p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:0.5rem;">点击下方作物标签切换查看不同作物的计算过程（默认展示推荐作物）</p>`;
+
+      // 收集要展示的作物：推荐的 + 排行前10
+      const shownIds = new Set();
+      const cropList = [];
+      function addCrop(row, tag) {
+        if (!row || shownIds.has(row.seedId)) return;
+        shownIds.add(row.seedId);
+        cropList.push({ row, tag });
+      }
+      addCrop(r.bestNoFert, '🌾不施肥推荐');
+      addCrop(r.bestFert, '🧪施肥推荐');
+      // 排行前10不重复
+      (r.rowsNoFert || []).slice(0, 10).forEach(row => addCrop(row, ''));
+      (r.rowsFert || []).slice(0, 10).forEach(row => addCrop(row, ''));
+
+      // tabs
+      html += `<div class="v-crop-tabs" id="vCropTabs">`;
+      cropList.forEach((c, i) => {
+        const label = c.tag ? `${c.tag} ${c.row.name}` : c.row.name;
+        html += `<button class="v-crop-tab${i === 0 ? ' v-active' : ''}" onclick="switchVerifyCrop(${i}, this)">${label}</button>`;
+      });
+      html += `</div>`;
+
+      // 每个作物的详细计算
+      cropList.forEach((c, i) => {
+        html += buildCropVerify(c.row, r, dist, lands, minLv, timeReduce, i === 0);
+      });
+
+      return html;
+    }
+
+    function buildCropVerify(row, r, dist, lands, minLv, timeReduce, isVisible) {
+      const showClass = isVisible ? 'v-crop-detail v-show' : 'v-crop-detail';
+      let html = `<div class="${showClass}" data-verify-crop>`;
+      const isTSD = row.twoSeasonDiff;  // 两季且阶段时长不等
+
+      // 作物基础数据
+      const tsBadgeV = isTSD ? ' <span style="font-size:0.7rem;color:var(--text-main);background:var(--glass-bg);padding:0.15rem 0.4rem;border-radius:999px;font-weight:600;">🔄两季</span>' : '';
+      html += `<div class="v-crop-header">${cropImg(row, 36)} <span class="v-crop-title">${row.name}${tsBadgeV}</span></div>`;
+
+      html += `<h4><span class="v-step-num">A</span> 基础属性</h4>`;
+      html += `<table class="v-table"><tbody>`;
+      html += `<tr><td style="font-weight:600;">解锁等级</td><td>Lv${row.requiredLevel}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">种子价格</td><td>${row.price} 金币</td></tr>`;
+      html += `<tr><td style="font-weight:600;">基础收获经验</td><td>${row.exp}${isTSD ? ' <span style="color:var(--text-main);">（每季）</span>' : ''}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">基础果实产量</td><td>${row.fruitCount}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">单果售价</td><td>${row.fruitSellPrice} 金币</td></tr>`;
+      html += `<tr><td style="font-weight:600;">阶段数量</td><td>${row.phaseCount} 个</td></tr>`;
+      html += `<tr><td style="font-weight:600;">作物季数</td><td>${row.isTwoSeason ? (isTSD ? '<span style="color:var(--text-main);font-weight:700;">🔄 两季（第二季走最后两个阶段，合并计算）</span>' : '两季') : '一季'}</td></tr>`;
+      html += `</tbody></table>`;
+
+      // 生长阶段详表
+      if (row.phaseDetails && row.phaseDetails.length > 0) {
+        html += `<h4><span class="v-step-num">B</span> 生长阶段明细</h4>`;
+        const rawTotal = row.phaseDetails.reduce((s, p) => s + p.seconds, 0);
+
+        // 寻找二季起始索引：固定取最后两个阶段
+        let s2StartIdx = -1;
+        if (isTSD) {
+          s2StartIdx = Math.max(0, row.phaseDetails.length - 2);
+        }
+
+        html += `<table class="v-table"><thead><tr><th>序号</th><th>阶段名</th><th>原始时长</th><th>缩减后时长</th>${isTSD ? '<th>所属季</th>' : ''}</tr></thead><tbody>`;
+        row.phaseDetails.forEach((p, i) => {
+          const adj = Math.max(1, Math.round(p.seconds * (1 - timeReduce)));
+          const isS2 = isTSD && s2StartIdx >= 0 && i >= s2StartIdx;
+          const s2Style = isS2 ? 'background:var(--glass-bg);' : '';
+          const seasonLabel = isTSD ? `<td style="${s2Style}font-weight:600;color:${isS2 ? 'var(--text-main)' : 'rgb(var(--color-primary-600))'}">${isS2 ? '一+二季' : '仅一季'}</td>` : '';
+          html += `<tr style="${s2Style}"><td>第${i + 1}阶段</td><td>${p.name}</td><td>${fmtSec(p.seconds)}（${p.seconds}秒）</td><td>${fmtSec(adj)}（${adj}秒）</td>${seasonLabel}</tr>`;
+        });
+        html += `<tr style="font-weight:700;background:rgba(var(--color-primary-100), 0.2);"><td colspan="2">一季合计</td><td>${fmtSec(rawTotal)}（${rawTotal}秒）</td><td>${fmtSec(row.growTimeSec)}（${row.growTimeSec}秒）</td>${isTSD ? '<td></td>' : ''}</tr>`;
+        html += `</tbody></table>`;
+
+        if (timeReduce > 0) {
+          html += `<div class="v-formula">原始总时长 × (1 - 时间缩减率) = ${rawTotal} × (1 - ${(timeReduce * 100).toFixed(0)}%) = ${rawTotal} × ${(1 - timeReduce).toFixed(2)} = <span class="v-ans">${row.growTimeSec}秒（${fmtSec(row.growTimeSec)}）</span></div>`;
+        } else {
+          html += `<div class="v-formula">最低土地等级为${LAND_NAMES[minLv]}，时间缩减 = 0%，生长时间不变 = <span class="v-ans">${row.growTimeSec}秒（${fmtSec(row.growTimeSec)}）</span></div>`;
+        }
+
+        // 两季作物分解说明
+        if (isTSD) {
+          html += `<div class="v-note" style="background:var(--glass-bg);border-color:#e9d5ff;color:#6d28d9;">
+        🔄 <b>两季作物说明</b>：摘第一季果实后，植物会从第${s2StartIdx + 1}阶段起重新生长第二季。<br>
+        &nbsp;&nbsp;• <b>第一季</b>（全阶段 1~${row.phaseCount}）：${fmtSec(row.growTimeSec)}（${row.growTimeSec}秒）<br>
+        &nbsp;&nbsp;• <b>第二季</b>（第${s2StartIdx + 1}~${row.phaseCount}阶段重新生长）：${fmtSec(row.secondSeasonGrowSec)}（${row.secondSeasonGrowSec}秒）<br>
+        &nbsp;&nbsp;• <b>两季总计</b>：${row.growTimeSec} + ${row.secondSeasonGrowSec} = ${fmtSec(row.fullCycleGrowSec)}（${row.fullCycleGrowSec}秒），收获 ×2
+      </div>`;
+        }
+      }
+
+      // 施肥效果
+      html += `<h4><span class="v-step-num">C</span> 施肥效果计算</h4>`;
+      const fertMode = r.smartFert ? '智能施肥（选最长阶段）' : '普通施肥（减第一阶段）';
+      const fertPhaseSec = row.fertBestPhaseSec;
+      const fertPhaseLabel = row.fertBestPhaseNames && row.fertBestPhaseNames.length > 0
+        ? row.fertBestPhaseNames.map((n, i) => `第${row.fertBestPhaseOrders[i]}阶段「${n}」`).join(' / ')
+        : '第1阶段';
+      if (row.fertPhasesAllSame && row.phaseCount > 1 && !isTSD) {
+        html += `<div class="v-note">✅ 各阶段时长完全相同（都是 ${fmtSec(fertPhaseSec)}），施肥任意阶段效果一致</div>`;
+      }
+
+      if (isTSD) {
+        // 两季作物：化肥只能用一次（第一季），第二季不施肥
+        html += `<div class="v-note" style="background:var(--glass-bg);border-color:#e9d5ff;color:#6d28d9;">⚠️ <b>两季作物施肥规则</b>：普通化肥种植后只能施肥<b>一次</b>，因此化肥仅作用于第一季，第二季不能再施肥，按原速生长。</div>`;
+        html += `<div class="v-formula">`;
+        html += `施肥模式：${fertMode}<br><br>`;
+        html += `<b>【第一季施肥】</b><br>`;
+        html += `&nbsp;&nbsp;施肥阶段：${fertPhaseLabel}，减少 <b>${fertPhaseSec}秒（${fmtSec(fertPhaseSec)}）</b><br>`;
+        html += `&nbsp;&nbsp;一季施肥后 = max(1, ${row.growTimeSec} - ${fertPhaseSec}) = <span class="v-eq">${row.growTimeFert}秒（${row.growTimeFertStr}）</span><br><br>`;
+        html += `<b>【第二季不施肥】</b><br>`;
+        html += `&nbsp;&nbsp;第二季仅走后段阶段，且不能再次施肥，原速生长：<span class="v-eq">${row.secondSeasonGrowSec}秒（${row.secondSeasonGrowStr}）</span><br><br>`;
+        html += `<b>【两季合计施肥后】</b><br>`;
+        html += `&nbsp;&nbsp;= ${row.growTimeFert} + ${row.secondSeasonGrowSec} = <span class="v-ans">${row.fullCycleGrowFertSec}秒（${row.fullCycleGrowFertStr}）</span>`;
+        html += `</div>`;
+      } else {
+        html += `<div class="v-formula">`;
+        html += `施肥模式：${fertMode}<br>`;
+        html += `施肥阶段：${fertPhaseLabel}，减少 <b>${fertPhaseSec}秒（${fmtSec(fertPhaseSec)}）</b><br>`;
+        html += `施肥后生长时间 = max(1, ${row.growTimeSec} - ${fertPhaseSec})<br>`;
+        html += `&nbsp;&nbsp;= max(1, ${row.growTimeSec - fertPhaseSec}) = <span class="v-ans">${row.growTimeFert}秒（${row.growTimeFertStr}）</span>`;
+        html += `</div>`;
+      }
+
+      // 每轮经验计算
+      html += `<h4><span class="v-step-num">D</span> 每轮总经验计算</h4>`;
+      html += `<div class="v-formula">`;
+      let expCalcLines = [];
+      let totalExp = 0;
+      [4, 3, 2, 1].forEach(lv => {
+        const cnt = dist[lv] || 0;
+        if (cnt <= 0) return;
+        const bonus = LAND_BONUSES[lv];
+        const expEach = row.exp * (1 + bonus.expBonus);
+        const sub = cnt * expEach;
+        totalExp += sub;
+        if (bonus.expBonus > 0) {
+          expCalcLines.push(`${LAND_EMOJI[lv]}${LAND_NAMES[lv]}：${cnt}块 × ${row.exp} × (1 + ${(bonus.expBonus * 100).toFixed(0)}%) = ${cnt} × ${expEach} = <b>${sub}</b>`);
+        } else {
+          expCalcLines.push(`${LAND_EMOJI[lv]}${LAND_NAMES[lv]}：${cnt}块 × ${row.exp} × (1 + 0%) = <b>${sub}</b>`);
+        }
+      });
+      html += expCalcLines.join('<br>');
+      let subTotals = [];
+      [4, 3, 2, 1].forEach(lv => {
+        const cnt = dist[lv] || 0;
+        if (cnt <= 0) return;
+        const bonus = LAND_BONUSES[lv];
+        const sub = cnt * row.exp * (1 + bonus.expBonus);
+        subTotals.push(sub);
+      });
+      html += `<br>单季总经验 = ${subTotals.join(' + ')} = <b>${totalExp}</b>`;
+      const expPerCycle = isTSD ? totalExp * 2 : totalExp;
+      if (isTSD) {
+        html += `<br><br>🔄 <b>两季合并</b>：每轮总经验 = ${totalExp} × 2 = <span class="v-ans">${expPerCycle}</span>`;
+      } else {
+        html += `<br>每轮总经验 = <span class="v-ans">${totalExp}</span>`;
+      }
+      html += `</div>`;
+
+      // 循环时间
+      html += `<h4><span class="v-step-num">E</span> 单轮循环时间</h4>`;
+      if (isTSD) {
+        if (r.ideal) {
+          html += `<div class="v-formula">`;
+          html += `🔄 两季作物，循环包含一季全阶段 + 二季后段：<br><br>`;
+          html += `<b>【不施肥】</b><br>`;
+          html += `&nbsp;&nbsp;循环时间 = 一季生长 + 二季生长<br>`;
+          html += `&nbsp;&nbsp;= ${row.growTimeSec} + ${row.secondSeasonGrowSec}<br>`;
+          html += `&nbsp;&nbsp;= <span class="v-ans">${row.fullCycleGrowSec}秒（${row.fullCycleGrowStr}）</span><br><br>`;
+          html += `<b>【施　肥】</b><br>`;
+          if (row.secondSeasonFertActive) {
+            html += `&nbsp;&nbsp;循环时间 = 一季施肥后 + 二季<span style="color:#f59e0b;font-weight:600;">施肥后</span><br>`;
+            html += `&nbsp;&nbsp;= ${row.growTimeFert} + ${row.secondSeasonGrowFertSec}（二季跳最长阶段）<br>`;
+            html += `&nbsp;&nbsp;= <span class="v-ans">${row.fullCycleGrowFertWithS2Sec}秒（${row.fullCycleGrowFertWithS2Str}）</span>`;
+          } else {
+            html += `&nbsp;&nbsp;循环时间 = 一季施肥后 + 二季不施肥<br>`;
+            html += `&nbsp;&nbsp;= ${row.growTimeFert} + ${row.secondSeasonGrowSec}<br>`;
+            html += `&nbsp;&nbsp;= <span class="v-ans">${row.fullCycleGrowFertSec}秒（${row.fullCycleGrowFertStr}）</span>`;
+          }
+          html += `</div>`;
+        } else {
+          const plantNoFert = lands / 9;
+          const plantFert = lands / 6;
+          const fertAction = lands * 0.1;
+          html += `<div class="v-formula">`;
+          html += `🔄 两季作物，循环包含一季全阶段 + 二季后段：<br><br>`;
+          html += `<b>【不施肥】</b><br>`;
+          html += `&nbsp;&nbsp;循环时间 = 一季生长 + 二季生长 + 种植耗时（仅种一次）<br>`;
+          html += `&nbsp;&nbsp;= ${row.growTimeSec} + ${row.secondSeasonGrowSec} + ${fmtNum(plantNoFert, 4)}<br>`;
+          html += `&nbsp;&nbsp;= <span class="v-ans">${fmtNum(row.cycleNoFert, 2)}秒（${fmtSec(row.cycleNoFert)}）</span><br><br>`;
+          html += `<b>【施　肥】</b><br>`;
+          if (row.secondSeasonFertActive) {
+            html += `&nbsp;&nbsp;循环时间 = 一季施肥后 + 二季<span style="color:#f59e0b;font-weight:600;">施肥后</span> + 种植耗时 + 施肥操作×2（两季各一次）<br>`;
+            html += `&nbsp;&nbsp;= ${row.growTimeFert} + ${row.secondSeasonGrowFertSec} + ${fmtNum(plantFert, 4)} + ${fmtNum(fertAction * 2, 1)}<br>`;
+          } else {
+            html += `&nbsp;&nbsp;循环时间 = 一季施肥后 + 二季不施肥 + 种植耗时 + 施肥操作×1<br>`;
+            html += `&nbsp;&nbsp;= ${row.growTimeFert} + ${row.secondSeasonGrowSec} + ${fmtNum(plantFert, 4)} + ${fmtNum(fertAction, 1)}<br>`;
+          }
+          html += `&nbsp;&nbsp;= <span class="v-ans">${fmtNum(row.cycleFert, 2)}秒（${fmtSec(row.cycleFert)}）</span>`;
+          html += `</div>`;
+        }
+      } else {
+        if (r.ideal) {
+          html += `<div class="v-formula">`;
+          html += `<b>【不施肥】</b>循环时间 = 纯生长时间 = <span class="v-ans">${row.growTimeSec}秒（${fmtSec(row.growTimeSec)}）</span><br>`;
+          html += `<b>【施　肥】</b>循环时间 = 施肥后生长时间 = <span class="v-ans">${row.growTimeFert}秒（${fmtSec(row.growTimeFert)}）</span>`;
+          html += `</div>`;
+        } else {
+          const plantNoFert = lands / 9;
+          const plantFert = lands / 6;
+          const fertAction = lands * 0.1;
+          html += `<div class="v-formula">`;
+          html += `<b>【不施肥】</b><br>`;
+          html += `&nbsp;&nbsp;循环时间 = 生长时间 + 种植耗时<br>`;
+          html += `&nbsp;&nbsp;= ${row.growTimeSec} + ${fmtNum(plantNoFert, 4)}<br>`;
+          html += `&nbsp;&nbsp;= <span class="v-ans">${fmtNum(row.cycleNoFert, 2)}秒（${fmtSec(row.cycleNoFert)}）</span><br><br>`;
+          html += `<b>【施　肥】</b><br>`;
+          html += `&nbsp;&nbsp;循环时间 = 施肥后生长时间 + 种植耗时 + 施肥操作耗时<br>`;
+          html += `&nbsp;&nbsp;= ${row.growTimeFert} + ${fmtNum(plantFert, 4)} + ${fmtNum(fertAction, 1)}<br>`;
+          html += `&nbsp;&nbsp;= <span class="v-ans">${fmtNum(row.cycleFert, 2)}秒（${fmtSec(row.cycleFert)}）</span>`;
+          html += `</div>`;
+        }
+      }
+
+      // 经验效率
+      html += `<h4><span class="v-step-num">F</span> 经验效率计算</h4>`;
+      html += `<div class="v-formula">`;
+      html += `公式：每小时经验 = (每轮总经验 ÷ 循环时间) × 3600<br><br>`;
+      html += `<b>【不施肥】</b><br>`;
+      html += `&nbsp;&nbsp;= (${expPerCycle} ÷ ${fmtNum(row.cycleNoFert, 2)}) × 3600<br>`;
+      html += `&nbsp;&nbsp;= ${fmtNum(expPerCycle / row.cycleNoFert, 6)} × 3600<br>`;
+      html += `&nbsp;&nbsp;= <span class="v-ans">${fmtNum(row.expPerHourNoFert, 4)} 经验/小时</span><br><br>`;
+      html += `<b>【施　肥】</b><br>`;
+      html += `&nbsp;&nbsp;= (${expPerCycle} ÷ ${fmtNum(row.cycleFert, 2)}) × 3600<br>`;
+      html += `&nbsp;&nbsp;= ${fmtNum(expPerCycle / row.cycleFert, 6)} × 3600<br>`;
+      html += `&nbsp;&nbsp;= <span class="v-ans">${fmtNum(row.expPerHourFert, 4)} 经验/小时</span>`;
+      html += `</div>`;
+
+      // 提升比例
+      html += `<h4><span class="v-step-num">G</span> 施肥提升比例</h4>`;
+      html += `<div class="v-formula">`;
+      html += `提升比例 = (施肥效率 - 不施肥效率) ÷ 不施肥效率 × 100%<br>`;
+      html += `&nbsp;&nbsp;= (${fmtNum(row.expPerHourFert, 4)} - ${fmtNum(row.expPerHourNoFert, 4)}) ÷ ${fmtNum(row.expPerHourNoFert, 4)} × 100%<br>`;
+      html += `&nbsp;&nbsp;= <span class="v-ans">+${fmtNum(row.gainPercent, 2)}%</span>`;
+      html += `</div>`;
+
+      // 每日汇总
+      html += `<h4><span class="v-step-num">H</span> 每日数据汇总</h4>`;
+      html += `<table class="v-table"><thead><tr><th>项目</th><th>不施肥</th><th>施肥</th><th>提升</th></tr></thead><tbody>`;
+      html += `<tr><td style="font-weight:600;">每小时经验</td><td>${fmtNum(row.expPerHourNoFert, 2)}</td><td>${fmtNum(row.expPerHourFert, 2)}</td><td style="color:rgb(var(--color-primary-500));font-weight:600;">+${fmtNum(row.expPerHourFert - row.expPerHourNoFert, 2)}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">每日经验（×24h）</td><td>${Math.round(row.expPerDayNoFert).toLocaleString()}</td><td>${Math.round(row.expPerDayFert).toLocaleString()}</td><td style="color:rgb(var(--color-primary-500));font-weight:600;">+${Math.round(row.expPerDayFert - row.expPerDayNoFert).toLocaleString()}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">每小时金币</td><td>${fmtNum(row.goldPerHourNoFert, 2)}</td><td>${fmtNum(row.goldPerHourFert, 2)}</td><td style="color:#f59e0b;font-weight:600;">+${fmtNum(row.goldPerHourFert - row.goldPerHourNoFert, 2)}</td></tr>`;
+      html += `<tr><td style="font-weight:600;">每日金币（×24h）</td><td>${Math.round(row.goldPerDayNoFert).toLocaleString()}</td><td>${Math.round(row.goldPerDayFert).toLocaleString()}</td><td style="color:#f59e0b;font-weight:600;">+${Math.round(row.goldPerDayFert - row.goldPerDayNoFert).toLocaleString()}</td></tr>`;
+      html += `</tbody></table>`;
+
+      html += `</div>`;
+      return html;
+    }
+
+    function switchVerifyCrop(idx, btn) {
+      document.querySelectorAll('#vCropTabs .v-crop-tab').forEach(t => t.classList.remove('v-active'));
+      btn.classList.add('v-active');
+      const panels = document.querySelectorAll('[data-verify-crop]');
+      panels.forEach((p, i) => { p.classList.toggle('v-show', i === idx); });
+    }
+
+    // 回车触发计算
+    levelInput.addEventListener('keydown', e => { if (e.key === 'Enter') doCalc(); });
+
+    // ===== ⓘ 字段级信息弹窗 =====
+    const INFO_CONTENT = {
+      'level': {
+        title: '🎯 账号等级',
+        content: '输入后<span style="color:rgb(var(--color-primary-600));font-weight:600;">自动匹配</span>最大土地数'
+      },
+      'land-dist': {
+        title: '🌟 土地等级分布',
+        content: '根据等级<span style="color:rgb(var(--color-primary-600));font-weight:600;">自动计算</span>默认最大，<span style="color:#f59e0b;font-weight:600;">减少高等级</span>会<span style="color:rgb(var(--color-primary-600));font-weight:600;">自动分配</span>给下一级；<span style="color:#3b82f6;font-weight:600;">普通</span>自动计算'
+      },
+      'smart-fert': {
+        title: '🧪 智能施肥',
+        content: '开启后<span style="color:rgb(var(--color-primary-600));font-weight:600;">自动选择</span><span style="color:#f59e0b;font-weight:600;">耗时最长</span>的生长阶段施肥，并提示建议施肥阶段；关闭则<span style="color:#3b82f6;font-weight:600;">固定施肥第一阶段</span>'
+      },
+      'ideal-mode': {
+        title: '✨ 理想模式',
+        content: '开启后<span style="color:#f59e0b;font-weight:600;">不计</span>种植操作耗时和施肥操作耗时，仅计<span style="color:rgb(var(--color-primary-600));font-weight:600;">纯生长时间</span>'
+      },
+      's2-fert': {
+        title: '🌿 普通化肥·第二季',
+        content: '当等级大于60级的时候会结算二季植物，可选择在植物在第二季中是否再使用<span style="color:#f59e0b;font-weight:600;">普通化肥</span>一次。<br>需要：等级 > 60 且「🧪 智能施肥」已开启。<br>开启后，第二季也会跳过一个最长阶段，进一步缩短循环时间。'
+      }
+    };
+
+    // 创建一个复用的弹窗 DOM（定位在按钮下方）
+    const fieldInfoPopup = document.createElement('div');
+    fieldInfoPopup.id = 'fieldInfoPopup';
+    fieldInfoPopup.className = 'info-popup hidden';
+    fieldInfoPopup.setAttribute('role', 'dialog');
+    fieldInfoPopup.setAttribute('aria-hidden', 'true');
+    document.body.appendChild(fieldInfoPopup);
+
+    function showFieldInfo(key, btn) {
+      const info = INFO_CONTENT[key];
+      if (!info) return;
+      fieldInfoPopup.innerHTML = `<button class="info-close" onclick="hideFieldInfo()">✕</button><h4>${info.title}</h4><div style="font-size:0.9rem;color:var(--text-muted);">${info.content}</div>`;
+      // 位置：出现在按钮下方，尽量不超出视口
+      const rect = btn.getBoundingClientRect();
+      const popupW = Math.min(340, window.innerWidth - 24);
+      let left = rect.left + window.scrollX;
+      if (left + popupW + 12 > window.scrollX + window.innerWidth) left = window.scrollX + window.innerWidth - popupW - 12;
+      const top = rect.top + window.scrollY + rect.height + 8;
+      fieldInfoPopup.style.left = left + 'px';
+      fieldInfoPopup.style.top = top + 'px';
+      fieldInfoPopup.style.width = popupW + 'px';
+      fieldInfoPopup.classList.remove('hidden');
+      fieldInfoPopup.setAttribute('aria-hidden', 'false');
+    }
+
+    function hideFieldInfo() {
+      fieldInfoPopup.classList.add('hidden');
+      fieldInfoPopup.setAttribute('aria-hidden', 'true');
+    }
+
+    // 绑定每个 info 按钮
+    document.addEventListener('DOMContentLoaded', () => {
+      document.querySelectorAll('.info-btn').forEach(b => {
+        b.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const key = b.getAttribute('data-info-key');
+          if (!key) return;
+          // 如果已打开同一弹窗则关闭
+          const open = !fieldInfoPopup.classList.contains('hidden');
+          if (open && fieldInfoPopup.getAttribute('aria-hidden') === 'false') {
+            hideFieldInfo();
+            return;
+          }
+          showFieldInfo(key, b);
+        });
+      });
+    });
+
+    // 点击页面任意处关闭弹窗
+    document.addEventListener('click', (e) => {
+      if (!fieldInfoPopup.classList.contains('hidden')) {
+        if (!fieldInfoPopup.contains(e.target)) hideFieldInfo();
+      }
+    });
+
+    // ════════════════════════════════════════════════════════
+    // ══            时间计算器 JavaScript                   ══
+    // ════════════════════════════════════════════════════════
+
+    let tcCrops = [];           // 所有可用作物
+    let tcLevelMap = {};        // level → [crops]
+    let tcSelectedCrop = null;  // 当前选中的作物
+    let tcFertSelected = [];    // 选中的化肥跳过阶段索引(active phase内)
+    let tcFertSelectedS2 = [];  // 第二季化肥跳过阶段索引
+
+    // ── 模式切换 ──
+    function switchCalcMode(mode) {
+      document.getElementById('expCalcMode').classList.toggle('hidden', mode !== 'exp');
+      document.getElementById('timeCalcMode').classList.toggle('hidden', mode !== 'time');
+      document.querySelectorAll('.calc-mode-tab').forEach((t, i) => {
+        t.classList.toggle('active', (i === 0 && mode === 'exp') || (i === 1 && mode === 'time'));
+      });
+      if (mode === 'time' && tcCrops.length === 0) loadTimeCrops();
+    }
+
+    // ── 加载作物数据 ──
+    async function loadTimeCrops() {
+      try {
+        const resp = await fetch('/api/time_crops');
+        const data = await resp.json();
+        tcCrops = data.crops || [];
+        tcLevelMap = {};
+        tcCrops.forEach(c => {
+          if (!tcLevelMap[c.level]) tcLevelMap[c.level] = [];
+          tcLevelMap[c.level].push(c);
+        });
+        onTcLevelChange();
+      } catch (e) {
+        console.error('加载作物数据失败:', e);
+      }
+    }
+
+    // ── 等级变化 → 自动匹配作物 ──
+    function onTcLevelChange() {
+      const lv = parseInt(document.getElementById('tcLevel').value) || 16;
+      const crops = tcLevelMap[lv];
+      if (crops && crops.length > 0) {
+        selectTcCrop(crops[0]);
+        document.getElementById('tcCropSearch').value = crops[0].name;
+      } else {
+        // 找最近的低等级作物
+        let found = null;
+        for (let l = lv; l >= 1; l--) {
+          if (tcLevelMap[l] && tcLevelMap[l].length > 0) { found = tcLevelMap[l][0]; break; }
+        }
+        if (found) {
+          selectTcCrop(found);
+          document.getElementById('tcCropSearch').value = found.name;
+        } else {
+          clearTcSelection();
+        }
+      }
+    }
+
+    // ── 模糊搜索 ──
+    function onTcCropSearch() {
+      const q = document.getElementById('tcCropSearch').value.trim();
+      const dropdown = document.getElementById('tcDropdown');
+      if (!q) { dropdown.classList.add('hidden'); return; }
+      const lower = q.toLowerCase();
+      const matches = tcCrops.filter(c => c.name.toLowerCase().includes(lower)).slice(0, 20);
+      if (matches.length === 0) { dropdown.classList.add('hidden'); return; }
+      let html = '';
+      matches.forEach(c => {
+        const thumb = c.asset_name ? `${IMG_BASE}plant_${c.asset_name}_Seed.png` : '';
+        html += `<div class="tc-dropdown-item" onclick="pickTcCrop(${c.seed_id})">
+      ${thumb ? `<img src="${thumb}" onerror="this.style.display='none'">` : '<span>🌱</span>'}
+      <span>${c.name}</span>
+      ${c.seasons === 2 ? '<span style="font-size:0.6rem;color:var(--text-main);background:var(--glass-bg);padding:0.05rem 0.25rem;border-radius:999px;">两季</span>' : ''}
+      <span class="tc-dd-level">Lv${c.level}</span>
+    </div>`;
+      });
+      dropdown.innerHTML = html;
+      dropdown.classList.remove('hidden');
+    }
+
+    function pickTcCrop(seedId) {
+      const crop = tcCrops.find(c => c.seed_id === seedId);
+      if (crop) {
+        selectTcCrop(crop);
+        document.getElementById('tcLevel').value = crop.level;
+        document.getElementById('tcCropSearch').value = crop.name;
+      }
+      document.getElementById('tcDropdown').classList.add('hidden');
+    }
+
+    function selectTcCrop(crop) {
+      tcSelectedCrop = crop;
+      const panel = document.getElementById('tcSelectedCrop');
+      const thumb = crop.asset_name ? `${IMG_BASE}plant_${crop.asset_name}_Seed.png` : '';
+      document.getElementById('tcCropImg').src = thumb;
+      document.getElementById('tcCropImg').onerror = function () { this.style.display = 'none'; };
+      document.getElementById('tcCropName').textContent = crop.name + (crop.seasons === 2 ? ' 🔄两季' : '');
+      const activePhases = crop.phases.filter(p => p.seconds > 0);
+      const totalSec = activePhases.reduce((s, p) => s + p.seconds, 0);
+      const expInfo = crop.exp ? ` · 经验 ${crop.exp}${crop.seasons === 2 ? '×2季' : ''}` : '';
+      document.getElementById('tcCropMeta').textContent =
+        `Lv${crop.level} · ${crop.seasons}季 · ${activePhases.length}个成长阶段 · 总时长 ${formatSec(totalSec)}${expInfo}`;
+      panel.classList.remove('hidden');
+      // 显示/隐藏第二季化肥开关
+      const isTwoSeason = crop.seasons === 2;
+      document.getElementById('tcS2FertToggleWrap').hidden = !isTwoSeason;
+      document.getElementById('tcS2FertInfoBtn').hidden = !isTwoSeason;
+      if (!isTwoSeason) {
+        document.getElementById('tcUseFertS2').checked = false;
+        document.getElementById('tcFertPanelS2').classList.add('hidden');
+      }
+      updateTcFertPhases();
+      updateTcFertPhasesS2();
+    }
+
+    function clearTcSelection() {
+      tcSelectedCrop = null;
+      document.getElementById('tcSelectedCrop').classList.add('hidden');
+      document.getElementById('tcFertPhases').innerHTML = '';
+      document.getElementById('tcFertPhasesS2').innerHTML = '';
+      tcFertSelected = [];
+      tcFertSelectedS2 = [];
+    }
+
+    // ── 化肥阶段 UI ──
+    function updateTcFertPhases() {
+      if (!tcSelectedCrop) return;
+      const container = document.getElementById('tcFertPhases');
+      const activePhases = tcSelectedCrop.phases.filter(p => p.seconds > 0);
+      let maxSec = 0;
+      activePhases.forEach(p => { if (p.seconds > maxSec) maxSec = p.seconds; });
+      // 默认选最长的一个阶段
+      tcFertSelected = [];
+      for (let i = 0; i < activePhases.length; i++) {
+        if (activePhases[i].seconds === maxSec && tcFertSelected.length === 0) {
+          tcFertSelected.push(i);
+          break;
+        }
+      }
+      let html = '';
+      activePhases.forEach((p, i) => {
+        const selected = tcFertSelected.includes(i) ? 'selected' : '';
+        const img = p.img ? `<img src="${IMG_BASE}${p.img}" onerror="this.style.display='none'">` : '🌱';
+        const isMax = p.seconds === maxSec ? ' ⭐' : '';
+        html += `<button class="tc-fert-phase-btn ${selected}" data-idx="${i}" onclick="toggleTcFertPhase(${i})">
+      ${img} <span>第${i + 1}阶段「${p.name}」(${formatSec(p.seconds)})${isMax}</span>
+    </button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleTcFertPhase(idx) {
+      const pos = tcFertSelected.indexOf(idx);
+      if (pos >= 0) {
+        tcFertSelected.splice(pos, 1);
+      } else {
+        if (tcFertSelected.length >= 2) tcFertSelected.shift();
+        tcFertSelected.push(idx);
+      }
+      document.querySelectorAll('#tcFertPhases .tc-fert-phase-btn').forEach(btn => {
+        const i = parseInt(btn.dataset.idx);
+        btn.classList.toggle('selected', tcFertSelected.includes(i));
+      });
+    }
+
+    // ── 第二季化肥阶段 UI ──
+    function updateTcFertPhasesS2() {
+      if (!tcSelectedCrop || tcSelectedCrop.seasons !== 2) return;
+      const container = document.getElementById('tcFertPhasesS2');
+      const allPhases = tcSelectedCrop.phases;
+      const activePhases = allPhases.filter(p => p.seconds > 0);
+      if (activePhases.length < 2) { container.innerHTML = ''; return; }
+      // 第二季只有最后2个 active 阶段
+      const s2Phases = activePhases.slice(-2);
+      let maxSec = 0;
+      s2Phases.forEach(p => { if (p.seconds > maxSec) maxSec = p.seconds; });
+      // 默认选最长的一个
+      tcFertSelectedS2 = [];
+      for (let i = 0; i < s2Phases.length; i++) {
+        if (s2Phases[i].seconds === maxSec && tcFertSelectedS2.length === 0) {
+          tcFertSelectedS2.push(i);
+          break;
+        }
+      }
+      let html = '';
+      s2Phases.forEach((p, i) => {
+        const selected = tcFertSelectedS2.includes(i) ? 'selected' : '';
+        const img = p.img ? `<img src="${IMG_BASE}${p.img}" onerror="this.style.display='none'">` : '🌱';
+        const isMax = p.seconds === maxSec ? ' ⭐' : '';
+        // 标注原始阶段序号
+        const origIdx = activePhases.length - 2 + i;
+        html += `<button class="tc-fert-phase-btn ${selected}" data-idx="${i}" onclick="toggleTcFertPhaseS2(${i})">
+      ${img} <span>第${origIdx + 1}阶段「${p.name}」(${formatSec(p.seconds)})${isMax}</span>
+    </button>`;
+      });
+      container.innerHTML = html;
+    }
+
+    function toggleTcFertPhaseS2(idx) {
+      const pos = tcFertSelectedS2.indexOf(idx);
+      if (pos >= 0) {
+        tcFertSelectedS2.splice(pos, 1);
+      } else {
+        if (tcFertSelectedS2.length >= 2) tcFertSelectedS2.shift();
+        tcFertSelectedS2.push(idx);
+      }
+      document.querySelectorAll('#tcFertPanelS2 .tc-fert-phase-btn').forEach(btn => {
+        const i = parseInt(btn.dataset.idx);
+        btn.classList.toggle('selected', tcFertSelectedS2.includes(i));
+      });
+    }
+
+    // ── 时间一致 & 化肥 toggle ──
+    document.getElementById('tcSameTime').addEventListener('change', function () {
+      const on = this.checked;
+      document.getElementById('tcLandTimes').classList.toggle('hidden', on);
+      document.getElementById('tcSameTimeLabel').textContent = on ? '⏱️ 时间一致' : '⏱️ 分别设定';
+    });
+    document.getElementById('tcUseFert').addEventListener('change', function () {
+      const on = this.checked;
+      document.getElementById('tcFertPanel').classList.toggle('hidden', !on);
+      document.getElementById('tcUseFertLabel').textContent = on ? '🧪 第一季化肥已启用' : '🧪 使用化肥（第一季）';
+      if (on) updateTcFertPhases();
+      // 第二季化肥联动
+      if (!on) {
+        document.getElementById('tcUseFertS2').checked = false;
+        document.getElementById('tcFertPanelS2').classList.add('hidden');
+      }
+    });
+    document.getElementById('tcUseFertS2').addEventListener('change', function () {
+      const on = this.checked;
+      document.getElementById('tcFertPanelS2').classList.toggle('hidden', !on);
+      document.getElementById('tcUseFertS2Label').textContent = on ? '🔄 第二季化肥已启用' : '🔄 第二季化肥';
+      if (on) updateTcFertPhasesS2();
+    });
+    document.getElementById('tcLevel').addEventListener('input', onTcLevelChange);
+    document.getElementById('tcCropSearch').addEventListener('input', onTcCropSearch);
+    document.getElementById('tcCropSearch').addEventListener('focus', onTcCropSearch);
+    document.addEventListener('click', (e) => {
+      if (!e.target.closest('.tc-search-wrap')) {
+        document.getElementById('tcDropdown').classList.add('hidden');
+      }
+    });
+
+    // ── 时间工具函数 ──
+    function parseTimeInput(timeStr) {
+      const parts = (timeStr || '08:00').split(':');
+      return (parseInt(parts[0]) || 0) * 3600 + (parseInt(parts[1]) || 0) * 60;
+    }
+    function formatTimeClock(totalSec) {
+      totalSec = Math.round(totalSec);
+      if (totalSec < 0) totalSec = 0;
+      const days = Math.floor(totalSec / 86400);
+      const rem = totalSec % 86400;
+      const h = Math.floor(rem / 3600);
+      const m = Math.floor((rem % 3600) / 60);
+      const timeStr = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      if (days >= 2) return `+${days}天 ${timeStr}`;
+      if (days === 1) return `次日 ${timeStr}`;
+      return timeStr;
+    }
+
+    // ── 计算时间线 ──
+    function calcPhaseTimeline(phases, timeReduce, startSec, skippedActiveIndices) {
+      let currentSec = startSec;
+      const timeline = [];
+      let activeIdx = 0;
+      for (let i = 0; i < phases.length; i++) {
+        const phase = phases[i];
+        const rawSec = phase.seconds;
+        const isActive = rawSec > 0;
+        const isSkipped = isActive && skippedActiveIndices.includes(activeIdx);
+        const adjSec = isActive ? Math.max(1, Math.round(rawSec * (1 - timeReduce))) : 0;
+        if (!isActive) {
+          timeline.push({ ...phase, adjustedSec: 0, startSec: currentSec, endSec: currentSec, isSkipped: false, isMature: true });
+        } else if (isSkipped) {
+          timeline.push({ ...phase, adjustedSec: adjSec, startSec: currentSec, endSec: currentSec, isSkipped: true, isMature: false });
+          activeIdx++;
+        } else {
+          timeline.push({ ...phase, adjustedSec: adjSec, startSec: currentSec, endSec: currentSec + adjSec, isSkipped: false, isMature: false });
+          currentSec += adjSec;
+          activeIdx++;
+        }
+      }
+      return timeline;
+    }
+
+    // ── 渲染阶段行 ──
+    function renderPhaseRows(timeline) {
+      let html = '';
+      for (const p of timeline) {
+        const imgSrc = p.img ? `${IMG_BASE}${p.img}` : '';
+        const imgHtml = imgSrc
+          ? `<img class="tc-phase-img" src="${imgSrc}" onerror="this.outerHTML='<div class=\\'tc-phase-img\\' style=\\'display:flex;align-items:center;justify-content:center;font-size:1.2rem;\\'>🌱</div>'">`
+          : '<div class="tc-phase-img" style="display:flex;align-items:center;justify-content:center;font-size:1.2rem;">🌱</div>';
+        let rowClass = 'tc-phase-row';
+        if (p.isSkipped) rowClass += ' skipped';
+        if (p.isMature) rowClass += ' mature';
+        if (p.isMature) {
+          html += `<div class="${rowClass}">
+        ${imgHtml}
+        <div class="tc-phase-info">
+          <div class="tc-phase-name">${p.name} <span class="tc-mature-badge">✅ 成熟</span></div>
+        </div>
+        <div class="tc-phase-clock" style="color:rgb(var(--color-primary-500));">${formatTimeClock(p.endSec)}</div>
+      </div>`;
+        } else if (p.isSkipped) {
+          html += `<div class="${rowClass}">
+        ${imgHtml}
+        <div class="tc-phase-info">
+          <div class="tc-phase-name">${p.name} <span class="tc-fert-badge">⚡ 化肥跳过</span></div>
+          <div class="tc-phase-dur">原需 ${formatSec(p.adjustedSec)}</div>
+        </div>
+        <div class="tc-phase-clock" style="color:var(--text-main);">跳过</div>
+      </div>`;
+        } else {
+          html += `<div class="${rowClass}">
+        ${imgHtml}
+        <div class="tc-phase-info">
+          <div class="tc-phase-name">${p.name}</div>
+          <div class="tc-phase-dur">${formatSec(p.adjustedSec)}</div>
+        </div>
+        <div class="tc-phase-clock">${formatTimeClock(p.startSec)} → ${formatTimeClock(p.endSec)}</div>
+      </div>`;
+        }
+      }
+      return html;
+    }
+
+    // ── 主查询函数 ──
+    function doTimeCalc() {
+      if (!tcSelectedCrop) { alert('请先选择作物'); return; }
+      const crop = tcSelectedCrop;
+      const sameTime = document.getElementById('tcSameTime').checked;
+      const useFert = document.getElementById('tcUseFert').checked;
+      const useFertS2 = document.getElementById('tcUseFertS2').checked && crop.seasons === 2;
+      const skippedIndices = useFert ? [...tcFertSelected] : [];
+      const skippedIndicesS2 = useFertS2 ? [...tcFertSelectedS2] : [];
+
+      // 获取种植时间
+      let plantTimes = {};
+      if (sameTime) {
+        const t = parseTimeInput(document.getElementById('tcPlantTime').value);
+        plantTimes = { 1: t, 2: t, 3: t, 4: t };
+      } else {
+        const t12 = parseTimeInput(document.getElementById('tcTimeLand1').value);
+        const t3 = parseTimeInput(document.getElementById('tcTimeLand3').value);
+        const t4 = parseTimeInput(document.getElementById('tcTimeLand4').value);
+        plantTimes = { 1: t12, 2: t12, 3: t3, 4: t4 };
+      }
+
+      const allPhases = crop.phases;
+      const activePhases = allPhases.filter(p => p.seconds > 0);
+      const cropExp = crop.exp || 0;
+
+      // 土地类型 —— 普通(1)和红(2)时间缩减都为0%，合并展示
+      const landTypes = [
+        { levels: [1, 2], name: '🌱 普通/红土地', reduce: 0, color: 'var(--text-muted)', dataLand: '1' },
+        { levels: [3], name: '🥈 黑土地', reduce: 0.10, color: 'var(--text-muted)', dataLand: '3' },
+        { levels: [4], name: '🥇 金土地', reduce: 0.20, color: '#f59e0b', dataLand: '4' },
+      ];
+
+      // 经验加成映射
+      const EXP_BONUS = { 1: 0, 2: 0, 3: 0, 4: 0.20 };
+
+      let html = '';
+
+      // 摘要
+      let fertSummaryParts = [];
+      if (useFert && skippedIndices.length > 0) {
+        fertSummaryParts.push(`🧪 一季化肥跳过: ${skippedIndices.map(i => `第${i + 1}阶段「${activePhases[i].name}」`).join(', ')}`);
+      }
+      if (useFertS2 && skippedIndicesS2.length > 0) {
+        const s2ActivePhases = activePhases.slice(-2);
+        fertSummaryParts.push(`🔄 二季化肥跳过: ${skippedIndicesS2.map(i => `「${s2ActivePhases[i].name}」`).join(', ')}`);
+      }
+      const fertSummary = fertSummaryParts.length > 0 ? fertSummaryParts.join(' · ') : '不使用化肥';
+      const expText = cropExp > 0 ? `⭐ 经验 ${cropExp}${crop.seasons === 2 ? '×2季' : ''}` : '';
+      html += `<div class="calc-summary" style="margin-bottom:1rem;">
+    <span class="sum-item">🌱 ${crop.name}</span>
+    <span class="sum-item">🎯 Lv${crop.level}</span>
+    <span class="sum-item">${crop.seasons === 2 ? '🔄 两季作物' : '单季作物'}</span>
+    ${expText ? `<span class="sum-item">${expText}</span>` : ''}
+    <span class="sum-item">${fertSummary}</span>
+  </div>`;
+
+      html += '<div class="tc-results">';
+
+      for (const land of landTypes) {
+        const startSec = plantTimes[land.levels[0]];
+        const s1Timeline = calcPhaseTimeline(allPhases, land.reduce, startSec, skippedIndices);
+        const s1Last = s1Timeline[s1Timeline.length - 1];
+        let finalTime = s1Last.endSec;
+
+        html += `<div class="tc-land-card" data-land="${land.dataLand}">`;
+
+        // 经验显示（取该组土地中最高经验加成来显示提示）
+        const maxExpBonus = Math.max(...land.levels.map(l => EXP_BONUS[l] || 0));
+        const expPerSeason = cropExp > 0 ? Math.floor(cropExp * (1 + maxExpBonus)) : 0;
+
+        if (crop.seasons === 2 && activePhases.length >= 2) {
+          // 两季作物
+          html += `<div class="tc-land-header" style="color:${land.color};">
+        <span>${land.name}${land.reduce > 0 ? ' (时间-' + Math.round(land.reduce * 100) + '%)' : ' (无时间加成)'}</span>
+        ${expPerSeason > 0 ? `<span style="font-size:0.75rem;color:var(--text-main);">⭐ ${expPerSeason}×2 = ${expPerSeason * 2}经验</span>` : ''}
+      </div>`;
+
+          // 第一季
+          html += `<div class="tc-season-divider">🌿 第一季 — 成熟: ${formatTimeClock(s1Last.endSec)}${expPerSeason > 0 ? ' · ⭐' + expPerSeason + '经验' : ''}</div>`;
+          html += renderPhaseRows(s1Timeline);
+
+          // 第二季：最后2个active阶段 + mature阶段
+          const s2ActiveStart = activePhases.length - 2;
+          const s2Phases = [];
+          let aCnt = 0;
+          for (let i = 0; i < allPhases.length; i++) {
+            if (allPhases[i].seconds > 0) {
+              if (aCnt >= s2ActiveStart) s2Phases.push(allPhases[i]);
+              aCnt++;
+            }
+          }
+          const maturePhase = allPhases.find(p => p.seconds === 0);
+          if (maturePhase) s2Phases.push(maturePhase);
+
+          // 第二季化肥
+          const s2Timeline = calcPhaseTimeline(s2Phases, land.reduce, s1Last.endSec, skippedIndicesS2);
+          const s2Last = s2Timeline[s2Timeline.length - 1];
+          finalTime = s2Last.endSec;
+
+          const s2FertNote = useFertS2 ? ' · 🧪化肥' : '';
+          html += `<div class="tc-season-divider">🔄 第二季${s2FertNote} — 成熟: ${formatTimeClock(s2Last.endSec)}${expPerSeason > 0 ? ' · ⭐' + expPerSeason + '经验' : ''}</div>`;
+          html += renderPhaseRows(s2Timeline);
+        } else {
+          // 单季作物
+          const reductionText = land.reduce > 0 ? ` (时间-${Math.round(land.reduce * 100)}%)` : ' (无时间加成)';
+          html += `<div class="tc-land-header" style="color:${land.color};">
+        <span>${land.name}${reductionText}</span>
+        <span style="display:flex;align-items:center;gap:0.5rem;">
+          ${expPerSeason > 0 ? `<span style="font-size:0.75rem;color:var(--text-main);">⭐ ${expPerSeason}经验</span>` : ''}
+          <span class="tc-harvest-time">成熟: ${formatTimeClock(finalTime)}</span>
+        </span>
+      </div>`;
+          html += renderPhaseRows(s1Timeline);
+        }
+
+        // 对两季作物，在卡片底部添加汇总
+        if (crop.seasons === 2 && activePhases.length >= 2) {
+          const totalDur = finalTime - startSec;
+          const totalExp = expPerSeason * 2;
+          html += `<div style="padding:0.5rem 1rem; background:rgba(var(--color-primary-100), 0.2); border-top:1px solid rgba(var(--color-primary-300), 0.4); font-size:0.78rem; color:rgb(var(--color-primary-800)); display:flex; justify-content:space-between; flex-wrap:wrap; gap:0.25rem;">
+        <span>📊 两季总耗时: ${formatSec(totalDur)}</span>
+        ${totalExp > 0 ? `<span>⭐ 总经验: ${totalExp}</span>` : ''}
+        <span style="font-weight:700;">🎯 最终成熟: ${formatTimeClock(finalTime)}</span>
+      </div>`;
+        }
+
+        html += '</div>';
+      }
+
+      html += '</div>';
+
+      document.getElementById('tcResultArea').innerHTML = html;
+      document.getElementById('tcResultArea').classList.remove('hidden');
+      document.getElementById('tcPlaceholder').classList.add('hidden');
+    }
+
+    // 回车触发时间计算
+    document.getElementById('tcLevel').addEventListener('keydown', e => { if (e.key === 'Enter') doTimeCalc(); });
+    document.getElementById('tcCropSearch').addEventListener('keydown', e => { if (e.key === 'Enter') { document.getElementById('tcDropdown').classList.add('hidden'); doTimeCalc(); } });
+  </script>
+
+</body>
+
+</html>

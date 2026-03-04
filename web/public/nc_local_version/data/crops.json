@@ -1,0 +1,4944 @@
+{
+  "count": 85,
+  "crops": [
+    {
+      "seed_id": 20002,
+      "name": "白萝卜",
+      "level": 1,
+      "price": 1,
+      "exp": 1,
+      "fruitCount": 5,
+      "fruitSellPrice": 2,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 30,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 30,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20003,
+      "name": "胡萝卜",
+      "level": 2,
+      "price": 2,
+      "exp": 2,
+      "fruitCount": 10,
+      "fruitSellPrice": 2,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 30,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 30,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 30,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 30,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20059,
+      "name": "大白菜",
+      "level": 3,
+      "price": 5,
+      "exp": 5,
+      "fruitCount": 20,
+      "fruitSellPrice": 2,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 60,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 60,
+          "img": ""
+        },
+        {
+          "name": "幼苗",
+          "seconds": 60,
+          "img": ""
+        },
+        {
+          "name": "成株",
+          "seconds": 60,
+          "img": ""
+        },
+        {
+          "name": "卷心",
+          "seconds": 60,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20065,
+      "name": "大蒜",
+      "level": 4,
+      "price": 10,
+      "exp": 10,
+      "fruitCount": 20,
+      "fruitSellPrice": 5,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 120,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 120,
+          "img": ""
+        },
+        {
+          "name": "幼苗",
+          "seconds": 120,
+          "img": ""
+        },
+        {
+          "name": "伸长",
+          "seconds": 120,
+          "img": ""
+        },
+        {
+          "name": "初熟",
+          "seconds": 120,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20064,
+      "name": "大葱",
+      "level": 5,
+      "price": 21,
+      "exp": 20,
+      "fruitCount": 30,
+      "fruitSellPrice": 7,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 300,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 300,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 300,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 300,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20060,
+      "name": "水稻",
+      "level": 6,
+      "price": 42,
+      "exp": 41,
+      "fruitCount": 30,
+      "fruitSellPrice": 14,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 480,
+          "img": ""
+        },
+        {
+          "name": "幼苗",
+          "seconds": 480,
+          "img": ""
+        },
+        {
+          "name": "秧苗",
+          "seconds": 480,
+          "img": ""
+        },
+        {
+          "name": "幼穗",
+          "seconds": 480,
+          "img": ""
+        },
+        {
+          "name": "开花",
+          "seconds": 480,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20061,
+      "name": "小麦",
+      "level": 7,
+      "price": 63,
+      "exp": 62,
+      "fruitCount": 40,
+      "fruitSellPrice": 15,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 720,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 720,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 720,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 720,
+          "img": ""
+        },
+        {
+          "name": "幼穗",
+          "seconds": 720,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20004,
+      "name": "玉米",
+      "level": 8,
+      "price": 84,
+      "exp": 82,
+      "fruitCount": 40,
+      "fruitSellPrice": 21,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 960,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 960,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 960,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 960,
+          "img": ""
+        },
+        {
+          "name": "开花",
+          "seconds": 960,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20066,
+      "name": "鲜姜",
+      "level": 9,
+      "price": 111,
+      "exp": 106,
+      "fruitCount": 60,
+      "fruitSellPrice": 18,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 1500,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 1500,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 1500,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 1500,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20005,
+      "name": "土豆",
+      "level": 10,
+      "price": 134,
+      "exp": 128,
+      "fruitCount": 60,
+      "fruitSellPrice": 22,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 1440,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 1440,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 1440,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 1440,
+          "img": ""
+        },
+        {
+          "name": "初熟",
+          "seconds": 1440,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20071,
+      "name": "小白菜",
+      "level": 11,
+      "price": 167,
+      "exp": 160,
+      "fruitCount": 80,
+      "fruitSellPrice": 20,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 2250,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 2250,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 2250,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 2250,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20096,
+      "name": "生菜",
+      "level": 12,
+      "price": 201,
+      "exp": 192,
+      "fruitCount": 80,
+      "fruitSellPrice": 25,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 2160,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 2160,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 2160,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 2160,
+          "img": ""
+        },
+        {
+          "name": "初熟",
+          "seconds": 2160,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20099,
+      "name": "油菜",
+      "level": 13,
+      "price": 288,
+      "exp": 272,
+      "fruitCount": 200,
+      "fruitSellPrice": 14,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 3600,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 3600,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 3600,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 3600,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20006,
+      "name": "茄子",
+      "level": 14,
+      "price": 576,
+      "exp": 544,
+      "fruitCount": 200,
+      "fruitSellPrice": 28,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 5760,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 5760,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 5760,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 5760,
+          "img": ""
+        },
+        {
+          "name": "开花",
+          "seconds": 5760,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "seed_id": 20051,
+      "name": "红枣",
+      "level": 15,
+      "price": 864,
+      "exp": 816,
+      "fruitCount": 200,
+      "fruitSellPrice": 43,
+      "seasons": 1,
+      "phases": [
+        {
+          "name": "种子",
+          "seconds": 8640,
+          "img": ""
+        },
+        {
+          "name": "发芽",
+          "seconds": 8640,
+          "img": ""
+        },
+        {
+          "name": "小叶子",
+          "seconds": 8640,
+          "img": ""
+        },
+        {
+          "name": "大叶子",
+          "seconds": 8640,
+          "img": ""
+        },
+        {
+          "name": "开花",
+          "seconds": 8640,
+          "img": ""
+        },
+        {
+          "name": "成熟",
+          "seconds": 0,
+          "img": ""
+        }
+      ]
+    },
+    {
+      "asset_name": "Crop_120",
+      "exp": 1632,
+      "land_level_need": 1,
+      "level": 16,
+      "name": "蒲公英",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_120_2.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_120_3.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_120_4.png",
+          "name": "花蕾",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_120_5.png",
+          "name": "盛开",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_120_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20120,
+      "price": 1728,
+      "fruitCount": 200,
+      "fruitSellPrice": 86,
+      "base_yield": 17200
+    },
+    {
+      "asset_name": "Crop_259",
+      "exp": 288,
+      "land_level_need": 1,
+      "level": 17,
+      "name": "银莲花",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_259_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_259_3.png",
+          "name": "小叶",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_259_4.png",
+          "name": "大叶",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_259_5.png",
+          "name": "花蕾",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_259_6.png",
+          "name": "开花",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20259,
+      "price": 320,
+      "fruitCount": 200,
+      "fruitSellPrice": 16,
+      "base_yield": 3200
+    },
+    {
+      "asset_name": "Crop_7",
+      "exp": 576,
+      "land_level_need": 1,
+      "level": 18,
+      "name": "番茄",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_7_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_7_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_7_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_7_5.png",
+          "name": "开花",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_7_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20007,
+      "price": 640,
+      "fruitCount": 200,
+      "fruitSellPrice": 32,
+      "base_yield": 6400
+    },
+    {
+      "asset_name": "Crop_98",
+      "exp": 864,
+      "land_level_need": 1,
+      "level": 19,
+      "name": "花菜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_98_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_98_3.png",
+          "name": "幼苗",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_98_4.png",
+          "name": "卷心",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_98_5.png",
+          "name": "初熟",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_98_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20098,
+      "price": 960,
+      "fruitCount": 200,
+      "fruitSellPrice": 48,
+      "base_yield": 9600
+    },
+    {
+      "asset_name": "Crop_305",
+      "exp": 1728,
+      "land_level_need": 1,
+      "level": 20,
+      "name": "韭菜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_305_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_305_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_305_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_305_5.png",
+          "name": "初熟",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_305_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20305,
+      "price": 1920,
+      "fruitCount": 200,
+      "fruitSellPrice": 96,
+      "base_yield": 19200
+    },
+    {
+      "asset_name": "Crop_105",
+      "exp": 304,
+      "land_level_need": 1,
+      "level": 21,
+      "name": "小雏菊",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_105_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_105_3.png",
+          "name": "小叶子",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_105_4.png",
+          "name": "大叶子",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_105_5.png",
+          "name": "初熟",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_105_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20105,
+      "price": 352,
+      "fruitCount": 200,
+      "fruitSellPrice": 17,
+      "base_yield": 3400
+    },
+    {
+      "asset_name": "Crop_8",
+      "exp": 608,
+      "land_level_need": 1,
+      "level": 22,
+      "name": "豌豆",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_8_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_8_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_8_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_8_5.png",
+          "name": "初熟",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_8_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20008,
+      "price": 704,
+      "fruitCount": 200,
+      "fruitSellPrice": 35,
+      "base_yield": 7000
+    },
+    {
+      "asset_name": "Crop_37",
+      "exp": 912,
+      "land_level_need": 1,
+      "level": 23,
+      "name": "莲藕",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_37_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_37_3.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_37_4.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_37_5.png",
+          "name": "开花",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_37_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20037,
+      "price": 1056,
+      "fruitCount": 200,
+      "fruitSellPrice": 52,
+      "base_yield": 10400
+    },
+    {
+      "asset_name": "Crop_41",
+      "exp": 1824,
+      "land_level_need": 1,
+      "level": 24,
+      "name": "红玫瑰",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_41_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_41_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_41_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_41_5.png",
+          "name": "初熟",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_41_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20041,
+      "price": 2112,
+      "fruitCount": 200,
+      "fruitSellPrice": 105,
+      "base_yield": 21000
+    },
+    {
+      "asset_name": "Crop_161",
+      "exp": 324,
+      "land_level_need": 1,
+      "level": 25,
+      "name": "秋菊（黄色）",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_161_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_161_3.png",
+          "name": "小叶子",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_161_4.png",
+          "name": "大叶子",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_161_5.png",
+          "name": "花蕾",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_161_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20161,
+      "price": 396,
+      "fruitCount": 200,
+      "fruitSellPrice": 19,
+      "base_yield": 3800
+    },
+    {
+      "asset_name": "Crop_110",
+      "exp": 648,
+      "land_level_need": 1,
+      "level": 26,
+      "name": "满天星",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_110_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_110_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_110_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_110_5.png",
+          "name": "花蕾",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_110_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20110,
+      "price": 792,
+      "fruitCount": 200,
+      "fruitSellPrice": 39,
+      "base_yield": 7800
+    },
+    {
+      "asset_name": "Crop_143",
+      "exp": 972,
+      "land_level_need": 1,
+      "level": 27,
+      "name": "含羞草",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_143_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_143_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_143_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_143_5.png",
+          "name": "花蕾",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_143_6.png",
+          "name": "盛开",
+          "seconds": 7200,
+          "slot": 6
+        },
+        {
+          "img": "plant_Crop_143_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20143,
+      "price": 1188,
+      "fruitCount": 200,
+      "fruitSellPrice": 59,
+      "base_yield": 11800
+    },
+    {
+      "asset_name": "Crop_147",
+      "exp": 1944,
+      "land_level_need": 1,
+      "level": 28,
+      "name": "牵牛花",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_147_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_147_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_147_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_147_5.png",
+          "name": "花蕾",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_147_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20147,
+      "price": 2376,
+      "fruitCount": 200,
+      "fruitSellPrice": 118,
+      "base_yield": 23600
+    },
+    {
+      "asset_name": "Crop_162",
+      "exp": 344,
+      "land_level_need": 1,
+      "level": 29,
+      "name": "秋菊（红色）",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_162_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_162_3.png",
+          "name": "小叶子",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_162_4.png",
+          "name": "大叶子",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_162_5.png",
+          "name": "花蕾",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_162_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20162,
+      "price": 444,
+      "fruitCount": 200,
+      "fruitSellPrice": 22,
+      "base_yield": 4400
+    },
+    {
+      "asset_name": "Crop_9",
+      "exp": 688,
+      "land_level_need": 1,
+      "level": 30,
+      "name": "辣椒",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_9_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_9_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_9_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_9_5.png",
+          "name": "初熟",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_9_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20009,
+      "price": 888,
+      "fruitCount": 200,
+      "fruitSellPrice": 44,
+      "base_yield": 8800
+    },
+    {
+      "asset_name": "Crop_97",
+      "exp": 1032,
+      "land_level_need": 1,
+      "level": 31,
+      "name": "黄瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_97_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_97_3.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_97_4.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_97_5.png",
+          "name": "开花",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_97_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20097,
+      "price": 1332,
+      "fruitCount": 200,
+      "fruitSellPrice": 66,
+      "base_yield": 13200
+    },
+    {
+      "asset_name": "Crop_306",
+      "exp": 2064,
+      "land_level_need": 1,
+      "level": 32,
+      "name": "芹菜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_306_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_306_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_306_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_306_5.png",
+          "name": "初熟",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_306_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20306,
+      "price": 2664,
+      "fruitCount": 200,
+      "fruitSellPrice": 133,
+      "base_yield": 26600
+    },
+    {
+      "asset_name": "Crop_103",
+      "exp": 368,
+      "land_level_need": 1,
+      "level": 33,
+      "name": "天香百合",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_103_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_103_3.png",
+          "name": "小叶子",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_103_4.png",
+          "name": "大叶子",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_103_5.png",
+          "name": "初熟",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_103_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20103,
+      "price": 496,
+      "fruitCount": 200,
+      "fruitSellPrice": 24,
+      "base_yield": 4800
+    },
+    {
+      "asset_name": "Crop_10",
+      "exp": 736,
+      "land_level_need": 1,
+      "level": 34,
+      "name": "南瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_10_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_10_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_10_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_10_5.png",
+          "name": "初熟",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_10_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20010,
+      "price": 992,
+      "fruitCount": 200,
+      "fruitSellPrice": 49,
+      "base_yield": 9800
+    },
+    {
+      "asset_name": "Crop_308",
+      "exp": 1104,
+      "land_level_need": 1,
+      "level": 35,
+      "name": "核桃",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 10800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_308_2.png",
+          "name": "发芽",
+          "seconds": 10800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_308_3.png",
+          "name": "小叶子",
+          "seconds": 10800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_308_5.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_308_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20308,
+      "price": 1488,
+      "fruitCount": 200,
+      "fruitSellPrice": 74,
+      "base_yield": 14800
+    },
+    {
+      "asset_name": "Crop_91",
+      "exp": 2208,
+      "land_level_need": 1,
+      "level": 36,
+      "name": "山楂",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_91_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_91_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_91_4.png",
+          "name": "大叶子",
+          "seconds": 14400,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_91_5.png",
+          "name": "开花",
+          "seconds": 14400,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_91_6.png",
+          "name": "初熟",
+          "seconds": 14400,
+          "slot": 6
+        },
+        {
+          "img": "plant_Crop_91_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20091,
+      "price": 2976,
+      "fruitCount": 200,
+      "fruitSellPrice": 148,
+      "base_yield": 29600
+    },
+    {
+      "asset_name": "Crop_73",
+      "exp": 392,
+      "land_level_need": 1,
+      "level": 37,
+      "name": "菠菜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_73_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_73_3.png",
+          "name": "小叶子",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_73_4.png",
+          "name": "大叶子",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_73_5.png",
+          "name": "初熟",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_73_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20073,
+      "price": 560,
+      "fruitCount": 200,
+      "fruitSellPrice": 28,
+      "base_yield": 5600
+    },
+    {
+      "asset_name": "Crop_1",
+      "exp": 784,
+      "land_level_need": 1,
+      "level": 38,
+      "name": "草莓",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_1_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_1_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_1_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_1_5.png",
+          "name": "开花",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_1_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20001,
+      "price": 1120,
+      "fruitCount": 200,
+      "fruitSellPrice": 56,
+      "base_yield": 11200
+    },
+    {
+      "asset_name": "Crop_11",
+      "exp": 1176,
+      "land_level_need": 1,
+      "level": 39,
+      "name": "苹果",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_11_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_11_3.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_11_4.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_11_5.png",
+          "name": "开花",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_11_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20011,
+      "price": 1680,
+      "fruitCount": 200,
+      "fruitSellPrice": 84,
+      "base_yield": 16800
+    },
+    {
+      "asset_name": "Crop_62",
+      "exp": 2352,
+      "land_level_need": 1,
+      "level": 40,
+      "name": "四叶草",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_62_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_62_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_62_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_62_5.png",
+          "name": "初熟",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_62_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20062,
+      "price": 3360,
+      "fruitCount": 200,
+      "fruitSellPrice": 168,
+      "base_yield": 33600
+    },
+    {
+      "asset_name": "Crop_104",
+      "exp": 420,
+      "land_level_need": 1,
+      "level": 41,
+      "name": "非洲菊",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_104_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_104_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_104_4.png",
+          "name": "大叶子",
+          "seconds": 2400,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_104_5.png",
+          "name": "花蕾",
+          "seconds": 2400,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_104_6.png",
+          "name": "盛开",
+          "seconds": 2400,
+          "slot": 6
+        },
+        {
+          "img": "plant_Crop_104_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20104,
+      "price": 624,
+      "fruitCount": 200,
+      "fruitSellPrice": 31,
+      "base_yield": 6200
+    },
+    {
+      "asset_name": "Crop_135",
+      "exp": 840,
+      "land_level_need": 1,
+      "level": 42,
+      "name": "火绒草",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_135_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_135_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_135_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_135_5.png",
+          "name": "花蕾",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_135_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20135,
+      "price": 1248,
+      "fruitCount": 200,
+      "fruitSellPrice": 62,
+      "base_yield": 12400
+    },
+    {
+      "asset_name": "Crop_141",
+      "exp": 1260,
+      "land_level_need": 1,
+      "level": 43,
+      "name": "花香根鸢尾",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_141_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_141_3.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_141_4.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_141_5.png",
+          "name": "花蕾",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_141_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20141,
+      "price": 1872,
+      "fruitCount": 200,
+      "fruitSellPrice": 93,
+      "base_yield": 18600
+    },
+    {
+      "asset_name": "Crop_142",
+      "exp": 2520,
+      "land_level_need": 1,
+      "level": 44,
+      "name": "虞美人",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_142_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_142_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_142_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_142_5.png",
+          "name": "花蕾",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_142_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20142,
+      "price": 3744,
+      "fruitCount": 200,
+      "fruitSellPrice": 187,
+      "base_yield": 37400
+    },
+    {
+      "asset_name": "Crop_145",
+      "exp": 448,
+      "land_level_need": 1,
+      "level": 45,
+      "name": "向日葵",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_145_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_145_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_145_4.png",
+          "name": "大叶子",
+          "seconds": 2400,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_145_5.png",
+          "name": "开花",
+          "seconds": 2400,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_145_6.png",
+          "name": "初熟",
+          "seconds": 2400,
+          "slot": 6
+        },
+        {
+          "img": "plant_Crop_145_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20145,
+      "price": 700,
+      "fruitCount": 200,
+      "fruitSellPrice": 35,
+      "base_yield": 7000
+    },
+    {
+      "asset_name": "Crop_14",
+      "exp": 896,
+      "land_level_need": 1,
+      "level": 46,
+      "name": "西瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_14_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_14_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_14_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_14_5.png",
+          "name": "开花",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_14_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20014,
+      "price": 1400,
+      "fruitCount": 200,
+      "fruitSellPrice": 70,
+      "base_yield": 14000
+    },
+    {
+      "asset_name": "Crop_70",
+      "exp": 1344,
+      "land_level_need": 1,
+      "level": 47,
+      "name": "黄豆",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_70_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_70_3.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_70_4.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_70_5.png",
+          "name": "初熟",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_70_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20070,
+      "price": 2100,
+      "fruitCount": 200,
+      "fruitSellPrice": 105,
+      "base_yield": 21000
+    },
+    {
+      "asset_name": "Crop_15",
+      "exp": 2688,
+      "land_level_need": 1,
+      "level": 48,
+      "name": "香蕉",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_15_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_15_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_15_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_15_5.png",
+          "name": "开花",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_15_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20015,
+      "price": 4200,
+      "fruitCount": 200,
+      "fruitSellPrice": 210,
+      "base_yield": 42000
+    },
+    {
+      "asset_name": "Crop_100",
+      "exp": 476,
+      "land_level_need": 1,
+      "level": 49,
+      "name": "竹笋",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_100_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_100_3.png",
+          "name": "幼苗",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_100_4.png",
+          "name": "伸长",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_100_5.png",
+          "name": "初熟",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_100_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20100,
+      "price": 780,
+      "fruitCount": 200,
+      "fruitSellPrice": 39,
+      "base_yield": 7800
+    },
+    {
+      "asset_name": "Crop_18",
+      "exp": 952,
+      "land_level_need": 1,
+      "level": 50,
+      "name": "桃子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_18_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_18_3.png",
+          "name": "开花",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_18_4.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_18_5.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_18_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20018,
+      "price": 1560,
+      "fruitCount": 200,
+      "fruitSellPrice": 78,
+      "base_yield": 15600
+    },
+    {
+      "asset_name": "Crop_47",
+      "exp": 1428,
+      "land_level_need": 1,
+      "level": 51,
+      "name": "甘蔗",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_47_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_47_3.png",
+          "name": "幼苗",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_47_4.png",
+          "name": "分叶",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_47_5.png",
+          "name": "伸长",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_47_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20047,
+      "price": 2340,
+      "fruitCount": 200,
+      "fruitSellPrice": 117,
+      "base_yield": 23400
+    },
+    {
+      "asset_name": "Crop_19",
+      "exp": 2856,
+      "land_level_need": 1,
+      "level": 52,
+      "name": "橙子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_19_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_19_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_19_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_19_5.png",
+          "name": "开花",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_19_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20019,
+      "price": 4680,
+      "fruitCount": 200,
+      "fruitSellPrice": 234,
+      "base_yield": 46800
+    },
+    {
+      "asset_name": "Crop_128",
+      "exp": 508,
+      "land_level_need": 1,
+      "level": 53,
+      "name": "茉莉花",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_128_2.png",
+          "name": "发芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_128_3.png",
+          "name": "小叶子",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_128_4.png",
+          "name": "大叶子",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_128_5.png",
+          "name": "花蕾",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_128_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20128,
+      "price": 864,
+      "fruitCount": 200,
+      "fruitSellPrice": 43,
+      "base_yield": 8600
+    },
+    {
+      "asset_name": "Crop_13",
+      "exp": 1016,
+      "land_level_need": 1,
+      "level": 54,
+      "name": "葡萄",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_13_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_13_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_13_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_13_5.png",
+          "name": "开花",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_13_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20013,
+      "price": 1728,
+      "fruitCount": 200,
+      "fruitSellPrice": 86,
+      "base_yield": 17200
+    },
+    {
+      "asset_name": "Crop_44",
+      "exp": 1524,
+      "land_level_need": 1,
+      "level": 55,
+      "name": "丝瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_44_2.png",
+          "name": "长枝",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_44_3.png",
+          "name": "开花",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_44_4.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_44_5.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_44_6.png",
+          "name": "结果",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20044,
+      "price": 2592,
+      "fruitCount": 200,
+      "fruitSellPrice": 129,
+      "base_yield": 25800
+    },
+    {
+      "asset_name": "Crop_72",
+      "exp": 3048,
+      "land_level_need": 1,
+      "level": 56,
+      "name": "榛子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_72_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_72_3.png",
+          "name": "开花",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_72_4.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_72_5.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_72_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20072,
+      "price": 5184,
+      "fruitCount": 200,
+      "fruitSellPrice": 259,
+      "base_yield": 51800
+    },
+    {
+      "asset_name": "Crop_396",
+      "exp": 540,
+      "land_level_need": 1,
+      "level": 57,
+      "name": "迎春花",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2880,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_396_2.png",
+          "name": "幼芽",
+          "seconds": 2880,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_396_3.png",
+          "name": "小叶",
+          "seconds": 2880,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_396_4.png",
+          "name": "大叶",
+          "seconds": 2880,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_396_5.png",
+          "name": "花蕾",
+          "seconds": 2880,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_396_6.png",
+          "name": "开花",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20396,
+      "price": 960,
+      "fruitCount": 200,
+      "fruitSellPrice": 48,
+      "base_yield": 9600
+    },
+    {
+      "asset_name": "Crop_23",
+      "exp": 1080,
+      "land_level_need": 1,
+      "level": 58,
+      "name": "石榴",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 5760,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_23_2.png",
+          "name": "发芽",
+          "seconds": 5760,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_23_3.png",
+          "name": "小叶子",
+          "seconds": 5760,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_23_4.png",
+          "name": "大叶子",
+          "seconds": 5760,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_23_5.png",
+          "name": "开花",
+          "seconds": 5760,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_23_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20023,
+      "price": 1920,
+      "fruitCount": 200,
+      "fruitSellPrice": 96,
+      "base_yield": 19200
+    },
+    {
+      "asset_name": "Crop_95",
+      "exp": 1620,
+      "land_level_need": 1,
+      "level": 59,
+      "name": "栗子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 8640,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_95_2.png",
+          "name": "发芽",
+          "seconds": 8640,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_95_3.png",
+          "name": "小叶子",
+          "seconds": 8640,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_95_4.png",
+          "name": "大叶子",
+          "seconds": 8640,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_95_5.png",
+          "name": "开花",
+          "seconds": 8640,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_95_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20095,
+      "price": 2880,
+      "fruitCount": 200,
+      "fruitSellPrice": 144,
+      "base_yield": 28800
+    },
+    {
+      "asset_name": "Crop_26",
+      "exp": 3240,
+      "land_level_need": 1,
+      "level": 60,
+      "name": "柚子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 17280,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_26_2.png",
+          "name": "发芽",
+          "seconds": 17280,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_26_3.png",
+          "name": "小叶子",
+          "seconds": 17280,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_26_4.png",
+          "name": "大叶子",
+          "seconds": 17280,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_26_5.png",
+          "name": "开花",
+          "seconds": 17280,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_26_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 1,
+      "seed_id": 20026,
+      "price": 5760,
+      "fruitCount": 200,
+      "fruitSellPrice": 288,
+      "base_yield": 57600
+    },
+    {
+      "asset_name": "Crop_50",
+      "exp": 429,
+      "land_level_need": 1,
+      "level": 61,
+      "name": "蘑菇",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 3600,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_50_2.png",
+          "name": "发芽",
+          "seconds": 3600,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_50_3.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_50_5.png",
+          "name": "初熟",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_50_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20050,
+      "price": 1584,
+      "fruitCount": 200,
+      "fruitSellPrice": 39,
+      "base_yield": 7800
+    },
+    {
+      "asset_name": "Crop_27",
+      "exp": 858,
+      "land_level_need": 1,
+      "level": 62,
+      "name": "菠萝",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_27_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_27_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_27_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_27_5.png",
+          "name": "开花",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_27_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20027,
+      "price": 3168,
+      "fruitCount": 200,
+      "fruitSellPrice": 79,
+      "base_yield": 15800
+    },
+    {
+      "asset_name": "Crop_36",
+      "exp": 1287,
+      "land_level_need": 1,
+      "level": 63,
+      "name": "箬竹",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_36_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_36_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_36_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_36_5.png",
+          "name": "初熟",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_36_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20036,
+      "price": 4752,
+      "fruitCount": 200,
+      "fruitSellPrice": 118,
+      "base_yield": 23600
+    },
+    {
+      "asset_name": "Crop_43",
+      "exp": 2574,
+      "land_level_need": 1,
+      "level": 64,
+      "name": "无花果",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_43_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_43_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_43_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_43_5.png",
+          "name": "开花",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_43_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20043,
+      "price": 9504,
+      "fruitCount": 200,
+      "fruitSellPrice": 237,
+      "base_yield": 47400
+    },
+    {
+      "asset_name": "Crop_29",
+      "exp": 456,
+      "land_level_need": 1,
+      "level": 65,
+      "name": "椰子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_29_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_29_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_29_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_29_5.png",
+          "name": "初熟",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_29_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20029,
+      "price": 1746,
+      "fruitCount": 200,
+      "fruitSellPrice": 43,
+      "base_yield": 8600
+    },
+    {
+      "asset_name": "Crop_49",
+      "exp": 912,
+      "land_level_need": 1,
+      "level": 66,
+      "name": "花生",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_49_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_49_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_49_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_49_5.png",
+          "name": "初熟",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_49_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20049,
+      "price": 3492,
+      "fruitCount": 200,
+      "fruitSellPrice": 87,
+      "base_yield": 17400
+    },
+    {
+      "asset_name": "Crop_52",
+      "exp": 1368,
+      "land_level_need": 1,
+      "level": 67,
+      "name": "金针菇",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_52_2.png",
+          "name": "发菌",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_52_3.png",
+          "name": "出菇",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_52_4.png",
+          "name": "幼菇",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_52_5.png",
+          "name": "初熟",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_52_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20052,
+      "price": 5238,
+      "fruitCount": 200,
+      "fruitSellPrice": 130,
+      "base_yield": 26000
+    },
+    {
+      "asset_name": "Crop_31",
+      "exp": 2736,
+      "land_level_need": 1,
+      "level": 68,
+      "name": "葫芦",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_31_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_31_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_31_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_31_5.png",
+          "name": "初熟",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_31_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20031,
+      "price": 10476,
+      "fruitCount": 200,
+      "fruitSellPrice": 261,
+      "base_yield": 52200
+    },
+    {
+      "asset_name": "Crop_45",
+      "exp": 480,
+      "land_level_need": 1,
+      "level": 69,
+      "name": "猕猴桃",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_45_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_45_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_45_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_45_5.png",
+          "name": "开花",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_45_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20045,
+      "price": 1914,
+      "fruitCount": 200,
+      "fruitSellPrice": 47,
+      "base_yield": 9400
+    },
+    {
+      "asset_name": "Crop_54",
+      "exp": 960,
+      "land_level_need": 1,
+      "level": 70,
+      "name": "梨",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_54_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_54_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_54_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_54_5.png",
+          "name": "初熟",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_54_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20054,
+      "price": 3828,
+      "fruitCount": 200,
+      "fruitSellPrice": 95,
+      "base_yield": 19000
+    },
+    {
+      "asset_name": "Crop_442",
+      "exp": 1440,
+      "land_level_need": 1,
+      "level": 71,
+      "name": "睡莲",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_442_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_442_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_442_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_442_5.png",
+          "name": "幼株",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_442_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20442,
+      "price": 5742,
+      "fruitCount": 200,
+      "fruitSellPrice": 143,
+      "base_yield": 28600
+    },
+    {
+      "asset_name": "Crop_33",
+      "exp": 2880,
+      "land_level_need": 1,
+      "level": 72,
+      "name": "火龙果",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_33_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_33_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_33_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_33_5.png",
+          "name": "初熟",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_33_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20033,
+      "price": 11484,
+      "fruitCount": 200,
+      "fruitSellPrice": 287,
+      "base_yield": 57400
+    },
+    {
+      "asset_name": "Crop_55",
+      "exp": 510,
+      "land_level_need": 1,
+      "level": 73,
+      "name": "枇杷",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_55_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_55_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_55_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_55_5.png",
+          "name": "初熟",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_55_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20055,
+      "price": 2088,
+      "fruitCount": 200,
+      "fruitSellPrice": 52,
+      "base_yield": 10400
+    },
+    {
+      "asset_name": "Crop_34",
+      "exp": 1020,
+      "land_level_need": 1,
+      "level": 74,
+      "name": "樱桃",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_34_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_34_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_34_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_34_5.png",
+          "name": "开花",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_34_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20034,
+      "price": 4176,
+      "fruitCount": 200,
+      "fruitSellPrice": 104,
+      "base_yield": 20800
+    },
+    {
+      "asset_name": "Crop_413",
+      "exp": 1530,
+      "land_level_need": 1,
+      "level": 75,
+      "name": "李子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_413_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_413_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_413_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_413_5.png",
+          "name": "开花",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_413_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20413,
+      "price": 6264,
+      "fruitCount": 200,
+      "fruitSellPrice": 156,
+      "base_yield": 31200
+    },
+    {
+      "asset_name": "Crop_35",
+      "exp": 3060,
+      "land_level_need": 1,
+      "level": 76,
+      "name": "荔枝",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_35_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_35_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_35_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_35_5.png",
+          "name": "开花",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_35_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20035,
+      "price": 12528,
+      "fruitCount": 200,
+      "fruitSellPrice": 313,
+      "base_yield": 62600
+    },
+    {
+      "asset_name": "Crop_67",
+      "exp": 537,
+      "land_level_need": 1,
+      "level": 77,
+      "name": "香瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_67_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_67_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_67_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_67_5.png",
+          "name": "开花",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_67_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20067,
+      "price": 2280,
+      "fruitCount": 200,
+      "fruitSellPrice": 57,
+      "base_yield": 11400
+    },
+    {
+      "asset_name": "Crop_38",
+      "exp": 1074,
+      "land_level_need": 1,
+      "level": 78,
+      "name": "木瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_38_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_38_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_38_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_38_5.png",
+          "name": "开花",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_38_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20038,
+      "price": 4560,
+      "fruitCount": 200,
+      "fruitSellPrice": 114,
+      "base_yield": 22800
+    },
+    {
+      "asset_name": "Crop_53",
+      "exp": 1611,
+      "land_level_need": 1,
+      "level": 79,
+      "name": "桂圆",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_53_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_53_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_53_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_53_5.png",
+          "name": "开花",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_53_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20053,
+      "price": 6840,
+      "fruitCount": 200,
+      "fruitSellPrice": 171,
+      "base_yield": 34200
+    },
+    {
+      "asset_name": "Crop_80",
+      "exp": 3222,
+      "land_level_need": 1,
+      "level": 80,
+      "name": "月柿",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_80_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_80_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_80_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_80_5.png",
+          "name": "开花",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_80_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20080,
+      "price": 13680,
+      "fruitCount": 200,
+      "fruitSellPrice": 342,
+      "base_yield": 68400
+    },
+    {
+      "asset_name": "Crop_39",
+      "exp": 567,
+      "land_level_need": 1,
+      "level": 81,
+      "name": "杨桃",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_39_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_39_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_39_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_39_5.png",
+          "name": "开花",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_39_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20039,
+      "price": 2472,
+      "fruitCount": 200,
+      "fruitSellPrice": 61,
+      "base_yield": 12200
+    },
+    {
+      "asset_name": "Crop_56",
+      "exp": 1134,
+      "land_level_need": 1,
+      "level": 82,
+      "name": "哈密瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_56_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_56_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_56_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_56_5.png",
+          "name": "开花",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_56_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20056,
+      "price": 4944,
+      "fruitCount": 200,
+      "fruitSellPrice": 123,
+      "base_yield": 24600
+    },
+    {
+      "asset_name": "Crop_75",
+      "exp": 1701,
+      "land_level_need": 1,
+      "level": 83,
+      "name": "桑葚",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_75_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_75_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_75_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_75_5.png",
+          "name": "开花",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_75_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20075,
+      "price": 7416,
+      "fruitCount": 200,
+      "fruitSellPrice": 185,
+      "base_yield": 37000
+    },
+    {
+      "asset_name": "Crop_42",
+      "exp": 3402,
+      "land_level_need": 1,
+      "level": 84,
+      "name": "柠檬",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_42_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_42_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_42_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_42_5.png",
+          "name": "初熟",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_42_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20042,
+      "price": 14832,
+      "fruitCount": 200,
+      "fruitSellPrice": 370,
+      "base_yield": 74000
+    },
+    {
+      "asset_name": "Crop_57",
+      "exp": 597,
+      "land_level_need": 1,
+      "level": 85,
+      "name": "芒果",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_57_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_57_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_57_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_57_5.png",
+          "name": "初熟",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_57_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20057,
+      "price": 2682,
+      "fruitCount": 200,
+      "fruitSellPrice": 67,
+      "base_yield": 13400
+    },
+    {
+      "asset_name": "Crop_48",
+      "exp": 1194,
+      "land_level_need": 1,
+      "level": 86,
+      "name": "杨梅",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_48_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_48_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_48_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_48_5.png",
+          "name": "开花",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_48_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20048,
+      "price": 5364,
+      "fruitCount": 200,
+      "fruitSellPrice": 134,
+      "base_yield": 26800
+    },
+    {
+      "asset_name": "Crop_58",
+      "exp": 1791,
+      "land_level_need": 1,
+      "level": 87,
+      "name": "榴莲",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_58_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_58_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_58_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_58_5.png",
+          "name": "开花",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_58_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20058,
+      "price": 8046,
+      "fruitCount": 200,
+      "fruitSellPrice": 201,
+      "base_yield": 40200
+    },
+    {
+      "asset_name": "Crop_79",
+      "exp": 3582,
+      "land_level_need": 1,
+      "level": 88,
+      "name": "番石榴",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_79_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_79_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_79_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_79_5.png",
+          "name": "开花",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_79_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20079,
+      "price": 16092,
+      "fruitCount": 200,
+      "fruitSellPrice": 402,
+      "base_yield": 80400
+    },
+    {
+      "asset_name": "Crop_218",
+      "exp": 627,
+      "land_level_need": 1,
+      "level": 89,
+      "name": "瓶子树",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_218_2.png",
+          "name": "长枝",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_218_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_218_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_218_5.png",
+          "name": "初熟",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_218_6.png",
+          "name": "成树",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20218,
+      "price": 2898,
+      "fruitCount": 200,
+      "fruitSellPrice": 72,
+      "base_yield": 14400
+    },
+    {
+      "asset_name": "Crop_77",
+      "exp": 1254,
+      "land_level_need": 1,
+      "level": 90,
+      "name": "蓝莓",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_77_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_77_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_77_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_77_5.png",
+          "name": "初熟",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_77_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20077,
+      "price": 5796,
+      "fruitCount": 200,
+      "fruitSellPrice": 144,
+      "base_yield": 28800
+    },
+    {
+      "asset_name": "Crop_220",
+      "exp": 1881,
+      "land_level_need": 1,
+      "level": 91,
+      "name": "猪笼草",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_220_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_220_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_220_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_220_5.png",
+          "name": "初熟",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_220_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20220,
+      "price": 8694,
+      "fruitCount": 200,
+      "fruitSellPrice": 217,
+      "base_yield": 43400
+    },
+    {
+      "asset_name": "Crop_76",
+      "exp": 3762,
+      "land_level_need": 1,
+      "level": 92,
+      "name": "山竹",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_76_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_76_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_76_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_76_5.png",
+          "name": "开花",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_76_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20076,
+      "price": 17388,
+      "fruitCount": 200,
+      "fruitSellPrice": 434,
+      "base_yield": 86800
+    },
+    {
+      "asset_name": "Crop_116",
+      "exp": 660,
+      "land_level_need": 1,
+      "level": 93,
+      "name": "曼陀罗华",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_116_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_116_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_116_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_116_5.png",
+          "name": "花蕾",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_116_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20116,
+      "price": 3120,
+      "fruitCount": 200,
+      "fruitSellPrice": 78,
+      "base_yield": 15600
+    },
+    {
+      "asset_name": "Crop_126",
+      "exp": 1320,
+      "land_level_need": 1,
+      "level": 94,
+      "name": "曼珠沙华",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_126_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_126_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_126_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_126_5.png",
+          "name": "初熟",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_126_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20126,
+      "price": 6240,
+      "fruitCount": 200,
+      "fruitSellPrice": 156,
+      "base_yield": 31200
+    },
+    {
+      "asset_name": "Crop_63",
+      "exp": 1980,
+      "land_level_need": 1,
+      "level": 95,
+      "name": "苦瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_63_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_63_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_63_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_63_5.png",
+          "name": "开花",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_63_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20063,
+      "price": 9360,
+      "fruitCount": 200,
+      "fruitSellPrice": 234,
+      "base_yield": 46800
+    },
+    {
+      "asset_name": "Crop_221",
+      "exp": 3960,
+      "land_level_need": 1,
+      "level": 96,
+      "name": "天堂鸟",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_221_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_221_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_221_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_221_5.png",
+          "name": "花蕾",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_221_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20221,
+      "price": 18720,
+      "fruitCount": 200,
+      "fruitSellPrice": 468,
+      "base_yield": 93600
+    },
+    {
+      "asset_name": "Crop_68",
+      "exp": 693,
+      "land_level_need": 1,
+      "level": 97,
+      "name": "冬瓜",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 2400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_68_2.png",
+          "name": "发芽",
+          "seconds": 2400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_68_3.png",
+          "name": "小叶子",
+          "seconds": 2400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_68_4.png",
+          "name": "大叶子",
+          "seconds": 3600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_68_5.png",
+          "name": "开花",
+          "seconds": 3600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_68_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20068,
+      "price": 3360,
+      "fruitCount": 200,
+      "fruitSellPrice": 84,
+      "base_yield": 16800
+    },
+    {
+      "asset_name": "Crop_222",
+      "exp": 1386,
+      "land_level_need": 1,
+      "level": 98,
+      "name": "豹皮花",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 4800,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_222_2.png",
+          "name": "发芽",
+          "seconds": 4800,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_222_3.png",
+          "name": "小叶子",
+          "seconds": 4800,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_222_4.png",
+          "name": "大叶子",
+          "seconds": 7200,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_222_5.png",
+          "name": "花蕾",
+          "seconds": 7200,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_222_6.png",
+          "name": "盛开",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20222,
+      "price": 6720,
+      "fruitCount": 200,
+      "fruitSellPrice": 168,
+      "base_yield": 33600
+    },
+    {
+      "asset_name": "Crop_78",
+      "exp": 2079,
+      "land_level_need": 1,
+      "level": 99,
+      "name": "杏子",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 7200,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_78_2.png",
+          "name": "发芽",
+          "seconds": 7200,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_78_3.png",
+          "name": "小叶子",
+          "seconds": 7200,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_78_4.png",
+          "name": "大叶子",
+          "seconds": 10800,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_78_5.png",
+          "name": "初熟",
+          "seconds": 10800,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_78_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20078,
+      "price": 10080,
+      "fruitCount": 200,
+      "fruitSellPrice": 252,
+      "base_yield": 50400
+    },
+    {
+      "asset_name": "Crop_74",
+      "exp": 4158,
+      "land_level_need": 1,
+      "level": 100,
+      "name": "金桔",
+      "phases": [
+        {
+          "img": "plant_Crop_1_1.png",
+          "name": "种子",
+          "seconds": 14400,
+          "slot": "Seed"
+        },
+        {
+          "img": "plant_Crop_74_2.png",
+          "name": "发芽",
+          "seconds": 14400,
+          "slot": 2
+        },
+        {
+          "img": "plant_Crop_74_3.png",
+          "name": "小叶子",
+          "seconds": 14400,
+          "slot": 3
+        },
+        {
+          "img": "plant_Crop_74_4.png",
+          "name": "大叶子",
+          "seconds": 21600,
+          "slot": 4
+        },
+        {
+          "img": "plant_Crop_74_5.png",
+          "name": "初熟",
+          "seconds": 21600,
+          "slot": 5
+        },
+        {
+          "img": "plant_Crop_74_6.png",
+          "name": "成熟",
+          "seconds": 0,
+          "slot": 6
+        }
+      ],
+      "seasons": 2,
+      "seed_id": 20074,
+      "price": 20160,
+      "fruitCount": 200,
+      "fruitSellPrice": 504,
+      "base_yield": 100800
+    }
+  ],
+  "level_max": 100,
+  "level_min": 16
+}

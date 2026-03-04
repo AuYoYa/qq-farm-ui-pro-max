@@ -307,7 +307,7 @@ async function batchStealFromFriends(stealFriends, myGid) {
         await leaveFriendFarm(friend.gid);
 
         if (i < stealFriends.length - 1) {
-            await sleep(1000 + Math.floor(Math.random() * 3000));
+            await sleep(1500 + Math.floor(Math.random() * 3500)); // 🔧 优化：1.5~5秒，更保守模拟人类
         }
     }
 
@@ -400,9 +400,31 @@ async function batchHelpFriends(helpFriends, myGid) {
 // ============ 好友 API ============
 
 async function getAllFriends() {
-    const body = types.GetAllFriendsRequest.encode(types.GetAllFriendsRequest.create({})).finish();
-    const { body: replyBody } = await sendMsgAsync('gamepb.friendpb.FriendService', 'GetAll', body);
-    const reply = types.GetAllFriendsReply.decode(replyBody);
+    const isQQ = CONFIG.platform && CONFIG.platform.startsWith('qq');
+    let reply;
+
+    if (isQQ) {
+        try {
+            // QQ 平台：优先使用 SyncAll（传入空 open_ids 数组获取所有好友）
+            const requestObj = types.SyncAllFriendsRequest.create({ open_ids: [] });
+            const body = types.SyncAllFriendsRequest.encode(requestObj).finish();
+            const { body: replyBody } = await sendMsgAsync('gamepb.friendpb.FriendService', 'SyncAll', body);
+            reply = types.SyncAllFriendsReply.decode(replyBody);
+        } catch (syncErr) {
+            // SyncAll 不可用时降级到 GetAll
+            logWarn('好友', `SyncAll 失败，降级为 GetAll: ${syncErr.message}`, {
+                module: 'friend', event: 'sync_all_fallback', result: 'warn',
+            });
+            const body = types.GetAllFriendsRequest.encode(types.GetAllFriendsRequest.create({})).finish();
+            const { body: replyBody } = await sendMsgAsync('gamepb.friendpb.FriendService', 'GetAll', body);
+            reply = types.GetAllFriendsReply.decode(replyBody);
+        }
+    } else {
+        // 微信平台：使用 GetAll
+        const body = types.GetAllFriendsRequest.encode(types.GetAllFriendsRequest.create({})).finish();
+        const { body: replyBody } = await sendMsgAsync('gamepb.friendpb.FriendService', 'GetAll', body);
+        reply = types.GetAllFriendsReply.decode(replyBody);
+    }
 
     if (reply && reply.game_friends && networkEvents) {
         networkEvents.emit('friends_updated', reply.game_friends);
@@ -1453,10 +1475,8 @@ async function friendCheckLoop() {
     if (externalSchedulerMode) return;
     if (!friendLoopRunning) return;
 
-    // 定期检查好友申请是否开启
-    if (isAutomationOn('friend_auto_accept')) {
-        await checkAndAcceptApplications();
-    }
+    // 定期检查并处理好友申请（开关由 checkAndAcceptApplications 内部守卫）
+    await checkAndAcceptApplications();
 
     await checkFriends();
     if (!friendLoopRunning) return;

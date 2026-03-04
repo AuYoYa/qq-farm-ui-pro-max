@@ -908,6 +908,12 @@ function analyzeLands(lands) {
     const nowSec = getServerTimeSec();
     const debug = isFirstFarmCheck;
 
+    // 🔧 优化：将 getUserState / getConfigSnapshot 提取到循环外，避免每块地重复调用
+    const state = getUserState();
+    const isSuspended = state.suspendUntil && Date.now() < state.suspendUntil;
+    const fullCfg = getConfigSnapshot() || {};
+    const accountMode = fullCfg.accountMode || 'main';
+
     for (const land of lands) {
         const id = toNum(land.id);
         if (!land.unlocked) {
@@ -947,8 +953,7 @@ function analyzeLands(lands) {
                 : null;
             const matureBegin = maturePhase ? toTimeSec(maturePhase.begin_time) : 0;
 
-            const fullCfg = getConfigSnapshot() || {};
-            const accountMode = fullCfg.accountMode || 'main';
+            // 🔧 优化：使用循环外预计算的 fullCfg / accountMode
             const harvestDelay = fullCfg.harvestDelay || { min: 180, max: 300 };
 
             let isDelayed = false;
@@ -1010,12 +1015,9 @@ function analyzeLands(lands) {
 
         result.growing.push(id);
 
-        // 防偷60秒注册逻辑
-        const state = getUserState();
-        const isSuspended = state.suspendUntil && Date.now() < state.suspendUntil;
-
+        // 防偷60秒注册逻辑（🔧 优化：state / isSuspended 已在循环外预计算）
         // P0 (风控阻断) 与 P1/P2 (小号/避险模式阻断)
-        if (isAutomationOn('fertilizer_60s_anti_steal') && mode === 'main' && !isSuspended) {
+        if (isAutomationOn('fertilizer_60s_anti_steal') && accountMode === 'main' && !isSuspended) {
             const maturePhase = Array.isArray(plant.phases)
                 ? plant.phases.find((p) => p && toNum(p.phase) === PlantPhase.MATURE)
                 : null;

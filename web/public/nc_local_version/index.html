@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./static/植物.ico">
+  <title>🌾 QQ经典农场 · 工具集</title>
+  <script src="./static/js/tailwindcss-3.4.17.js"></script>
+  <script>
+        tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'rgba(var(--color-primary-50), <alpha-value>)',
+              100: 'rgba(var(--color-primary-100), <alpha-value>)',
+              200: 'rgba(var(--color-primary-200), <alpha-value>)',
+              300: 'rgba(var(--color-primary-300), <alpha-value>)',
+              400: 'rgba(var(--color-primary-400), <alpha-value>)',
+              500: 'rgba(var(--color-primary-500), <alpha-value>)',
+              600: 'rgba(var(--color-primary-600), <alpha-value>)',
+              700: 'rgba(var(--color-primary-700), <alpha-value>)',
+              800: 'rgba(var(--color-primary-800), <alpha-value>)',
+              900: 'rgba(var(--color-primary-900), <alpha-value>)',
+              950: 'rgba(var(--color-primary-950), <alpha-value>)',
+            },
+            farm: {
+              50:'rgba(var(--color-primary-100), 0.2)',100:'rgba(var(--color-primary-200), 0.3)',200:'rgba(var(--color-primary-300), 0.4)',
+              300:'rgb(var(--color-primary-300))',400:'rgb(var(--color-primary-400))',500:'rgb(var(--color-primary-500))',
+              600:'rgb(var(--color-primary-600))',700:'rgb(var(--color-primary-700))',800:'rgb(var(--color-primary-800))',900:'#14532d',
+            }
+          },
+          fontFamily: { sans: ['"Microsoft YaHei"','Segoe UI','sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: linear-gradient(135deg, var(--text-main) 0%, var(--text-main) 40%, #134e4a 100%);
+      overflow-y: auto;
+    }
+
+    /* 粒子背景 */
+    .particles {
+      position: fixed; inset: 0; pointer-events: none; z-index: 0;
+    }
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      animation: float linear infinite;
+      opacity: 0.15;
+    }
+    @keyframes float {
+      0%   { transform: translateY(100vh) scale(0); opacity: 0; }
+      10%  { opacity: 0.15; }
+      90%  { opacity: 0.15; }
+      100% { transform: translateY(-10vh) scale(1); opacity: 0; }
+    }
+
+    .home-container {
+      position: relative; z-index: 1;
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 2rem 1rem;
+      width: 100%; max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .logo-area {
+      text-align: center; margin-bottom: 2.5rem;
+    }
+    .logo-icon {
+      font-size: 4rem; margin-bottom: 0.5rem;
+      animation: bounce-in 0.8s ease;
+    }
+    .logo-title {
+      font-size: 2rem; font-weight: 800; color: var(--glass-bg);
+      letter-spacing: 0.05em;
+      text-shadow: 0 2px 12px rgba(34,197,94,0.3);
+    }
+    .logo-sub {
+      font-size: 0.95rem; color: var(--text-muted); margin-top: 0.5rem;
+    }
+
+    @keyframes bounce-in {
+      0%   { transform: scale(0.3); opacity: 0; }
+      50%  { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+
+    .cards-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+    }
+    @media (max-width: 540px) {
+      .cards-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+      }
+    }
+
+    .entry-card {
+      position: relative;
+      background: var(--glass-bg);
+      backdrop-filter: blur(16px);
+      border: 1px solid var(--glass-bg);
+      border-radius: 1.25rem;
+      padding: 2rem 1.5rem;
+      text-decoration: none;
+      color: var(--glass-bg);
+      transition: all 0.35s cubic-bezier(0.4,0,0.2,1);
+      overflow: hidden;
+      cursor: pointer;
+    }
+    .entry-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      border-radius: inherit;
+      opacity: 0;
+      transition: opacity 0.35s;
+    }
+    .entry-card:hover {
+      transform: translateY(-6px);
+      border-color: var(--glass-bg);
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3), 0 0 40px rgba(34,197,94,0.08);
+    }
+    .entry-card:hover::before { opacity: 1; }
+
+    .card-calc::before {
+      background: linear-gradient(135deg, rgba(34,197,94,0.12), rgba(16,185,129,0.05));
+    }
+    .card-guide::before {
+      background: linear-gradient(135deg, rgba(59,130,246,0.12), rgba(99,102,241,0.05));
+    }
+
+    .card-emoji {
+      font-size: 2.5rem; margin-bottom: 1rem;
+      display: inline-block;
+      transition: transform 0.35s;
+    }
+    .entry-card:hover .card-emoji {
+      transform: scale(1.15) rotate(-5deg);
+    }
+
+    .card-title {
+      font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem;
+    }
+    .card-desc {
+      font-size: 0.875rem; color: var(--text-muted); line-height: 1.6;
+    }
+
+    .card-tags {
+      display: flex; flex-wrap: wrap; gap: 0.4rem; margin-top: 1rem;
+    }
+    .card-tag {
+      font-size: 0.7rem;
+      padding: 0.2rem 0.55rem;
+      border-radius: 999px;
+      background: var(--glass-bg);
+      color: var(--glass-border);
+      white-space: nowrap;
+    }
+
+    .card-arrow {
+      position: absolute; right: 1.25rem; bottom: 1.25rem;
+      width: 2rem; height: 2rem;
+      border-radius: 50%;
+      background: var(--glass-bg);
+      display: flex; align-items: center; justify-content: center;
+      transition: all 0.3s;
+    }
+    .entry-card:hover .card-arrow {
+      background: rgba(34,197,94,0.25);
+      transform: translateX(4px);
+    }
+    .card-arrow svg { width: 14px; height: 14px; }
+
+    .footer-text {
+      color: var(--text-muted); font-size: 0.8rem; margin-top: 2.5rem; text-align: center;
+    }
+
+    /* ══ 侧栏样式 ══ */
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.625rem 0.75rem;
+      border-radius: 0.5rem;
+      transition: all 0.15s ease;
+      text-decoration: none;
+      color: var(--glass-bg);
+    }
+    .nav-item:hover { background: var(--glass-bg); }
+    .nav-item.active { background: var(--glass-bg); }
+    .nav-item.active .nav-dot { opacity: 1; }
+    .nav-dot { opacity: 0; width: 4px; border-radius: 2px; background: rgb(var(--color-primary-400)); }
+    .grad-text {
+      background: linear-gradient(135deg, rgb(var(--color-primary-500)), rgb(var(--color-primary-600)));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* 侧栏滚动条 */
+    #sidebar::-webkit-scrollbar { width: 4px; }
+    #sidebar::-webkit-scrollbar-track { background: transparent; }
+    #sidebar::-webkit-scrollbar-thumb { background: var(--text-main); border-radius: 2px; }
+
+    /* ══ 冻结导航项 ══ */
+    .frozen-nav {
+      color: var(--text-muted) !important;
+      cursor: not-allowed !important;
+      opacity: 0.45;
+    }
+    .frozen-nav:hover {
+      background: transparent !important;
+    }
+    .frozen-nav .frozen-name {
+      text-decoration: line-through;
+      text-decoration-color: var(--text-muted);
+      text-decoration-thickness: 1px;
+    }
+    .frozen-nav .frozen-emoji {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    /* ══ 冻结卡片 ══ */
+    .entry-card.frozen-card {
+      cursor: not-allowed !important;
+      filter: grayscale(0.8) brightness(0.6);
+      opacity: 0.5;
+    }
+    .entry-card.frozen-card:hover {
+      transform: none !important;
+      border-color: var(--glass-bg) !important;
+      box-shadow: none !important;
+    }
+    .entry-card.frozen-card:hover .card-emoji {
+      transform: none !important;
+    }
+    .entry-card.frozen-card:hover .card-arrow {
+      background: var(--glass-bg) !important;
+      transform: none !important;
+    }
+    .entry-card.frozen-card::before {
+      opacity: 0 !important;
+    }
+
+    /* 冻结徽章 */
+    .frozen-badge {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      background: rgba(239, 68, 68, 0.25);
+      backdrop-filter: blur(4px);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      color: var(--text-main);
+      font-size: 0.7rem;
+      font-weight: 600;
+      padding: 0.25rem 0.6rem;
+      border-radius: 999px;
+      letter-spacing: 0.05em;
+      pointer-events: none;
+    }
+
+    /* ══ Toast 提示 ══ */
+    #toast-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+    .toast-msg {
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-bg);
+      color: var(--glass-bg);
+      padding: 0.65rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.3);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    @keyframes toastIn {
+      from { opacity: 0; transform: translateY(-1rem) scale(0.95); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+    @keyframes toastOut {
+      from { opacity: 1; transform: translateY(0) scale(1); }
+      to   { opacity: 0; transform: translateY(-1rem) scale(0.95); }
+    }
+  </style>
+</head>
+<body>
+  <!-- 粒子背景 -->
+  <div class="particles" id="particles"></div>
+
+  <!-- Toast 容器 -->
+  <div id="toast-container"></div>
+
+  <!-- ══ 移动端顶部导航栏 ══ -->
+  <header class="lg:hidden sticky top-0 z-50 flex items-center justify-between px-4 h-14 flex-shrink-0 shadow-lg" style="background:rgba(15,23,42,0.85);backdrop-filter:blur(16px);">
+    <button onclick="openSidebar()" class="p-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition text-white" aria-label="菜单">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16"/>
+      </svg>
+    </button>
+    <a href="./index.html" class="flex items-center gap-2 text-white no-underline">
+      <span class="text-xl">🌾</span>
+      <span class="font-bold text-sm">QQ经典农场</span>
+    </a>
+    <div class="w-9"></div>
+  </header>
+
+  <!-- 移动端侧边栏遮罩 -->
+  <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/50 hidden" onclick="closeSidebar()"></div>
+
+  <div class="flex min-h-screen">
+
+    <!-- ══ 侧边栏 ══ -->
+    <aside id="sidebar" class="fixed lg:static inset-y-0 left-0 z-40 w-72 lg:w-60 text-white flex flex-col flex-shrink-0 overflow-y-auto -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out" style="background:rgba(15,23,42,0.82);backdrop-filter:blur(20px);border-right:1px solid var(--glass-bg);">
+
+      <!-- Logo -->
+      <div class="px-5 py-5 border-b border-slate-700/50">
+        <a href="./index.html" class="flex items-center gap-3 no-underline">
+          <span class="text-2xl">🌾</span>
+          <div>
+            <div class="font-bold text-base leading-tight grad-text">QQ经典农场</div>
+            <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">工具集</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- 导航 -->
+      <nav class="flex-1 px-3 py-4 space-y-1">
+        <!-- 首页（当前页，active） -->
+        <a href="./index.html" class="nav-item active" onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🏠</span><span class="text-sm font-medium">首页</span>
+        </a>
+        <!-- 经验计算器（正常） -->
+        <a href="./calculator.html" class="nav-item" onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🧮</span><span class="text-sm font-medium">经验计算器</span>
+        </a>
+        <!-- 氪金计算器（正常） -->
+        <a href="./levels.html" class="nav-item" onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">💰</span><span class="text-sm font-medium">氪金计算器</span>
+        </a>
+
+        <!-- 图鉴分组 -->
+        <div class="pt-3 pb-1 px-3">
+          <div class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">图鉴</div>
+        </div>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg frozen-emoji">📋</span><span class="text-sm font-medium frozen-name">总览</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="./plants.html" class="nav-item" onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🌿</span><span class="text-sm font-medium">作物图鉴</span>
+        </a>
+        <a href="./lands.html" class="nav-item" onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🏞️</span><span class="text-sm font-medium">土地图鉴</span>
+        </a>
+
+        <!-- 商店道具分组 -->
+        <div class="pt-3 pb-1 px-3">
+          <div class="text-xs font-semibold text-slate-600 dark:text-slate-400 uppercase tracking-wider">商店道具</div>
+        </div>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🔧</span><span class="text-sm truncate frozen-name">系统占位</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">💰</span><span class="text-sm truncate frozen-name">货币与计数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">⭐</span><span class="text-sm truncate frozen-name">经验与成长</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🛠️</span><span class="text-sm truncate frozen-name">操作工具</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="./items/05.html" class="nav-item" onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none">🌱</span><span class="text-sm truncate">种子</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🍎</span><span class="text-sm truncate frozen-name">果实与产物</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🧪</span><span class="text-sm truncate frozen-name">化肥道具</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🐕</span><span class="text-sm truncate frozen-name">狗与看门犬</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🦴</span><span class="text-sm truncate frozen-name">狗粮</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎨</span><span class="text-sm truncate frozen-name">头像框与装饰</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎁</span><span class="text-sm truncate frozen-name">礼包与宝箱</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">📖</span><span class="text-sm truncate frozen-name">图鉴点数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">⚡</span><span class="text-sm truncate frozen-name">活跃点数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🔑</span><span class="text-sm truncate frozen-name">种子解锁卡</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">💎</span><span class="text-sm truncate frozen-name">充值货币</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="javascript:void(0)" class="nav-item frozen-nav" onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎀</span><span class="text-sm truncate frozen-name">自选礼包</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- ══ 主内容区 ══ -->
+    <main class="flex-1 min-h-screen lg:min-h-0 overflow-y-auto relative z-[1]">
+      <div class="home-container">
+        <!-- Logo -->
+        <div class="logo-area">
+          <div class="logo-icon">🌾</div>
+          <div class="logo-title">QQ经典农场</div>
+          <div class="logo-sub">工具集 · 数据来源于游戏配置</div>
+        </div>
+
+        <!-- 入口卡片 -->
+        <div class="cards-grid">
+          <!-- 经验计算器（正常） -->
+          <a href="./calculator.html" class="entry-card card-calc">
+            <div class="card-emoji">🧮</div>
+            <div class="card-title">经验计算器</div>
+            <div class="card-desc">输入等级自动计算，智能推荐最优种植方案，最大化经验收益</div>
+            <div class="card-tags">
+              <span class="card-tag">⚡ 实时计算</span>
+              <span class="card-tag">🧪 化肥对比</span>
+              <span class="card-tag">🏆 排行榜</span>
+            </div>
+            <div class="card-arrow">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </a>
+
+          <!-- 升级氪金计算器（正常） -->
+          <a href="./levels.html" class="entry-card card-calc">
+            <div class="card-emoji">💰</div>
+            <div class="card-title">升级氪金计算器</div>
+            <div class="card-desc">计算升级所需化肥和充值成本，智能推荐充值档位和种植作物</div>
+            <div class="card-tags">
+              <span class="card-tag">💎 氪金规划</span>
+              <span class="card-tag">💳 充值优化</span>
+              <span class="card-tag">📊 费用预估</span>
+            </div>
+            <div class="card-arrow">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </a>
+
+          <!-- 道具图鉴 -->
+          <a href="./plants.html" class="entry-card card-guide">
+            <div class="card-emoji">📖</div>
+            <div class="card-title">道具图鉴</div>
+            <div class="card-desc">收录作物种子、道具、土地配置等游戏数据，可视化查询</div>
+            <div class="card-tags">
+              <span class="card-tag">🌿 作物图鉴</span>
+              <span class="card-tag">💰 商店道具</span>
+              <span class="card-tag">🏞️ 土地配置</span>
+            </div>
+            <div class="card-arrow">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+              </svg>
+            </div>
+          </a>
+        </div>
+
+        <div class="footer-text">数据仅供参考 · 基于作者整理的游戏配置（仅供娱乐）</div>
+      </div>
+    </main>
+
+  </div>
+
+  <script>
+    // 粒子效果
+    (function() {
+      const container = document.getElementById('particles');
+      const colors = ['rgb(var(--color-primary-500))','#3b82f6','#a855f7','#f59e0b','#14b8a6'];
+      for (let i = 0; i < 20; i++) {
+        const p = document.createElement('div');
+        p.className = 'particle';
+        const size = 4 + Math.random() * 8;
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.left = Math.random() * 100 + '%';
+        p.style.background = colors[Math.floor(Math.random() * colors.length)];
+        p.style.animationDuration = (8 + Math.random() * 12) + 's';
+        p.style.animationDelay = (Math.random() * 10) + 's';
+        container.appendChild(p);
+      }
+    })();
+
+    // Toast 提示
+    function showFrozenToast() {
+      var container = document.getElementById('toast-container');
+      if (container.children.length > 0) return;
+      var toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      toast.innerHTML = '🚧 整改中，暂停访问';
+      container.appendChild(toast);
+      setTimeout(function() { toast.remove(); }, 2000);
+    }
+
+    // 移动端侧边栏
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    window.addEventListener('resize', function() {
+      if (window.innerWidth >= 1024) {
+        document.getElementById('sidebar-backdrop').classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+</body>
+</html>

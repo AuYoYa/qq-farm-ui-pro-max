@@ -1,0 +1,3328 @@
+<!DOCTYPE html>
+<html lang="zh-CN" class="h-full">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/x-icon" href="./static/植物.ico">
+  <title>🏞️ 土地图鉴 · 农场道具图鉴</title>
+  <script src="./static/js/tailwindcss-3.4.17.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: {
+              50: 'rgba(var(--color-primary-50), <alpha-value>)',
+              100: 'rgba(var(--color-primary-100), <alpha-value>)',
+              200: 'rgba(var(--color-primary-200), <alpha-value>)',
+              300: 'rgba(var(--color-primary-300), <alpha-value>)',
+              400: 'rgba(var(--color-primary-400), <alpha-value>)',
+              500: 'rgba(var(--color-primary-500), <alpha-value>)',
+              600: 'rgba(var(--color-primary-600), <alpha-value>)',
+              700: 'rgba(var(--color-primary-700), <alpha-value>)',
+              800: 'rgba(var(--color-primary-800), <alpha-value>)',
+              900: 'rgba(var(--color-primary-900), <alpha-value>)',
+              950: 'rgba(var(--color-primary-950), <alpha-value>)',
+            },
+            farm: {
+              50: 'rgba(var(--color-primary-100), 0.2)', 100: 'rgba(var(--color-primary-200), 0.3)', 200: 'rgba(var(--color-primary-300), 0.4)',
+              300: 'rgb(var(--color-primary-300))', 400: 'rgb(var(--color-primary-400))', 500: 'rgb(var(--color-primary-500))',
+              600: 'rgb(var(--color-primary-600))', 700: 'rgb(var(--color-primary-700))', 800: 'rgb(var(--color-primary-800))', 900: '#14532d',
+            },
+            soil: { 400: '#a16207', 500: '#854d0e', 600: '#713f12' }
+          },
+          fontFamily: { sans: ['"Microsoft YaHei"', 'Segoe UI', 'sans-serif'] }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* =========== 深色模式：土地卡片图片区背景 =========== */
+    /* 自定义类，彻底绕开 Tailwind CDN 渐变类的覆盖问题 */
+    .land-img-bg {
+      background: transparent;
+    }
+
+    html.dark .land-img-bg {
+      background: linear-gradient(to bottom right, #1e293b, #0f172a) !important;
+      background-image: linear-gradient(to bottom right, #1e293b, #0f172a) !important;
+    }
+
+    /* 滚动条美化 */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: var(--glass-bg);
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--text-muted);
+      border-radius: 3px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--text-muted);
+    }
+
+    /* 侧边栏链接激活态 */
+    .nav-item.active {
+      background: var(--glass-bg);
+    }
+
+    .nav-item.active .nav-dot {
+      opacity: 1;
+    }
+
+    .nav-dot {
+      opacity: 0;
+      width: 4px;
+      border-radius: 2px;
+      background: rgb(var(--color-primary-400));
+    }
+
+    /* 卡片悬浮 */
+    .card-hover {
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .card-hover:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+    }
+
+    /* 渐变文字 */
+    .grad-text {
+      background: linear-gradient(135deg, rgb(var(--color-primary-500)), rgb(var(--color-primary-600)));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    /* 道具图标容器 */
+    .item-icon {
+      width: 64px;
+      height: 64px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 12px;
+      background: linear-gradient(135deg, var(--glass-bg), var(--glass-border));
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .item-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .item-icon .no-img {
+      font-size: 1.8rem;
+    }
+
+    /* 稀有度颜色 */
+    .rarity-1 {
+      color: #9ca3af;
+    }
+
+    .rarity-2 {
+      color: rgb(var(--color-primary-500));
+    }
+
+    .rarity-3 {
+      color: #3b82f6;
+    }
+
+    .rarity-4 {
+      color: #a855f7;
+    }
+
+    .rarity-5 {
+      color: #f59e0b;
+    }
+
+    /* 动画 */
+    @keyframes fadeInUp {
+      from {
+        opacity: 0;
+        transform: translateY(16px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .fade-in {
+      animation: fadeInUp .35s ease both;
+    }
+
+    /* 植物卡片图片区 */
+    .plant-img-wrap {
+      width: 80px;
+      height: 80px;
+      background: linear-gradient(135deg, rgba(var(--color-primary-200), 0.3), rgba(var(--color-primary-300), 0.4));
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+
+    .plant-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    /* ══ 冻结导航项 ══ */
+    .frozen-nav {
+      color: var(--text-muted) !important;
+      cursor: not-allowed !important;
+      opacity: 0.45;
+    }
+
+    .frozen-nav:hover {
+      background: transparent !important;
+    }
+
+    .frozen-nav .frozen-name {
+      text-decoration: line-through;
+      text-decoration-color: var(--text-muted);
+      text-decoration-thickness: 1px;
+    }
+
+    .frozen-nav .frozen-emoji {
+      filter: grayscale(1);
+      opacity: 0.5;
+    }
+
+    /* ══ Toast 提示 ══ */
+    #toast-container {
+      position: fixed;
+      top: 2rem;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      pointer-events: none;
+    }
+
+    .toast-msg {
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(12px);
+      border: 1px solid var(--glass-bg);
+      color: var(--glass-bg);
+      padding: 0.65rem 1.5rem;
+      border-radius: 0.75rem;
+      font-size: 0.875rem;
+      font-weight: 500;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      animation: toastIn 0.3s ease, toastOut 0.3s ease 1.7s forwards;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    @keyframes toastIn {
+      from {
+        opacity: 0;
+        transform: translateY(-1rem) scale(0.95);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes toastOut {
+      from {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+
+      to {
+        opacity: 0;
+        transform: translateY(-1rem) scale(0.95);
+      }
+    }
+  </style>
+
+  <style>
+    .land-card {
+      transition: transform .2s, box-shadow .2s;
+    }
+
+    .land-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, .12);
+    }
+
+    .land-img-wrap {
+      width: 120px;
+      height: 120px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      overflow: hidden;
+      border-radius: 16px;
+    }
+
+    .land-img-wrap img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      image-rendering: pixelated;
+    }
+
+    .bonus-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      padding: 2px 10px;
+      border-radius: 999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+
+    .grid-cell {
+      transition: all .3s;
+    }
+
+    .grid-cell:hover {
+      transform: scale(1.08);
+      z-index: 10;
+    }
+
+    /* 升级箭头动画 */
+    .upgrade-arrow {
+      animation: bounce-right 1.5s infinite;
+    }
+
+    @keyframes bounce-right {
+
+      0%,
+      100% {
+        transform: translateX(0);
+      }
+
+      50% {
+        transform: translateX(4px);
+      }
+    }
+  </style>
+
+</head>
+
+<body class="bg-transparent text-slate-800 dark:text-slate-200 font-sans">
+
+  <!-- Toast 容器 -->
+  <div id="toast-container"></div>
+
+  <!-- ════ 移动端顶部导航栏 ════ -->
+  <header
+    class="lg:hidden sticky top-0 z-50 bg-slate-900 text-white flex items-center justify-between px-4 h-14 flex-shrink-0 shadow-lg">
+    <button id="menu-btn" onclick="openSidebar()"
+      class="p-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition" aria-label="菜单">
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"
+        stroke-width="2">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+      </svg>
+    </button>
+    <a href="./index.html" class="flex items-center gap-2">
+      <span class="text-xl">🌾</span>
+      <span class="font-bold text-sm">QQ经典农场</span>
+    </a>
+    <div class="w-9"></div>
+  </header>
+
+  <!-- 移动端侧边栏遮罩 -->
+  <div id="sidebar-backdrop" class="fixed inset-0 z-30 bg-black/50 hidden" onclick="closeSidebar()"></div>
+
+  <div class="flex lg:h-screen lg:overflow-hidden">
+
+    <!-- ════ 侧边栏 ════ -->
+    <aside id="sidebar"
+      class="fixed lg:static inset-y-0 left-0 z-40 w-72 lg:w-60 bg-slate-900 text-white flex flex-col flex-shrink-0 overflow-y-auto -translate-x-full lg:translate-x-0 transition-transform duration-300 ease-in-out">
+      <!-- Logo -->
+      <div class="px-5 py-5 border-b border-slate-700/50">
+        <a href="./index.html" class="flex items-center gap-3 group">
+          <span class="text-2xl">🌾</span>
+          <div>
+            <div class="font-bold text-base leading-tight grad-text">QQ经典农场</div>
+            <div class="text-xs text-slate-400 dark:text-slate-500 mt-0.5">道具图鉴</div>
+          </div>
+        </a>
+      </div>
+
+      <!-- 导航 -->
+      <nav class="flex-1 px-3 py-4 space-y-1">
+        <a href="./index.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🏠</span><span class="text-sm font-medium">首页</span>
+        </a>
+        <a href="./calculator.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🧮</span><span class="text-sm font-medium">经验计算器</span>
+        </a>
+        <a href="./levels.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">💰</span><span class="text-sm font-medium">氪金计算器</span>
+        </a>
+
+        <div class="pt-3 pb-1 px-3">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">图鉴</div>
+        </div>
+        <a href="javascript:void(0)"
+          class="nav-item frozen-nav flex items-center gap-3 px-3 py-2.5 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg frozen-emoji">📋</span><span class="text-sm font-medium frozen-name">总览</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+        <a href="./plants.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🌿</span><span class="text-sm font-medium">作物图鉴</span>
+        </a>
+        <a href="./lands.html"
+          class="nav-item flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition active"
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-lg">🏞️</span><span class="text-sm font-medium">土地图鉴</span>
+        </a>
+
+        <!-- 道具分类 -->
+        <div class="pt-3 pb-1 px-3">
+          <div class="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">商店道具</div>
+        </div>
+
+
+        <a href="./items/05.html"
+          class="nav-item flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-white/10 dark:hover:bg-slate-800/10 transition "
+          onclick="closeSidebar()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none">🌱</span>
+          <span class="text-sm truncate">种子</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🔑</span>
+          <span class="text-sm truncate frozen-name">种子解锁卡</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎁</span>
+          <span class="text-sm truncate frozen-name">礼包与宝箱</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎀</span>
+          <span class="text-sm truncate frozen-name">自选礼包</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">💰</span>
+          <span class="text-sm truncate frozen-name">货币与计数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🛠️</span>
+          <span class="text-sm truncate frozen-name">操作工具</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🧪</span>
+          <span class="text-sm truncate frozen-name">化肥道具</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🎨</span>
+          <span class="text-sm truncate frozen-name">头像框与装饰</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🐕</span>
+          <span class="text-sm truncate frozen-name">狗与看门犬</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🦴</span>
+          <span class="text-sm truncate frozen-name">狗粮</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">📖</span>
+          <span class="text-sm truncate frozen-name">图鉴点数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">🔧</span>
+          <span class="text-sm truncate frozen-name">系统占位</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">⭐</span>
+          <span class="text-sm truncate frozen-name">经验与成长</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">⚡</span>
+          <span class="text-sm truncate frozen-name">活跃点数</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+
+        <a href="javascript:void(0)" class="nav-item frozen-nav flex items-center gap-3 px-3 py-2 rounded-lg transition"
+          onclick="showFrozenToast()">
+          <div class="nav-dot h-5 mr-0.5"></div>
+          <span class="text-base leading-none frozen-emoji">💎</span>
+          <span class="text-sm truncate frozen-name">充值货币</span>
+          <span class="ml-auto text-xs opacity-40">🔒</span>
+        </a>
+
+
+      </nav>
+
+
+    </aside>
+
+    <!-- ════ 主内容 ════ -->
+    <main class="flex-1 min-h-screen lg:min-h-0 overflow-y-auto bg-transparent w-full">
+
+      <div class="bg-gradient-to-br from-primary-700 to-primary-500 text-white px-4 sm:px-8 py-6 sm:py-8">
+        <h1 class="text-2xl font-bold mb-1">🏞️ 土地图鉴</h1>
+        <p class="text-primary-100 text-sm">土地类型、解锁条件与升级详情</p>
+      </div>
+
+      <div class="px-4 sm:px-8 py-6 space-y-10">
+
+        <!-- ═══════════ 单块土地类型 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">🌾</span> 单块土地类型（1×1）
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">土地分为4个等级，另有3种多格合并土地（四方福地/九宫良田/阡陌沃土）各4个等级</p>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+
+
+
+
+
+
+
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-primary-200 overflow-hidden fade-in">
+              <!-- 图片区 -->
+              <div class="bg-gradient-to-br from-primary-700 to-yellow-50 p-4 flex flex-col items-center gap-3">
+                <div class="flex gap-3 items-center">
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_valid1.png" alt="普通土地（正常）" title="正常状态">
+                  </div>
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_dry1.png" alt="普通土地（干裂）" title="干裂状态">
+                  </div>
+                </div>
+                <div class="text-xs text-slate-400 dark:text-slate-500 flex gap-8">
+                  <span>正常</span><span>干裂</span>
+                </div>
+              </div>
+              <!-- 信息区 -->
+              <div class="p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-lg font-bold text-slate-800 dark:text-slate-200">普通土地</span>
+                  <span class="bonus-tag bg-primary-100 text-primary-700">Lv.1</span>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-primary-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">🌾 产量加成</span>
+                    <span class="font-bold text-slate-400 dark:text-slate-500">
+                      +0%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-blue-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⏱️ 时间缩减</span>
+                    <span class="font-bold text-slate-400 dark:text-slate-500">
+                      -0%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-purple-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⭐ 经验加成</span>
+                    <span class="font-bold text-slate-400 dark:text-slate-500">
+                      +0%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-red-300 overflow-hidden fade-in">
+              <!-- 图片区 -->
+              <div class="land-img-bg p-4 flex flex-col items-center gap-3">
+                <div class="flex gap-3 items-center">
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_valid2.png" alt="红土地（正常）" title="正常状态">
+                  </div>
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_dry2.png" alt="红土地（干裂）" title="干裂状态">
+                  </div>
+                </div>
+                <div class="text-xs text-slate-400 dark:text-slate-500 flex gap-8">
+                  <span>正常</span><span>干裂</span>
+                </div>
+              </div>
+              <!-- 信息区 -->
+              <div class="p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-lg font-bold text-slate-800 dark:text-slate-200">红土地</span>
+                  <span class="bonus-tag bg-red-100 text-red-700">Lv.2</span>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-primary-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">🌾 产量加成</span>
+                    <span class="font-bold text-primary-600">
+                      +100%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-blue-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⏱️ 时间缩减</span>
+                    <span class="font-bold text-slate-400 dark:text-slate-500">
+                      -0%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-purple-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⭐ 经验加成</span>
+                    <span class="font-bold text-slate-400 dark:text-slate-500">
+                      +0%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-slate-400 overflow-hidden fade-in">
+              <!-- 图片区 -->
+              <div class="land-img-bg p-4 flex flex-col items-center gap-3">
+                <div class="flex gap-3 items-center">
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_valid3.png" alt="黑土地（正常）" title="正常状态">
+                  </div>
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_dry3.png" alt="黑土地（干裂）" title="干裂状态">
+                  </div>
+                </div>
+                <div class="text-xs text-slate-400 dark:text-slate-500 flex gap-8">
+                  <span>正常</span><span>干裂</span>
+                </div>
+              </div>
+              <!-- 信息区 -->
+              <div class="p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-lg font-bold text-slate-800 dark:text-slate-200">黑土地</span>
+                  <span class="bonus-tag bg-slate-200 text-slate-700 dark:text-slate-300">Lv.3</span>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-primary-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">🌾 产量加成</span>
+                    <span class="font-bold text-primary-600">
+                      +200%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-blue-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⏱️ 时间缩减</span>
+                    <span class="font-bold text-blue-600">
+                      -10%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-purple-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⭐ 经验加成</span>
+                    <span class="font-bold text-slate-400 dark:text-slate-500">
+                      +0%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-yellow-400 overflow-hidden fade-in">
+              <!-- 图片区 -->
+              <div class="land-img-bg p-4 flex flex-col items-center gap-3">
+                <div class="flex gap-3 items-center">
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_valid4.png" alt="金土地（正常）" title="正常状态">
+                  </div>
+                  <div class="land-img-wrap bg-transparent  shadow-inner">
+                    <img src="./images/extraRes_land_dry4.png" alt="金土地（干裂）" title="干裂状态">
+                  </div>
+                </div>
+                <div class="text-xs text-slate-400 dark:text-slate-500 flex gap-8">
+                  <span>正常</span><span>干裂</span>
+                </div>
+              </div>
+              <!-- 信息区 -->
+              <div class="p-4">
+                <div class="flex items-center gap-2 mb-3">
+                  <span class="text-lg font-bold text-slate-800 dark:text-slate-200">金土地</span>
+                  <span class="bonus-tag bg-yellow-100 text-yellow-700">Lv.4</span>
+                </div>
+                <div class="space-y-2 text-sm">
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-primary-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">🌾 产量加成</span>
+                    <span class="font-bold text-primary-600">
+                      +300%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-blue-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⏱️ 时间缩减</span>
+                    <span class="font-bold text-blue-600">
+                      -20%
+                    </span>
+                  </div>
+                  <div class="flex items-center justify-between py-1.5 px-3 bg-purple-50 rounded-lg">
+                    <span class="text-slate-600 dark:text-slate-400">⭐ 经验加成</span>
+                    <span class="font-bold text-purple-600">
+                      +20%
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- ═══════════ 特殊土地状态 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">🔒</span> 特殊土地状态
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">未解锁的荒地外观</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-slate-300 overflow-hidden fade-in">
+              <div class="land-img-bg p-6 flex flex-col items-center">
+                <div class="land-img-wrap bg-transparent  shadow-inner">
+                  <img src="./images/extraRes_land_locked.png" alt="荒地（未解锁）">
+                </div>
+              </div>
+              <div class="p-4 text-center">
+                <span class="text-lg font-bold text-slate-700 dark:text-slate-300">🏜️ 荒地</span>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">未解锁的土地，需满足等级要求并花费金币开垦</p>
+              </div>
+            </div>
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-primary-200 overflow-hidden fade-in">
+              <div class="bg-gradient-to-br from-primary-700 to-yellow-50 p-6 flex flex-col items-center">
+                <div class="land-img-wrap bg-transparent  shadow-inner">
+                  <img src="./images/extraRes_land_extend.png" alt="扩展土地">
+                </div>
+              </div>
+              <div class="p-4 text-center">
+                <span class="text-lg font-bold text-slate-700 dark:text-slate-300">➕ 可开垦</span>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">可点击开垦的待解锁土地</p>
+              </div>
+            </div>
+            <div
+              class="land-card bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border-2 border-green-300 overflow-hidden fade-in">
+              <div class="land-img-bg p-6 flex flex-col items-center">
+                <div class="land-img-wrap bg-transparent  shadow-inner">
+                  <img src="./images/extraRes_land_valid_selected.png" alt="选中土地">
+                </div>
+              </div>
+              <div class="p-4 text-center">
+                <span class="text-lg font-bold text-slate-700 dark:text-slate-300">✅ 选中状态</span>
+                <p class="text-sm text-slate-500 dark:text-slate-400 mt-1">被选中高亮的土地</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ 地块解锁网格 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">🗺️</span> 地块解锁配置
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">共24块地，4×6网格布局。前6块初始解锁，第7-24块需等级+金币逐步开荒</p>
+
+          <!-- 4×6 网格可视化 -->
+          <div
+            class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6 mb-6 overflow-x-auto">
+            <h3 class="text-sm font-semibold text-slate-600 dark:text-slate-400 mb-3">农场布局（4×6 网格）</h3>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+            <div class="inline-grid gap-2" style="grid-template-columns: repeat(4, 1fr);">
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-primary-400 bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="初始解锁">
+                <img src="./images/extraRes_land_valid1.png" class="w-12 h-12" style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#1</span>
+                <span class="text-[10px] text-primary-600">初始解锁</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-primary-400 bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="初始解锁">
+                <img src="./images/extraRes_land_valid1.png" class="w-12 h-12" style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#2</span>
+                <span class="text-[10px] text-primary-600">初始解锁</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-primary-400 bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="初始解锁">
+                <img src="./images/extraRes_land_valid1.png" class="w-12 h-12" style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#3</span>
+                <span class="text-[10px] text-primary-600">初始解锁</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-primary-400 bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="初始解锁">
+                <img src="./images/extraRes_land_valid1.png" class="w-12 h-12" style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#4</span>
+                <span class="text-[10px] text-primary-600">初始解锁</span>
+              </div>
+
+
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-primary-400 bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="初始解锁">
+                <img src="./images/extraRes_land_valid1.png" class="w-12 h-12" style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#5</span>
+                <span class="text-[10px] text-primary-600">初始解锁</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-primary-400 bg-gradient-to-br from-primary-50 to-primary-100 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="初始解锁">
+                <img src="./images/extraRes_land_valid1.png" class="w-12 h-12" style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#6</span>
+                <span class="text-[10px] text-primary-600">初始解锁</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="5级解锁，花费5,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#7</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.5</span>
+                <span class="text-[10px] text-amber-600 font-medium">5,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="7级解锁，花费10,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#8</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.7</span>
+                <span class="text-[10px] text-amber-600 font-medium">10,000金</span>
+              </div>
+
+
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="9级解锁，花费20,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#9</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.9</span>
+                <span class="text-[10px] text-amber-600 font-medium">20,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="11级解锁，花费30,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#10</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.11</span>
+                <span class="text-[10px] text-amber-600 font-medium">30,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="13级解锁，花费40,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#11</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.13</span>
+                <span class="text-[10px] text-amber-600 font-medium">40,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="15级解锁，花费60,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#12</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.15</span>
+                <span class="text-[10px] text-amber-600 font-medium">60,000金</span>
+              </div>
+
+
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="17级解锁，花费80,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#13</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.17</span>
+                <span class="text-[10px] text-amber-600 font-medium">80,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="19级解锁，花费100,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#14</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.19</span>
+                <span class="text-[10px] text-amber-600 font-medium">100,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="21级解锁，花费120,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#15</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.21</span>
+                <span class="text-[10px] text-amber-600 font-medium">120,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="23级解锁，花费140,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#16</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.23</span>
+                <span class="text-[10px] text-amber-600 font-medium">140,000金</span>
+              </div>
+
+
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="25级解锁，花费160,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#17</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.25</span>
+                <span class="text-[10px] text-amber-600 font-medium">160,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="27级解锁，花费180,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#18</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.27</span>
+                <span class="text-[10px] text-amber-600 font-medium">180,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="29级解锁，花费200,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#19</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.29</span>
+                <span class="text-[10px] text-amber-600 font-medium">200,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="31级解锁，花费220,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#20</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.31</span>
+                <span class="text-[10px] text-amber-600 font-medium">220,000金</span>
+              </div>
+
+
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="33级解锁，花费240,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#21</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.33</span>
+                <span class="text-[10px] text-amber-600 font-medium">240,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="35级解锁，花费260,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#22</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.35</span>
+                <span class="text-[10px] text-amber-600 font-medium">260,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="37级解锁，花费280,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#23</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.37</span>
+                <span class="text-[10px] text-amber-600 font-medium">280,000金</span>
+              </div>
+
+
+
+
+
+
+
+              <div
+                class="grid-cell relative w-24 h-24 sm:w-28 sm:h-28 rounded-xl border-2 border-amber-300 bg-gradient-to-br from-primary-700 to-orange-50 flex flex-col items-center justify-center text-center cursor-default shadow-sm"
+                title="39级解锁，花费300,000金币">
+                <img src="./images/extraRes_land_locked.png" class="w-12 h-12 opacity-70"
+                  style="image-rendering: pixelated;">
+                <span class="text-xs font-bold text-primary-700 mt-1">#24</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400">Lv.39</span>
+                <span class="text-[10px] text-amber-600 font-medium">300,000金</span>
+              </div>
+
+
+
+
+            </div>
+          </div>
+
+          <!-- 解锁列表表格 -->
+          <!-- <div class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-transparent text-left text-slate-600 dark:text-slate-400">
+              <th class="px-4 py-3 font-semibold">地块</th>
+              <th class="px-4 py-3 font-semibold">坐标</th>
+              <th class="px-4 py-3 font-semibold">需要等级</th>
+              <th class="px-4 py-3 font-semibold">需要金币</th>
+              <th class="px-4 py-3 font-semibold">前置地块</th>
+              <th class="px-4 py-3 font-semibold">备注</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#1</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(0, 5)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">—</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">免费</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                —
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">初始解锁</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#2</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(1, 5)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">—</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">免费</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                —
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">初始解锁</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#3</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(2, 5)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">—</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">免费</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                —
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">初始解锁</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#4</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(3, 5)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">—</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">免费</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                —
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">初始解锁</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#5</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(0, 4)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">—</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">免费</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                —
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">初始解锁</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#6</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(1, 4)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">—</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-primary-500">免费</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                —
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">初始解锁</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#7</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(2, 4)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.5</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 5,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #6
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">5级解锁，花费5,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#8</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(3, 4)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.7</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 10,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #7
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">7级解锁，花费10,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#9</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(0, 3)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.9</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 20,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #8
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">9级解锁，花费20,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#10</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(1, 3)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.11</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 30,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #9
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">11级解锁，花费30,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#11</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(2, 3)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.13</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 40,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #10
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">13级解锁，花费40,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#12</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(3, 3)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.15</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 60,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #11
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">15级解锁，花费60,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#13</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(0, 2)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.17</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 80,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #12
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">17级解锁，花费80,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#14</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(1, 2)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.19</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 100,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #13
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">19级解锁，花费100,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#15</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(2, 2)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.21</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 120,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #14
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">21级解锁，花费120,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#16</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(3, 2)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.23</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 140,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #15
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">23级解锁，花费140,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#17</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(0, 1)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.25</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 160,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #16
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">25级解锁，花费160,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#18</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(1, 1)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.27</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 180,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #17
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">27级解锁，花费180,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#19</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(2, 1)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.29</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 200,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #18
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">29级解锁，花费200,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#20</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(3, 1)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.31</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 220,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #19
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">31级解锁，花费220,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#21</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(0, 0)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.33</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 240,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #20
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">33级解锁，花费240,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#22</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(1, 0)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.35</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 260,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #21
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">35级解锁，花费260,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#23</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(2, 0)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.37</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 280,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #22
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">37级解锁，花费280,000金币</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 font-bold text-slate-700 dark:text-slate-300">#24</td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">(3, 0)</td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">Lv.39</span>
+                
+              </td>
+              <td class="px-4 py-2.5">
+                
+                <span class="text-amber-600 font-semibold">💰 300,000</span>
+                
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">
+                #23
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 text-xs">39级解锁，花费300,000金币</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div> -->
+        </section>
+
+        <!-- ═══════════ 土地升级需求 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">⬆️</span> 土地升级需求
+          </h2>
+          <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">每块地可从 Lv1(普通) 升至 Lv4(金土地)，需要达到对应等级并花费金币(物品ID
+            1001)。土地升级系统在28级解锁。</p>
+
+          <div
+            class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="bg-transparent text-left text-slate-600 dark:text-slate-400">
+                    <th class="px-4 py-3 font-semibold">地块</th>
+                    <th class="px-4 py-3 font-semibold text-center">
+                      <span class="inline-flex items-center gap-1">→ 红土地<span class="text-red-400">●</span></span>
+                    </th>
+                    <th class="px-4 py-3 font-semibold text-center">
+                      <span class="inline-flex items-center gap-1">→ 黑土地<span
+                          class="text-slate-700 dark:text-slate-300">●</span></span>
+                    </th>
+                    <th class="px-4 py-3 font-semibold text-center">
+                      <span class="inline-flex items-center gap-1">→ 金土地<span class="text-yellow-500">●</span></span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-slate-100">
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#1</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.28</div>
+                      <div class="font-semibold text-amber-600">💰 200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.40</div>
+                      <div class="font-semibold text-amber-600">💰 600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.58</div>
+                      <div class="font-semibold text-amber-600">💰 1,000,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#2</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.29</div>
+                      <div class="font-semibold text-amber-600">💰 250,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.41</div>
+                      <div class="font-semibold text-amber-600">💰 800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.59</div>
+                      <div class="font-semibold text-amber-600">💰 1,400,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#3</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.30</div>
+                      <div class="font-semibold text-amber-600">💰 300,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.42</div>
+                      <div class="font-semibold text-amber-600">💰 1,000,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.60</div>
+                      <div class="font-semibold text-amber-600">💰 1,800,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#4</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.31</div>
+                      <div class="font-semibold text-amber-600">💰 350,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.43</div>
+                      <div class="font-semibold text-amber-600">💰 1,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.61</div>
+                      <div class="font-semibold text-amber-600">💰 2,200,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#5</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.32</div>
+                      <div class="font-semibold text-amber-600">💰 400,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.44</div>
+                      <div class="font-semibold text-amber-600">💰 1,400,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.62</div>
+                      <div class="font-semibold text-amber-600">💰 2,600,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#6</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.33</div>
+                      <div class="font-semibold text-amber-600">💰 500,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.45</div>
+                      <div class="font-semibold text-amber-600">💰 1,600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.63</div>
+                      <div class="font-semibold text-amber-600">💰 3,000,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#7</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.34</div>
+                      <div class="font-semibold text-amber-600">💰 600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.46</div>
+                      <div class="font-semibold text-amber-600">💰 1,800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.64</div>
+                      <div class="font-semibold text-amber-600">💰 3,400,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#8</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.35</div>
+                      <div class="font-semibold text-amber-600">💰 700,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.47</div>
+                      <div class="font-semibold text-amber-600">💰 2,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.65</div>
+                      <div class="font-semibold text-amber-600">💰 4,200,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#9</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.36</div>
+                      <div class="font-semibold text-amber-600">💰 800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.48</div>
+                      <div class="font-semibold text-amber-600">💰 2,600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.66</div>
+                      <div class="font-semibold text-amber-600">💰 5,000,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#10</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.37</div>
+                      <div class="font-semibold text-amber-600">💰 900,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.49</div>
+                      <div class="font-semibold text-amber-600">💰 3,000,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.67</div>
+                      <div class="font-semibold text-amber-600">💰 5,800,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#11</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.38</div>
+                      <div class="font-semibold text-amber-600">💰 1,000,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.50</div>
+                      <div class="font-semibold text-amber-600">💰 3,400,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.68</div>
+                      <div class="font-semibold text-amber-600">💰 6,600,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#12</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.39</div>
+                      <div class="font-semibold text-amber-600">💰 1,100,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.51</div>
+                      <div class="font-semibold text-amber-600">💰 3,800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.69</div>
+                      <div class="font-semibold text-amber-600">💰 7,400,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#13</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.40</div>
+                      <div class="font-semibold text-amber-600">💰 1,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.52</div>
+                      <div class="font-semibold text-amber-600">💰 4,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.70</div>
+                      <div class="font-semibold text-amber-600">💰 8,200,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#14</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.41</div>
+                      <div class="font-semibold text-amber-600">💰 1,300,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.53</div>
+                      <div class="font-semibold text-amber-600">💰 4,600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.71</div>
+                      <div class="font-semibold text-amber-600">💰 9,000,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#15</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.42</div>
+                      <div class="font-semibold text-amber-600">💰 1,400,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.54</div>
+                      <div class="font-semibold text-amber-600">💰 5,000,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.72</div>
+                      <div class="font-semibold text-amber-600">💰 9,800,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#16</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.43</div>
+                      <div class="font-semibold text-amber-600">💰 1,500,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.55</div>
+                      <div class="font-semibold text-amber-600">💰 5,400,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.73</div>
+                      <div class="font-semibold text-amber-600">💰 10,600,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#17</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.44</div>
+                      <div class="font-semibold text-amber-600">💰 1,600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.56</div>
+                      <div class="font-semibold text-amber-600">💰 5,800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.74</div>
+                      <div class="font-semibold text-amber-600">💰 11,400,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#18</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.45</div>
+                      <div class="font-semibold text-amber-600">💰 1,700,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.57</div>
+                      <div class="font-semibold text-amber-600">💰 6,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.75</div>
+                      <div class="font-semibold text-amber-600">💰 12,200,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#19</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.47</div>
+                      <div class="font-semibold text-amber-600">💰 1,800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.59</div>
+                      <div class="font-semibold text-amber-600">💰 6,600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.77</div>
+                      <div class="font-semibold text-amber-600">💰 13,000,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#20</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.49</div>
+                      <div class="font-semibold text-amber-600">💰 1,900,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.61</div>
+                      <div class="font-semibold text-amber-600">💰 7,000,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.79</div>
+                      <div class="font-semibold text-amber-600">💰 13,800,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#21</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.51</div>
+                      <div class="font-semibold text-amber-600">💰 2,000,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.63</div>
+                      <div class="font-semibold text-amber-600">💰 7,400,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.81</div>
+                      <div class="font-semibold text-amber-600">💰 14,600,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#22</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.53</div>
+                      <div class="font-semibold text-amber-600">💰 2,100,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.65</div>
+                      <div class="font-semibold text-amber-600">💰 7,800,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.83</div>
+                      <div class="font-semibold text-amber-600">💰 15,400,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#23</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.55</div>
+                      <div class="font-semibold text-amber-600">💰 2,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.67</div>
+                      <div class="font-semibold text-amber-600">💰 8,200,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.85</div>
+                      <div class="font-semibold text-amber-600">💰 16,200,000</div>
+                    </td>
+
+                  </tr>
+
+                  <tr class="hover:bg-transparent/80 transition">
+                    <td class="px-4 py-3 font-bold text-slate-700 dark:text-slate-300">#24</td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.57</div>
+                      <div class="font-semibold text-amber-600">💰 2,300,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.69</div>
+                      <div class="font-semibold text-amber-600">💰 8,600,000</div>
+                    </td>
+
+                    <td class="px-4 py-3 text-center">
+                      <div class="text-xs text-slate-500 dark:text-slate-400">Lv.87</div>
+                      <div class="font-semibold text-amber-600">💰 17,000,000</div>
+                    </td>
+
+                  </tr>
+
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ═══════════ 多格土地 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">🏗️</span> 多格土地
+          </h2>
+          <!-- <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">多格土地可覆盖多个地块，加成效果由覆盖地块等级计算（暂无图片资源）</p>
+
+    
+
+    <div class="space-y-6">
+      
+      <div class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <span class="text-2xl">
+            🟫
+          </span>
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-slate-200">四方福地</h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">覆盖范围：2×2</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              2×2
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">四方福地 Lv1</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">-0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              2×2
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">四方福地 Lv2</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+100%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">-0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              2×2
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">四方福地 Lv3</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+200%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-blue-600">-10%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              2×2
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">四方福地 Lv4</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+300%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-blue-600">-20%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-purple-600">+20%</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+      <div class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <span class="text-2xl">
+            🟧
+          </span>
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-slate-200">九宫良田</h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">覆盖范围：3×3</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              3×3
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">九宫良田 Lv1</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">-0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              3×3
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">九宫良田 Lv2</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+100%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">-0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              3×3
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">九宫良田 Lv3</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+200%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-blue-600">-10%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              3×3
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">九宫良田 Lv4</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+300%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-blue-600">-20%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-purple-600">+20%</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+      <div class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+        <div class="px-5 py-4 border-b border-slate-100 dark:border-slate-800 flex items-center gap-3">
+          <span class="text-2xl">
+            🟨
+          </span>
+          <div>
+            <h3 class="font-bold text-slate-800 dark:text-slate-200">阡陌沃土</h3>
+            <span class="text-xs text-slate-500 dark:text-slate-400">覆盖范围：4×4</span>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 divide-y sm:divide-y-0 sm:divide-x divide-slate-100">
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              4×4
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">阡陌沃土 Lv1</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">-0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              4×4
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">阡陌沃土 Lv2</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+100%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">-0%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              4×4
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">阡陌沃土 Lv3</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+200%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-blue-600">-10%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-slate-400 dark:text-slate-500">+0%</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="p-4 text-center space-y-2">
+            <div class="w-20 h-20 mx-auto rounded-xl bg-transparent flex items-center justify-center text-3xl text-slate-300 dark:text-slate-600">
+              4×4
+            </div>
+            <div class="font-semibold text-slate-700 dark:text-slate-300 text-sm">阡陌沃土 Lv4</div>
+            <div class="space-y-1 text-xs">
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">产量</span>
+                <span class="font-bold text-primary-600">+300%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">时间</span>
+                <span class="font-bold text-blue-600">-20%</span>
+              </div>
+              <div class="flex items-center justify-between px-2">
+                <span class="text-slate-500 dark:text-slate-400">经验</span>
+                <span class="font-bold text-purple-600">+20%</span>
+              </div>
+            </div>
+          </div>
+          
+        </div>
+      </div>
+      
+    </div> -->
+        </section>
+
+        <!-- ═══════════ 偷菜权重 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">🥷</span> 偷菜数量权重
+          </h2>
+          <!-- <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">偷菜时随机占据地块数的概率权重表，steal_num 表示偷取数量，weight 表示权重（越大概率越高）</p>
+
+    
+    
+
+    <div class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 p-4 sm:p-6">
+      <div class="space-y-1.5 max-w-2xl">
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">1</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-amber-400"
+              style="width: 10.256410256410257%;">
+              3.4%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">100</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">2</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-amber-400"
+              style="width: 10.256410256410257%;">
+              3.4%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">100</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">3</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-primary-500"
+              style="width: 41.02564102564103%;">
+              13.7%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">400</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">4</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-primary-500"
+              style="width: 41.02564102564103%;">
+              13.7%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">400</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">5</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-primary-500"
+              style="width: 51.282051282051285%;">
+              17.1%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">500</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">6</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-primary-500"
+              style="width: 51.282051282051285%;">
+              17.1%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">500</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">7</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-primary-500"
+              style="width: 41.02564102564103%;">
+              13.7%
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">400</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">8</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">9</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">10</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">11</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">12</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">13</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">14</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">15</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">16</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">17</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">18</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">19</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">20</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-orange-400"
+              style="width: 2.5641025641025643%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">25</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">21</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">22</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">23</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">24</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">25</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">26</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">27</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">28</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">29</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">30</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">31</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">32</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">33</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">34</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">35</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">36</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">37</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">38</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">39</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+        
+        <div class="flex items-center gap-2 text-xs">
+          <span class="w-8 text-right text-slate-500 dark:text-slate-400 font-mono">40</span>
+          <div class="flex-1 bg-transparent rounded-full h-5 overflow-hidden">
+            <div class="h-full rounded-full flex items-center px-2 text-white font-semibold
+              bg-red-400"
+              style="width: 1.0256410256410255%;">
+              
+            </div>
+          </div>
+          <span class="w-12 text-slate-400 dark:text-slate-500 font-mono">10</span>
+        </div>
+        
+      </div>
+      <div class="mt-3 text-xs text-slate-400 dark:text-slate-500">总权重：2925　|　偷菜数量范围 1-40</div>
+    </div> -->
+        </section>
+
+        <!-- ═══════════ 多格土地等级映射 ═══════════ -->
+        <section>
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-200 mb-1 flex items-center gap-2">
+            <span class="text-xl">🗂️</span> 多格土地等级映射
+          </h2>
+          <!-- <p class="text-sm text-slate-500 dark:text-slate-400 mb-4">将 land_size + land_level 映射到对应的多格土地 ID</p> -->
+
+          <!-- <div class="bg-transparent dark:bg-slate-800/80 rounded-2xl shadow-sm border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="bg-transparent text-left text-slate-600 dark:text-slate-400">
+              <th class="px-4 py-3 font-semibold">ID</th>
+              <th class="px-4 py-3 font-semibold">土地尺寸</th>
+              <th class="px-4 py-3 font-semibold">土地等级</th>
+              <th class="px-4 py-3 font-semibold">映射ID</th>
+              <th class="px-4 py-3 font-semibold">名称</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-100">
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">1</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">2×2</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.1</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10001</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">四方福地 Lv1</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">2</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">2×2</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.2</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10002</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">四方福地 Lv2</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">3</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">2×2</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.3</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10003</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">四方福地 Lv3</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">4</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">2×2</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.4</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10004</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">四方福地 Lv4</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">5</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">3×3</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.1</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10011</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">九宫良田 Lv1</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">6</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">3×3</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.2</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10012</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">九宫良田 Lv2</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">7</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">3×3</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.3</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10013</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">九宫良田 Lv3</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">8</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">3×3</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.4</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10014</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">九宫良田 Lv4</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">9</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">4×4</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.1</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10021</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">阡陌沃土 Lv1</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">10</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">4×4</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.2</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10022</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">阡陌沃土 Lv2</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">11</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">4×4</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.3</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10023</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">阡陌沃土 Lv3</td>
+            </tr>
+            
+            <tr class="hover:bg-transparent/80 transition">
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400">12</td>
+              <td class="px-4 py-2.5 font-semibold text-slate-700 dark:text-slate-300">4×4</td>
+              <td class="px-4 py-2.5">
+                <span class="bonus-tag bg-primary-100 text-primary-700">Lv.4</span>
+              </td>
+              <td class="px-4 py-2.5 text-slate-500 dark:text-slate-400 font-mono">10024</td>
+              <td class="px-4 py-2.5 font-medium text-slate-700 dark:text-slate-300">阡陌沃土 Lv4</td>
+            </tr>
+            
+          </tbody>
+        </table>
+      </div>
+    </div> -->
+        </section>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <script>
+    // Toast 提示
+    function showFrozenToast() {
+      var container = document.getElementById('toast-container');
+      if (container.children.length > 0) return;
+      var toast = document.createElement('div');
+      toast.className = 'toast-msg';
+      toast.innerHTML = '🚧 整改中，暂停访问';
+      container.appendChild(toast);
+      setTimeout(function () { toast.remove(); }, 2000);
+    }
+
+    // 侧边栏激活状态
+    document.querySelectorAll('.nav-item').forEach(el => {
+      const href = el.getAttribute('href');
+      if (!href) return;
+      const path = window.location.pathname;
+      if ((href === '/' && path === '/') ||
+        (href !== '/' && path.startsWith(href))) {
+        el.classList.add('active');
+      } else {
+        el.classList.remove('active');
+      }
+    });
+
+    // 移动端侧边栏
+    function openSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.remove('hidden');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+      document.getElementById('sidebar-backdrop').classList.add('hidden');
+      document.body.style.overflow = '';
+    }
+    // 大屏时确保侧边栏可见
+    window.addEventListener('resize', () => {
+      if (window.innerWidth >= 1024) {
+        document.getElementById('sidebar-backdrop').classList.add('hidden');
+        document.body.style.overflow = '';
+      }
+    });
+  </script>
+
+
+</body>
+
+</html>
