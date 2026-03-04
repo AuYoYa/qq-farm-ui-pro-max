@@ -193,24 +193,9 @@ function startAdminServer(dataProvider) {
 
         if (!username) {
             const input = String(password || '');
-            const storedHash = store.getAdminPasswordHash ? store.getAdminPasswordHash() : '';
-            let ok = false;
-            if (storedHash) {
-                const verify = security.verifyPassword(input, storedHash);
-                ok = verify.valid;
-                if (ok && verify.needsMigration) {
-                    const newHash = security.hashPassword(input);
-                    store.setAdminPasswordHash(newHash);
-                    adminLogger.info('管理员密码已自动迁移为 PBKDF2 格式');
-                }
-            } else {
-                ok = input === String(CONFIG.adminPassword || '');
-                if (ok) {
-                    const newHash = security.hashPassword(input);
-                    store.setAdminPasswordHash(newHash);
-                    adminLogger.info('管理员密码已从明文迁移为 PBKDF2 格式');
-                }
-            }
+            // 统一走 user-store 验证，消除双轨密码体系
+            const adminUser = userStore.validateUser('admin', input);
+            const ok = adminUser && !adminUser.error;
             if (!ok) {
                 security.loginLock.recordFailure(lockKey);
                 return res.status(401).json({ ok: false, error: 'Invalid password' });
@@ -265,16 +250,12 @@ function startAdminServer(dataProvider) {
             return res.status(400).json({ ok: false, error: strength.errors.join('；') });
         }
 
-        const storedHash = store.getAdminPasswordHash ? store.getAdminPasswordHash() : '';
-        let ok = false;
-        if (storedHash) {
-            ok = security.verifyPassword(oldPassword, storedHash).valid;
-        } else {
-            ok = oldPassword === String(CONFIG.adminPassword || '');
+        // 使用 user-store 统一验证和修改密码
+        const result = userStore.changePassword('admin', oldPassword, newPassword);
+        if (!result.ok) {
+            return res.status(400).json({ ok: false, error: result.error });
         }
-        if (!ok) {
-            return res.status(400).json({ ok: false, error: '原密码错误' });
-        }
+        // 同步更新 store 层的 hash（兼容旧逻辑）
         const nextHash = security.hashPassword(newPassword);
         if (store.setAdminPasswordHash) {
             store.setAdminPasswordHash(nextHash);
@@ -1386,8 +1367,8 @@ function startAdminServer(dataProvider) {
         const logPath = path.join(__dirname, '../../../logs/development/Update.log');
         if (!fs.existsSync(logPath)) return [];
         const raw = fs.readFileSync(logPath, 'utf-8');
-        // 按连续空行（2个以上换行）分割条目
-        const blocks = raw.split(/\n\s*\n\s*\n/).filter(b => b.trim());
+        // 按连续空行（1个以上空行即可）分割条目
+        const blocks = raw.split(/\n\s*\n+/).filter(b => b.trim());
         const entries = [];
         const dateRe = /^(\d{4}-\d{2}-\d{2})\s+(.+?)$/;
         const versionRe = /前端[：:]\s*(v[\d.]+)/;

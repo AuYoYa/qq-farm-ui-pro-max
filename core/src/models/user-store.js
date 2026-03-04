@@ -249,7 +249,9 @@ function initDefaultAdmin() {
     loadUsers();
     const adminExists = users.find(u => u.username === 'admin');
     if (!adminExists) {
-        const defaultPassword = 'admin';
+        // 从环境变量读取管理员初始密码，若未设置则回退到 'admin'
+        const { CONFIG } = require('../config/config');
+        const defaultPassword = CONFIG.adminPassword || 'admin';
         users.push({
             username: 'admin',
             password: hashPassword(defaultPassword),
@@ -258,7 +260,10 @@ function initDefaultAdmin() {
             createdAt: Date.now()
         });
         saveUsers();
-        console.log('[用户系统] 已创建默认管理员账号：admin / admin');
+        const maskedPwd = defaultPassword.length > 2
+            ? defaultPassword[0] + '*'.repeat(defaultPassword.length - 2) + defaultPassword.slice(-1)
+            : '***';
+        console.log(`[用户系统] 已创建默认管理员账号：admin / ${maskedPwd}（来源：${CONFIG.adminPassword ? '.env ADMIN_PASSWORD' : '内置默认值'}）`);
     }
 }
 

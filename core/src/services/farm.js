@@ -293,6 +293,21 @@ const ANTI_STEAL_MAX_MATURE_SEC = 75;
 async function antiStealHarvest(landId) {
     if (!landId) return;
     try {
+        // [P0] 风控休眠绝对互斥屏障
+        const state = getUserState();
+        if (state.suspendUntil && Date.now() < state.suspendUntil) {
+            logWarn('防封', `[防偷熔断] 账号正处于风控强休眠期(至 ${new Date(state.suspendUntil).toLocaleTimeString()})，强制阻断 土地#${landId} 防偷发包，宁弃菜保号！`);
+            return;
+        }
+
+        // [P1/P2] 独立账号模式安全阻断
+        const config = getConfigSnapshot();
+        const mode = (config && config.mode) ? config.mode : 'main';
+        if (mode !== 'main') {
+            logWarn('防封', `[模式屏蔽] 当前为 ${mode} 模式，主动取消 土地#${landId} 的极限防偷操作，维护安全/错峰网络指纹。`);
+            return;
+        }
+
         // ==========================================
         // [Double Check: 实时状态探测机制] - 紧急通道
         // ==========================================
@@ -823,7 +838,15 @@ async function autoPlantEmptyLands(deadLandIds, emptyLandIds, cachedLandsReply =
     }
 
     // 5. 施肥（传入缓存 lands 数据避免重复 API 调用）
-    await runFertilizerByConfig(plantedLands, cachedLandsReply);
+    // 如果启用了流程编排模式，施肥交给 stage_fertilize 节点按阶段处理
+    // 传统模式下保持种植后立即施肥的行为
+    const fullCfg = getConfigSnapshot() || {};
+    const farmWorkflowEnabled = fullCfg.workflowConfig?.farm?.enabled;
+    if (!farmWorkflowEnabled) {
+        await runFertilizerByConfig(plantedLands, cachedLandsReply);
+    } else {
+        log('种植', `流程编排模式已启用，跳过种植后立即施肥，交由阶段施肥节点处理`);
+    }
 }
 
 function getCurrentPhase(phases, debug, landLabel) {
@@ -972,7 +995,11 @@ function analyzeLands(lands) {
         result.growing.push(id);
 
         // 防偷60秒注册逻辑
-        if (isAutomationOn('fertilizer_60s_anti_steal')) {
+        const state = getUserState();
+        const isSuspended = state.suspendUntil && Date.now() < state.suspendUntil;
+
+        // P0 (风控阻断) 与 P1/P2 (小号/避险模式阻断)
+        if (isAutomationOn('fertilizer_60s_anti_steal') && mode === 'main' && !isSuspended) {
             const maturePhase = Array.isArray(plant.phases)
                 ? plant.phases.find((p) => p && toNum(p.phase) === PlantPhase.MATURE)
                 : null;

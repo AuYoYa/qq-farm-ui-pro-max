@@ -50,6 +50,9 @@ CREATE TABLE IF NOT EXISTS `accounts` (
 CREATE TABLE IF NOT EXISTS `account_configs` (
     `id` int NOT NULL AUTO_INCREMENT,
     `account_id` int NOT NULL,
+    `account_mode` varchar(20) COLLATE utf8mb4_unicode_ci DEFAULT 'main',
+    `harvest_delay_min` int DEFAULT 180,
+    `harvest_delay_max` int DEFAULT 300,
     `automation_farm` tinyint(1) DEFAULT '1',
     `automation_farm_push` tinyint(1) DEFAULT '1',
     `automation_land_upgrade` tinyint(1) DEFAULT '1',
