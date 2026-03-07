@@ -16,6 +16,8 @@ GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 NC='\033[0m'
+COMPOSE_PULL_RETRIES="${COMPOSE_PULL_RETRIES:-3}"
+PULL_RETRY_DELAY_SECONDS="${PULL_RETRY_DELAY_SECONDS:-10}"
 
 print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -217,6 +219,25 @@ wait_for_container() {
     done
 }
 
+compose_pull_with_retry() {
+    local attempt=1
+
+    while true; do
+        if "${DOCKER[@]}" compose pull; then
+            return 0
+        fi
+
+        if [ "${attempt}" -ge "${COMPOSE_PULL_RETRIES}" ]; then
+            print_error "镜像拉取连续失败 ${COMPOSE_PULL_RETRIES} 次，请检查服务器到 Docker Hub 的网络。"
+            return 1
+        fi
+
+        print_warning "镜像拉取失败，${PULL_RETRY_DELAY_SECONDS}s 后重试（${attempt}/${COMPOSE_PULL_RETRIES}）..."
+        attempt=$((attempt + 1))
+        sleep "${PULL_RETRY_DELAY_SECONDS}"
+    done
+}
+
 main() {
     echo ""
     echo "=========================================="
@@ -258,7 +279,7 @@ main() {
     cd "${DEPLOY_DIR}"
 
     print_info "拉取镜像并启动服务..."
-    "${DOCKER[@]}" compose pull
+    compose_pull_with_retry
     "${DOCKER[@]}" compose up -d
 
     wait_for_container "qq-farm-mysql" 240

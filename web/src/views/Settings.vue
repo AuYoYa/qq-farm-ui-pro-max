@@ -274,7 +274,7 @@ const localOffline = ref({
   token: '',
   title: '',
   msg: '',
-  offlineDeleteSec: 120,
+  offlineDeleteSec: 0,
 })
 
 const localTiming = ref({
@@ -1331,92 +1331,94 @@ async function restoreTimingDefaults() {
           </div>
         </div>
 
-        <!-- Offline Header -->
-        <div class="border-b border-t border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
-          <h3 class="glass-text-main flex items-center gap-2 text-base font-bold">
-            <div class="i-carbon-notification" />
-            下线提醒
-          </h3>
-        </div>
+        <template v-if="isAdmin">
+          <!-- Offline Header -->
+          <div class="border-b border-t border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
+            <h3 class="glass-text-main flex items-center gap-2 text-base font-bold">
+              <div class="i-carbon-notification" />
+              下线提醒
+            </h3>
+          </div>
 
-        <!-- Offline Content -->
-        <div class="flex-1 p-4 space-y-3">
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-            <div class="flex items-center gap-2">
+          <!-- Offline Content -->
+          <div class="flex-1 p-4 space-y-3">
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <div class="flex items-center gap-2">
+                <BaseSelect
+                  v-model="localOffline.channel"
+                  label="推送渠道"
+                  :options="channelOptions"
+                  class="flex-1"
+                />
+                <a
+                  v-if="channelDocUrl"
+                  :href="channelDocUrl"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  class="mt-5 inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-blue-100 px-2 py-1.5 text-xs text-blue-700 font-medium transition dark:bg-blue-900/30 hover:bg-blue-200 dark:text-blue-300 dark:hover:bg-blue-800/40"
+                  title="查看官方文档"
+                >
+                  <span class="i-carbon-launch text-xs" />
+                  官网
+                </a>
+              </div>
               <BaseSelect
-                v-model="localOffline.channel"
-                label="推送渠道"
-                :options="channelOptions"
-                class="flex-1"
+                v-model="localOffline.reloginUrlMode"
+                label="重登录链接"
+                :options="reloginUrlModeOptions"
               />
-              <a
-                v-if="channelDocUrl"
-                :href="channelDocUrl"
-                target="_blank"
-                rel="noopener noreferrer"
-                class="mt-5 inline-flex items-center gap-1 whitespace-nowrap rounded-md bg-blue-100 px-2 py-1.5 text-xs text-blue-700 font-medium transition dark:bg-blue-900/30 hover:bg-blue-200 dark:text-blue-300 dark:hover:bg-blue-800/40"
-                title="查看官方文档"
-              >
-                <span class="i-carbon-launch text-xs" />
-                官网
-              </a>
             </div>
-            <BaseSelect
-              v-model="localOffline.reloginUrlMode"
-              label="重登录链接"
-              :options="reloginUrlModeOptions"
-            />
-          </div>
 
-          <BaseInput
-            v-model="localOffline.endpoint"
-            label="接口地址"
-            type="text"
-            :disabled="localOffline.channel !== 'webhook'"
-          />
-
-          <BaseInput
-            v-model="localOffline.token"
-            label="Token"
-            type="text"
-            placeholder="接收端 token"
-          />
-
-          <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
             <BaseInput
-              v-model="localOffline.title"
-              label="标题"
+              v-model="localOffline.endpoint"
+              label="接口地址"
               type="text"
-              placeholder="提醒标题"
+              :disabled="localOffline.channel !== 'webhook'"
             />
+
             <BaseInput
-              v-model.number="localOffline.offlineDeleteSec"
-              label="离线删除账号 (秒)"
-              type="number"
-              min="1"
-              placeholder="默认 120"
+              v-model="localOffline.token"
+              label="Token"
+              type="text"
+              placeholder="接收端 token"
+            />
+
+            <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
+              <BaseInput
+                v-model="localOffline.title"
+                label="标题"
+                type="text"
+                placeholder="提醒标题"
+              />
+              <BaseInput
+                v-model.number="localOffline.offlineDeleteSec"
+                label="离线删除账号 (秒)"
+                type="number"
+                min="0"
+                placeholder="0 表示不自动删除"
+              />
+            </div>
+
+            <BaseInput
+              v-model="localOffline.msg"
+              label="内容"
+              type="text"
+              placeholder="提醒内容"
             />
           </div>
 
-          <BaseInput
-            v-model="localOffline.msg"
-            label="内容"
-            type="text"
-            placeholder="提醒内容"
-          />
-        </div>
-
-        <!-- Save Offline Button -->
-        <div class="mt-auto flex justify-end border-t border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
-          <BaseButton
-            variant="primary"
-            size="sm"
-            :loading="offlineSaving"
-            @click="handleSaveOffline"
-          >
-            保存下线提醒设置
-          </BaseButton>
-        </div>
+          <!-- Save Offline Button -->
+          <div class="mt-auto flex justify-end border-t border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
+            <BaseButton
+              variant="primary"
+              size="sm"
+              :loading="offlineSaving"
+              @click="handleSaveOffline"
+            >
+              保存下线提醒设置
+            </BaseButton>
+          </div>
+        </template>
       </div>
 
       <!-- Card Time Parameters: 系统级时间参数调优（仅管理员可见） -->

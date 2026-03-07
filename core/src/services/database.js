@@ -1,6 +1,6 @@
 const { initMysql, getPool } = require('./mysql-db');
 const { initRedis, getRedisClient } = require('./redis-cache');
-const circuitBreaker = require('./circuit-breaker');
+const { circuitBreaker } = require('./circuit-breaker');
 const { createModuleLogger } = require('./logger');
 
 const logger = createModuleLogger('database');
@@ -14,8 +14,12 @@ async function initDatabase() {
             await initMysql();
             logger.info('MySQL initialized');
             try {
-                await initRedis();
-                logger.info('Redis initialized');
+                const redisReady = await initRedis();
+                if (redisReady) {
+                    logger.info('Redis initialized');
+                } else {
+                    logger.warn('Redis unavailable, continuing in degraded mode');
+                }
             } catch (rErr) {
                 // Redis 初始化失败：熔断器已在 initRedis 内部自动切换到 OPEN 状态
                 logger.error('⚠️ Redis 初始化失败，已启动熔断保护模式。Worker 重度查询将被降级处理。', rErr.message);

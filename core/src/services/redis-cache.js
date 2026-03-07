@@ -3,6 +3,28 @@ const { createModuleLogger } = require('./logger');
 const { circuitBreaker } = require('./circuit-breaker');
 
 const logger = createModuleLogger('redis-cache');
+let redisDisabled = false;
+let redisDisableReason = '';
+
+function getErrorMessage(err) {
+    return String(err && err.message ? err.message : err || 'unknown').trim() || 'unknown';
+}
+
+function isAuthError(message) {
+    return /NOAUTH|WRONGPASS|authentication required|invalid username-password/i.test(String(message || ''));
+}
+
+function disableRedis(reason) {
+    if (redisDisabled) return;
+    redisDisabled = true;
+    redisDisableReason = reason || 'unknown';
+    logger.warn(`⚠️ Redis 已切换为降级模式: ${redisDisableReason}`);
+    try {
+        redis.disconnect();
+    } catch {
+        // ignore
+    }
+}
 
 // 从环境变量读取配置，兼容 docker-compose 和本地开发
 const REDIS_HOST = process.env.REDIS_HOST || '127.0.0.1';
@@ -16,7 +38,10 @@ const redisOptions = {
     host: REDIS_HOST,
     port: REDIS_PORT,
     commandTimeout: 5000,
+    enableReadyCheck: false,
+    lazyConnect: true,
     retryStrategy(times) {
+        if (redisDisabled) return null;
         // 重连策略: 延迟重试，最大不超过 2 秒
         const delay = Math.min(times * 50, 2000);
         return delay;
@@ -32,21 +57,34 @@ const redis = new Redis(redisOptions);
 // === Redis 连接事件 → 同步更新熔断器状态 ===
 
 redis.on('connect', () => {
-    logger.info(`✅ Redis 连接成功 (${REDIS_HOST}:${REDIS_PORT})`);
-    circuitBreaker.recordSuccess();
+    if (redisDisabled) return;
+    logger.info(`Redis TCP connected (${REDIS_HOST}:${REDIS_PORT})`);
+});
+
+redis.on('ready', () => {
+    if (redisDisabled) return;
+    logger.info('✅ Redis ready');
 });
 
 redis.on('error', (err) => {
-    logger.error('❌ Redis 发生错误:', err.message);
-    circuitBreaker.recordFailure();
+    const message = getErrorMessage(err);
+    logger.error(`❌ Redis 发生错误: ${message}`);
+    if (isAuthError(message)) {
+        disableRedis(`Redis 鉴权失败: ${message}`);
+        return;
+    }
+    if (!redisDisabled)
+        circuitBreaker.recordFailure(message);
 });
 
 redis.on('close', () => {
+    if (redisDisabled) return;
     logger.warn('⚠️ Redis 连接已断开');
     circuitBreaker.recordFailure();
 });
 
 redis.on('reconnecting', () => {
+    if (redisDisabled) return;
     logger.info('🔄 Redis 正在重连...');
 });
 
@@ -55,13 +93,26 @@ redis.on('reconnecting', () => {
  * 由 database.js 的 initDatabase 调用
  */
 async function initRedis() {
+    if (redisDisabled) {
+        logger.warn(`⚠️ Redis 已停用，跳过初始化: ${redisDisableReason}`);
+        return false;
+    }
     try {
+        if (redis.status === 'wait') {
+            await redis.connect();
+        }
         await redis.ping();
         circuitBreaker.recordSuccess();
         logger.info('✅ Redis PING 验证成功');
+        return true;
     } catch (e) {
-        circuitBreaker.recordFailure();
-        logger.error('❌ Redis PING 验证失败:', e.message);
+        const message = getErrorMessage(e);
+        if (isAuthError(message)) {
+            disableRedis(`Redis 鉴权失败: ${message}`);
+            return false;
+        }
+        circuitBreaker.recordFailure(message);
+        logger.error(`❌ Redis PING 验证失败: ${message}`);
         throw e;
     }
 }
@@ -73,6 +124,7 @@ async function initRedis() {
  * @param {number} expireSecs 过期时间(秒) 默认永不过期
  */
 async function setCache(key, value, expireSecs = 0) {
+    if (redisDisabled) return;
     // 熔断器检查：Redis 不可用时直接跳过写入
     if (!circuitBreaker.allowRequest()) return;
     try {
@@ -94,6 +146,7 @@ async function setCache(key, value, expireSecs = 0) {
  * @param {string} key 
  */
 async function getCache(key) {
+    if (redisDisabled) return null;
     // 熔断器检查：Redis 不可用时直接返回 null
     if (!circuitBreaker.allowRequest()) return null;
     try {
@@ -116,6 +169,7 @@ async function getCache(key) {
  * 提供分布式锁简单实现 (SET NX)（接入熔断器）
  */
 async function acquireLock(lockKey, expireMs = 5000) {
+    if (redisDisabled) return false;
     if (!circuitBreaker.allowRequest()) return false;
     try {
         // PX = 毫秒， NX = 不存在才创建
@@ -130,6 +184,7 @@ async function acquireLock(lockKey, expireMs = 5000) {
 }
 
 async function releaseLock(lockKey) {
+    if (redisDisabled) return;
     if (!circuitBreaker.allowRequest()) return;
     try {
         await redis.del(lockKey);
@@ -141,6 +196,7 @@ async function releaseLock(lockKey) {
 }
 
 function getRedisClient() {
+    if (redisDisabled) return null;
     return redis;
 }
 

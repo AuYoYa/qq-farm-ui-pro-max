@@ -11,6 +11,8 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 DOCKER=(docker)
 SUDO=""
+COMPOSE_PULL_RETRIES="${COMPOSE_PULL_RETRIES:-3}"
+PULL_RETRY_DELAY_SECONDS="${PULL_RETRY_DELAY_SECONDS:-10}"
 
 print_info() { echo -e "${BLUE}[INFO]${NC} $1"; }
 print_success() { echo -e "${GREEN}[OK]${NC} $1"; }
@@ -72,6 +74,25 @@ wait_for_app() {
     done
 }
 
+compose_pull_with_retry() {
+    local attempt=1
+
+    while true; do
+        if "${DOCKER[@]}" compose pull "${APP_SERVICE}"; then
+            return 0
+        fi
+
+        if [ "${attempt}" -ge "${COMPOSE_PULL_RETRIES}" ]; then
+            print_error "主程序镜像拉取连续失败 ${COMPOSE_PULL_RETRIES} 次，请检查服务器到 Docker Hub 的网络。"
+            return 1
+        fi
+
+        print_warning "主程序镜像拉取失败，${PULL_RETRY_DELAY_SECONDS}s 后重试（${attempt}/${COMPOSE_PULL_RETRIES}）..."
+        attempt=$((attempt + 1))
+        sleep "${PULL_RETRY_DELAY_SECONDS}"
+    done
+}
+
 main() {
     ensure_docker
 
@@ -87,7 +108,7 @@ main() {
     old_image="$("${DOCKER[@]}" inspect -f '{{.Image}}' "${APP_SERVICE}" 2>/dev/null || true)"
 
     print_info "仅更新主程序容器，不会重启 MySQL / Redis / ipad860。"
-    "${DOCKER[@]}" compose pull "${APP_SERVICE}"
+    compose_pull_with_retry
     "${DOCKER[@]}" compose up -d --no-deps "${APP_SERVICE}"
     wait_for_app 240
 

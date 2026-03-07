@@ -134,7 +134,7 @@ export const useSettingStore = defineStore('setting', () => {
       token: '',
       title: '账号下线提醒',
       msg: '账号下线',
-      offlineDeleteSec: 120,
+      offlineDeleteSec: 0,
     },
     trialConfig: {
       enabled: true,
@@ -206,7 +206,7 @@ export const useSettingStore = defineStore('setting', () => {
           token: '',
           title: '账号下线提醒',
           msg: '账号下线',
-          offlineDeleteSec: 120,
+          offlineDeleteSec: 0,
         }
       }
     }
@@ -259,12 +259,19 @@ export const useSettingStore = defineStore('setting', () => {
   async function saveOfflineConfig(config: OfflineConfig) {
     // 不设置 loading，避免整页切换导致闪烁；Settings.vue 已用 offlineSaving 控制按钮加载态
     try {
+      const user = JSON.parse(localStorage.getItem('current_user') || 'null')
+      if (user?.role !== 'admin')
+        return { ok: false, error: '仅管理员可修改下线提醒设置' }
+
       const { data } = await api.post('/api/settings/offline-reminder', config)
       if (data && data.ok) {
-        settings.value.offlineReminder = config
+        settings.value.offlineReminder = data.data || config
         return { ok: true }
       }
-      return { ok: false, error: '保存失败' }
+      return { ok: false, error: data?.error || '保存失败' }
+    }
+    catch (e: any) {
+      return { ok: false, error: e.response?.data?.error || e.message || '保存失败' }
     }
     finally {
       // loading 未在此处修改，无需 finally 中重置

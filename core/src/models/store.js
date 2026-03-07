@@ -106,6 +106,7 @@ function normalizeOfflineReminder(input) {
     if (!Number.isFinite(offlineDeleteSec)) {
         offlineDeleteSec = DEFAULT_OFFLINE_REMINDER.offlineDeleteSec;
     }
+    offlineDeleteSec = Math.max(0, offlineDeleteSec);
     const rawChannel = (src.channel !== undefined && src.channel !== null)
         ? String(src.channel).trim().toLowerCase()
         : '';

@@ -26,7 +26,7 @@ const pool = mysql.createPool({
     waitForConnections: true,
     connectionLimit: DB_LIMIT,
     queueLimit: DB_LIMIT * 2, // 排队上限为连接池的2倍，超额直接抛出快速失败
-    acquireTimeout: 10000,    // 取连接最大容忍 10 秒死等，防止高并发夯死
+    connectTimeout: 10000,    // 连接建立超时 10 秒，避免网络异常时长时间阻塞
     enableKeepAlive: true,
     keepAliveInitialDelay: 10000,
     // 空闲连接超时回收（毫秒），避免连接囤积占用 MySQL 资源

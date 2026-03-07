@@ -1,5 +1,5 @@
 const { log, logWarn } = require('../utils/utils');
-const { pushNotify } = require('./push');
+const { sendPushooMessage } = require('./push');
 const store = require('../models/store');
 
 const THRESHOLD = 5;
@@ -44,9 +44,9 @@ class CircuitBreaker {
         this.lastOpenTime = Date.now();
         logWarn('安全', `【风控告警】账户级断路器被触发 (原因: ${reason})，累计在 10 分钟内异常 ${this.failures.length} 次。挂起本地网络分发以物理断阻黑盒风控！`, { module: 'circuit-breaker' });
 
-        pushNotify({
-            title: '⚠️ 账户风控保护性熔断',
-            content: `触发断路器，原因：近10分钟内出现 ${this.failures.length} 次风控阻断(${reason})。当前账号已自动丢弃所有排队请求，进入一小时强制冰冻期。`
+        void notifyCircuitBreakerTrip({
+            reason,
+            failures: this.failures.length,
         });
     }
 
@@ -71,9 +71,41 @@ class CircuitBreaker {
 
         return true;
     }
+
+    isAvailable() {
+        return this.allowRequest();
+    }
 }
 
 const circuitBreaker = new CircuitBreaker();
+
+async function notifyCircuitBreakerTrip({ reason, failures }) {
+    try {
+        const cfg = store.getOfflineReminder ? store.getOfflineReminder() : null;
+        if (!cfg) return;
+
+        const channel = String(cfg.channel || '').trim().toLowerCase();
+        const endpoint = String(cfg.endpoint || '').trim();
+        const token = String(cfg.token || '').trim();
+
+        if (!channel) return;
+        if (channel === 'webhook' && !endpoint) return;
+
+        const result = await sendPushooMessage({
+            channel,
+            endpoint,
+            token,
+            title: '⚠️ 账户风控保护性熔断',
+            content: `触发断路器，原因：近10分钟内出现 ${failures} 次风控阻断(${reason || 'unknown'})。当前账号已自动丢弃所有排队请求，进入一小时强制冰冻期。`,
+        });
+
+        if (!result?.ok) {
+            logWarn('安全', `断路器告警推送失败: ${result?.msg || 'unknown'}`, { module: 'circuit-breaker' });
+        }
+    } catch (error) {
+        logWarn('安全', `断路器告警推送异常: ${error.message}`, { module: 'circuit-breaker' });
+    }
+}
 
 module.exports = {
     circuitBreaker

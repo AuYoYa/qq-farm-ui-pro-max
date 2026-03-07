@@ -263,9 +263,17 @@ function startAdminServer(dataProvider) {
     // 登录与鉴权 - 支持多用户 + PBKDF2 + 登录锁定
     app.post('/api/login', async (req, res) => {
         try {
-            const { username, password } = req.body || {};
+            const username = String(req.body?.username || '').trim();
+            const password = String(req.body?.password || '');
             const clientIP = getClientIP(req);
             const lockKey = username ? `user:${username}` : `ip:${clientIP}`;
+
+            if (!username || !password) {
+                return res.status(400).json({
+                    ok: false,
+                    error: '用户名和密码不能为空',
+                });
+            }
 
             const lockStatus = security.loginLock.checkLock(lockKey);
             if (lockStatus.locked) {
@@ -278,26 +286,15 @@ function startAdminServer(dataProvider) {
 
             let validatedUser;
 
-            if (!username) {
-                const input = String(password || '');
-                const adminUser = await userStore.validateUser('admin', input);
-                const ok = adminUser && !adminUser.error;
-                if (!ok) {
-                    security.loginLock.recordFailure(lockKey);
-                    return res.status(401).json({ ok: false, error: 'Invalid password' });
-                }
-                validatedUser = { username: 'admin', role: 'admin', card: null };
-            } else {
-                const user = await userStore.validateUser(username, password);
-                if (!user) {
-                    security.loginLock.recordFailure(lockKey);
-                    return res.status(401).json({ ok: false, error: '用户名或密码错误' });
-                }
-                if (user.error) {
-                    return res.status(403).json({ ok: false, error: user.error });
-                }
-                validatedUser = { username: user.username, role: user.role, card: user.card };
+            const user = await userStore.validateUser(username, password);
+            if (!user) {
+                security.loginLock.recordFailure(lockKey);
+                return res.status(401).json({ ok: false, error: '用户名或密码错误' });
             }
+            if (user.error) {
+                return res.status(403).json({ ok: false, error: user.error });
+            }
+            validatedUser = { username: user.username, role: user.role, card: user.card };
 
             security.loginLock.recordSuccess(lockKey);
 
@@ -1011,7 +1008,7 @@ function startAdminServer(dataProvider) {
     app.post('/api/settings/offline-reminder', async (req, res) => {
         try {
             if (req.currentUser && req.currentUser.role !== 'admin') {
-                return res.json({ ok: true, data: {} });
+                return res.status(403).json({ ok: false, error: '仅管理员可修改下线提醒设置' });
             }
             const body = (req.body && typeof req.body === 'object') ? req.body : {};
             const data = store.setOfflineReminder ? store.setOfflineReminder(body) : {};
@@ -1090,7 +1087,7 @@ function startAdminServer(dataProvider) {
             const ui = store.getUI();
             const offlineReminder = store.getOfflineReminder
                 ? store.getOfflineReminder()
-                : { channel: 'webhook', reloginUrlMode: 'none', endpoint: '', token: '', title: '账号下线提醒', msg: '账号下线', offlineDeleteSec: 120 };
+                : { channel: 'webhook', reloginUrlMode: 'none', endpoint: '', token: '', title: '账号下线提醒', msg: '账号下线', offlineDeleteSec: 0 };
             // 从完整配置快照中提取工作流编排配置
             const fullSnapshot = store.getConfigSnapshot(id);
             const workflowConfig = fullSnapshot.workflowConfig || { farm: { enabled: false, minInterval: 30, maxInterval: 120, nodes: [] }, friend: { enabled: false, minInterval: 60, maxInterval: 300, nodes: [] } };
