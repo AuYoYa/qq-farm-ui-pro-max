@@ -9,6 +9,7 @@ const fs = require('node:fs');
 const path = require('node:path');
 const process = require('node:process');
 const express = require('express');
+const cookieParser = require('cookie-parser');
 const cron = require('node-cron');
 const { Server: SocketIOServer } = require('socket.io');
 const { version } = require('../../package.json');
@@ -30,6 +31,7 @@ const usersController = require('./users');
 const cardsController = require('./cards');
 const { validateUsername, validatePassword, validateCardCode } = require('../utils/validators');
 const accountRepository = require('../repositories/account-repository');
+const jwtService = require('../services/jwt-service');
 
 const adminLogger = createModuleLogger('admin');
 
@@ -85,19 +87,27 @@ function startAdminServer(dataProvider) {
 
     app = express();
     app.use(express.json());
+    app.use(cookieParser());
 
-    const tokens = new Set();
-    const tokenUserMap = new Map(); // token -> user info
-
-    const issueToken = () => crypto.randomBytes(24).toString('hex');
-    const authRequired = (req, res, next) => {
-        const token = req.headers['x-admin-token'];
-        if (!token || !tokens.has(token)) {
+    const authRequired = async (req, res, next) => {
+        try {
+            const accessToken = req.cookies?.access_token || req.headers['x-admin-token'] || '';
+            if (!accessToken) {
+                return res.status(401).json({ ok: false, error: 'Unauthorized' });
+            }
+            const decoded = jwtService.verifyAccessToken(accessToken);
+            if (!decoded) {
+                return res.status(401).json({ ok: false, error: 'Token expired or invalid' });
+            }
+            const userInfo = await userStore.getUserInfo(decoded.username);
+            if (!userInfo) {
+                return res.status(401).json({ ok: false, error: 'User not found' });
+            }
+            req.currentUser = userInfo;
+            next();
+        } catch (err) {
             return res.status(401).json({ ok: false, error: 'Unauthorized' });
         }
-        req.adminToken = token;
-        req.currentUser = tokenUserMap.get(token);
-        next();
     };
 
     // 避免 Dirty Write（如 NTP 失步导致短时间内多次运行导致双倍或多倍累加，仅通过日期字符串锁来拦截同一天的多次并发写库）
@@ -161,35 +171,27 @@ function startAdminServer(dataProvider) {
         }
     });
 
-    // 用户状态检查中间件
+    const EXPIRED_WHITELIST = new Set(['/auth/renew', '/auth/trial-renew', '/trial-card-config', '/auth/validate', '/auth/change-password', '/ping', '/announcement']);
+    const BANNED_WHITELIST = new Set(['/auth/validate', '/ping']);
+
     const userRequired = (req, res, next) => {
         if (!req.currentUser) {
             return res.status(401).json({ ok: false, error: 'Unauthorized' });
         }
 
-        // 管理员不受限制
         if (req.currentUser.role === 'admin') {
             return next();
         }
 
-        // 检查封禁状态
+        const currentPath = req.path.replace(/^\/api/, '');
+
         if (req.currentUser.card?.enabled === false) {
-            tokens.delete(req.adminToken);
-            tokenUserMap.delete(req.adminToken);
+            if (BANNED_WHITELIST.has(currentPath)) return next();
             return res.status(403).json({ ok: false, error: '账号已被封禁' });
         }
 
-        // 检查过期状态
-        if (req.currentUser.card?.expiresAt && req.currentUser.card.expiresAt < Date.now()) {
-            // 安全优化：允许过期用户访问续费接口，而不是直接踢下线
-            const RENEW_WHITELIST = ['/auth/renew', '/auth/trial-renew', '/trial-card-config'];
-            const currentPath = req.path.replace(/^\/api/, '');
-            if (RENEW_WHITELIST.includes(currentPath)) {
-                return next();
-            }
-
-            tokens.delete(req.adminToken);
-            tokenUserMap.delete(req.adminToken);
+        if (req.currentUser.isExpired) {
+            if (EXPIRED_WHITELIST.has(currentPath)) return next();
             return res.status(403).json({ ok: false, error: '账号已过期，请续费后操作' });
         }
 
@@ -223,9 +225,24 @@ function startAdminServer(dataProvider) {
         next();
     };
 
+    const allowedOrigins = (process.env.CORS_ORIGINS || '')
+        .split(',')
+        .map(s => s.trim())
+        .filter(Boolean);
+
     app.use((req, res, next) => {
-        res.header('Access-Control-Allow-Origin', '*');
-        res.header('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS');
+        const origin = req.headers.origin || '';
+        const isLocalDev = /^https?:\/\/(localhost|127\.0\.0\.1|0\.0\.0\.0|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/.test(origin);
+        const isAllowed = isLocalDev || allowedOrigins.includes(origin);
+
+        if (origin && isAllowed) {
+            res.header('Access-Control-Allow-Origin', origin);
+            res.header('Access-Control-Allow-Credentials', 'true');
+        } else if (!origin) {
+            res.header('Access-Control-Allow-Origin', '*');
+        }
+
+        res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
         res.header('Access-Control-Allow-Headers', 'Content-Type, x-account-id, x-admin-token');
         res.header('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate');
         res.header('Pragma', 'no-cache');
@@ -245,76 +262,119 @@ function startAdminServer(dataProvider) {
 
     // 登录与鉴权 - 支持多用户 + PBKDF2 + 登录锁定
     app.post('/api/login', async (req, res) => {
-        const { username, password } = req.body || {};
-        const clientIP = getClientIP(req);
-        const lockKey = username ? `user:${username}` : `ip:${clientIP}`;
+        try {
+            const { username, password } = req.body || {};
+            const clientIP = getClientIP(req);
+            const lockKey = username ? `user:${username}` : `ip:${clientIP}`;
 
-        // 登录锁定检查
-        const lockStatus = security.loginLock.checkLock(lockKey);
-        if (lockStatus.locked) {
-            const remainMin = Math.ceil(lockStatus.remainingMs / 60000);
-            return res.status(429).json({
-                ok: false,
-                error: `登录尝试过多，请 ${remainMin} 分钟后再试`,
-            });
-        }
-
-        if (!username) {
-            const input = String(password || '');
-            // 统一走 user-store 验证，消除双轨密码体系
-            const adminUser = await userStore.validateUser('admin', input);
-            const ok = adminUser && !adminUser.error;
-            if (!ok) {
-                security.loginLock.recordFailure(lockKey);
-                return res.status(401).json({ ok: false, error: 'Invalid password' });
+            const lockStatus = security.loginLock.checkLock(lockKey);
+            if (lockStatus.locked) {
+                const remainMin = Math.ceil(lockStatus.remainingMs / 60000);
+                return res.status(429).json({
+                    ok: false,
+                    error: `登录尝试过多，请 ${remainMin} 分钟后再试`,
+                });
             }
-            security.loginLock.recordSuccess(lockKey);
-            const token = issueToken();
-            tokens.add(token);
-            tokenUserMap.set(token, { username: 'admin', role: 'admin', card: null });
-            return res.json({ ok: true, data: { token, user: { username: 'admin', role: 'admin', card: null } } });
-        }
 
-        const user = await userStore.validateUser(username, password);
-        if (!user) {
-            security.loginLock.recordFailure(lockKey);
-            return res.status(401).json({ ok: false, error: '用户名或密码错误' });
-        }
+            let validatedUser;
 
-        if (user.error) {
-            return res.status(403).json({ ok: false, error: user.error });
-        }
-
-        security.loginLock.recordSuccess(lockKey);
-        const token = issueToken();
-        tokens.add(token);
-        tokenUserMap.set(token, user);
-
-        res.json({
-            ok: true,
-            data: {
-                token,
-                user: {
-                    username: user.username,
-                    role: user.role,
-                    card: user.card
+            if (!username) {
+                const input = String(password || '');
+                const adminUser = await userStore.validateUser('admin', input);
+                const ok = adminUser && !adminUser.error;
+                if (!ok) {
+                    security.loginLock.recordFailure(lockKey);
+                    return res.status(401).json({ ok: false, error: 'Invalid password' });
                 }
+                validatedUser = { username: 'admin', role: 'admin', card: null };
+            } else {
+                const user = await userStore.validateUser(username, password);
+                if (!user) {
+                    security.loginLock.recordFailure(lockKey);
+                    return res.status(401).json({ ok: false, error: '用户名或密码错误' });
+                }
+                if (user.error) {
+                    return res.status(403).json({ ok: false, error: user.error });
+                }
+                validatedUser = { username: user.username, role: user.role, card: user.card };
             }
-        });
+
+            security.loginLock.recordSuccess(lockKey);
+
+            const accessToken = jwtService.signAccessToken(validatedUser);
+            const refreshToken = jwtService.generateRefreshToken();
+            await jwtService.storeRefreshToken(validatedUser.username, refreshToken, validatedUser.role, req);
+            jwtService.setTokenCookies(res, accessToken, refreshToken, validatedUser.role);
+
+            const defaultPwd = CONFIG.adminPassword || 'admin';
+            const isDefaultPassword = (password === defaultPwd);
+
+            res.json({
+                ok: true,
+                data: {
+                    user: {
+                        username: validatedUser.username,
+                        role: validatedUser.role,
+                        card: validatedUser.card,
+                    },
+                    ...(isDefaultPassword && { passwordWarning: '您正在使用默认密码，建议尽快修改以保障账户安全' }),
+                },
+            });
+        } catch (err) {
+            logger.error('Login error:', err.message);
+            return res.status(500).json({ ok: false, error: 'Server error' });
+        }
+    });
+
+    app.post('/api/auth/refresh', async (req, res) => {
+        try {
+            const oldRefresh = req.cookies?.refresh_token;
+            if (!oldRefresh) return res.status(401).json({ ok: false, error: 'No refresh token' });
+
+            const consumed = await jwtService.atomicConsumeRefreshToken(oldRefresh);
+            if (!consumed) return res.status(401).json({ ok: false, error: 'Invalid or expired refresh token' });
+
+            const userInfo = await userStore.getUserInfo(consumed.username);
+            if (!userInfo) return res.status(401).json({ ok: false, error: 'User not found' });
+
+            const newAccess = jwtService.signAccessToken(userInfo);
+            const newRefresh = jwtService.generateRefreshToken();
+            await jwtService.storeRefreshToken(userInfo.username, newRefresh, userInfo.role, req);
+            jwtService.setTokenCookies(res, newAccess, newRefresh, userInfo.role);
+
+            res.json({ ok: true });
+        } catch (err) {
+            logger.error('Token refresh error:', err.message);
+            return res.status(500).json({ ok: false, error: 'Server error' });
+        }
+    });
+
+    app.post('/api/auth/logout', async (req, res) => {
+        try {
+            const refreshToken = req.cookies?.refresh_token;
+            if (refreshToken) await jwtService.revokeRefreshToken(refreshToken);
+        } catch (err) {
+            logger.error('Logout error:', err.message);
+        }
+        jwtService.clearTokenCookies(res);
+        res.json({ ok: true });
     });
 
     // Farm Tools API 微服务接管
     app.use('/api', require('./farm-tools-routing'));
 
+    const PUBLIC_PATHS = new Set(['/login', '/auth/register', '/auth/refresh', '/auth/logout', '/qr/create', '/qr/check', '/notifications', '/trial-card', '/ui-config']);
     app.use('/api', (req, res, next) => {
-        if (req.path === '/login' || req.path === '/auth/register' || req.path === '/qr/create' || req.path === '/qr/check' || req.path === '/notifications' || req.path === '/trial-card' || req.path === '/ui-config') return next();
-        return authRequired(req, res, next);
+        if (PUBLIC_PATHS.has(req.path)) return next();
+        authRequired(req, res, (err) => {
+            if (err) return next(err);
+            userRequired(req, res, next);
+        });
     });
 
     app.get('/api/system-logs', async (req, res) => {
         try {
             const pool = getPool();
-            if (!pool) return res.status(500).json({ ok: false, error: 'Database pool not initialized' });
 
             const page = Math.max(1, Number.parseInt(req.query.page) || 1);
             const limit = Math.min(100, Math.max(1, Number.parseInt(req.query.limit) || 50));
@@ -325,6 +385,21 @@ function startAdminServer(dataProvider) {
             let querySql = "SELECT * FROM system_logs WHERE 1=1";
             let countSql = "SELECT COUNT(*) as total FROM system_logs WHERE 1=1";
             const params = [];
+
+            // 数据隔离：非管理员只能查看自己账号的系统日志
+            if (req.currentUser && req.currentUser.role !== 'admin') {
+                const allAccounts = await store.getAccounts();
+                const userAccountIds = allAccounts.accounts
+                    .filter(a => a.username === req.currentUser.username)
+                    .map(a => String(a.id));
+                if (userAccountIds.length === 0) {
+                    return res.json({ ok: true, data: { total: 0, page, limit, items: [] } });
+                }
+                const placeholders = userAccountIds.map(() => '?').join(',');
+                querySql += ` AND account_id IN (${placeholders})`;
+                countSql += ` AND account_id IN (${placeholders})`;
+                params.push(...userAccountIds);
+            }
 
             if (level) {
                 querySql += " AND level = ?";
@@ -365,8 +440,10 @@ function startAdminServer(dataProvider) {
     // Phase 4/5: Echarts 数据走势聚合真实下发
     app.get('/api/stats/trend', async (req, res) => {
         try {
+            if (req.currentUser && req.currentUser.role !== 'admin') {
+                return res.status(403).json({ ok: false, error: '全局统计趋势仅限管理员查看' });
+            }
             const pool = getPool();
-            if (!pool) return res.status(500).json({ ok: false, error: 'Database not ready' });
 
             const [rows] = await pool.query(
                 `SELECT DATE_FORMAT(record_date, '%m-%d') as short_date, total_exp, total_gold, total_steal
@@ -407,35 +484,25 @@ function startAdminServer(dataProvider) {
         }
     });
 
-    app.post('/api/admin/change-password', async (req, res) => {
-        const body = req.body || {};
-        const oldPassword = String(body.oldPassword || '');
-        const newPassword = String(body.newPassword || '');
-
-        const strength = security.checkPasswordStrength(newPassword);
-        if (!strength.strong) {
-            return res.status(400).json({ ok: false, error: strength.errors.join('；') });
-        }
-
-        // 使用 user-store 统一验证和修改密码
-        const result = await userStore.changePassword('admin', oldPassword, newPassword);
-        if (!result.ok) {
-            return res.status(400).json({ ok: false, error: result.error });
-        }
-        // 同步更新 store 层的 hash（兼容旧逻辑）
-        const nextHash = security.hashPassword(newPassword);
-        if (store.setAdminPasswordHash) {
-            store.setAdminPasswordHash(nextHash);
-        }
-        res.json({ ok: true });
-    });
+    // 密码修改已统一迁移至 /api/auth/change-password（基于 token 识别当前用户，见 users.js）
+    // 该路由已于 v4.5 移除，所有用户（含管理员）通过同一端点修改自己的密码
 
     app.get('/api/ping', async (req, res) => {
         res.json({ ok: true, data: { ok: true, uptime: process.uptime(), version } });
     });
 
     app.get('/api/auth/validate', async (req, res) => {
-        res.json({ ok: true, data: { valid: true } });
+        res.json({
+            ok: true,
+            data: {
+                valid: true,
+                user: {
+                    username: req.currentUser?.username,
+                    role: req.currentUser?.role,
+                    card: req.currentUser?.card,
+                },
+            },
+        });
     });
 
     // 公开 API: 获取 UI 配置 (用于登录页背景等)
@@ -459,17 +526,13 @@ function startAdminServer(dataProvider) {
     });
 
     app.post('/api/logout', async (req, res) => {
-        const token = req.adminToken;
-        if (token) {
-            tokens.delete(token);
-            if (io) {
-                for (const socket of io.sockets.sockets.values()) {
-                    if (String(socket.data.adminToken || '') === String(token)) {
-                        socket.disconnect(true);
-                    }
-                }
-            }
+        try {
+            const refreshToken = req.cookies?.refresh_token;
+            if (refreshToken) await jwtService.revokeRefreshToken(refreshToken);
+        } catch (err) {
+            logger.error('Legacy logout error:', err.message);
         }
+        jwtService.clearTokenCookies(res);
         res.json({ ok: true });
     });
 
@@ -851,7 +914,9 @@ function startAdminServer(dataProvider) {
     // API: 种植效率排行（数据分析）
     app.get('/api/analytics', async (req, res) => {
         try {
-            const sortBy = req.query.sort || 'exp';
+            const ANALYTICS_SORT_WHITELIST = new Set(['exp', 'fert', 'gold', 'profit', 'fert_profit', 'level']);
+            const rawSort = String(req.query.sort || 'exp');
+            const sortBy = ANALYTICS_SORT_WHITELIST.has(rawSort) ? rawSort : 'exp';
             const levelRaw = req.query.level;
             const levelMax = (levelRaw !== undefined && levelRaw !== '' && Number.isFinite(Number(levelRaw)))
                 ? Number(levelRaw) : null;
@@ -1056,7 +1121,6 @@ function startAdminServer(dataProvider) {
             // Console log to trace running status issue reported by user
             let runningMap = {};
             accountList.forEach(a => runningMap[a.id] = a.running);
-            console.log('[DEBUG /api/accounts] accounts running map:', runningMap, provider.workers ? Object.keys(provider.workers) : 'No workers accessible');
 
             res.json({ ok: true, data: { ...data, accounts: accountList } });
         } catch (e) {
@@ -1067,30 +1131,33 @@ function startAdminServer(dataProvider) {
     // API: 排行榜分页数据接口 (前端重排解耦)
     app.get('/api/leaderboard', async (req, res) => {
         try {
-            const sortBy = String(req.query.sort_by || 'level');
-            const limit = Number.parseInt(req.query.limit || '50', 10);
+            const SORT_WHITELIST = new Set(['level', 'gold', 'coupon', 'uptime', 'exp']);
+            const rawSort = String(req.query.sort_by || 'level');
+            const sortBy = SORT_WHITELIST.has(rawSort) ? rawSort : 'level';
+            const limit = Math.min(Math.max(Number.parseInt(req.query.limit || '50', 10) || 50, 1), 200);
 
             const data = await provider.getAccounts();
             let accountList = [...(data.accounts || [])];
 
-            // 抹除敏感信息并附加 worker 数据
             accountList = accountList.map(acc => {
                 const safeAcc = { ...acc, level: acc.level || 0, gold: acc.gold || 0, coupon: acc.coupon || 0, uptime: acc.uptime || 0 };
                 delete safeAcc.password;
                 return safeAcc;
             });
 
-            // 后端执行高速排序：完全活跃 (running) > 不活跃，之后再通过 sortBy 第二关键字
+            const isAdmin = req.currentUser?.role === 'admin';
+            if (!isAdmin) {
+                const currentUsername = req.currentUser?.username;
+                accountList = accountList.filter(acc => acc.username === currentUsername);
+            }
+
             accountList.sort((a, b) => {
                 if (a.running && !b.running) return -1;
                 if (!a.running && b.running) return 1;
                 return (b[sortBy] || 0) - (a[sortBy] || 0);
             });
 
-            // 附带排名
             accountList = accountList.map((acc, index) => ({ ...acc, ranking: index + 1 }));
-
-            // 执行分页切割
             const pagedList = accountList.slice(0, limit);
 
             res.json({ ok: true, data: { accounts: pagedList, total: accountList.length } });
@@ -1264,12 +1331,12 @@ function startAdminServer(dataProvider) {
                 return res.status(400).json(result);
             }
 
-            // 注册成功后自动登录
-            const token = issueToken();
-            tokens.add(token);
-            tokenUserMap.set(token, result.user);
+            const accessToken = jwtService.signAccessToken(result.user);
+            const refreshToken = jwtService.generateRefreshToken();
+            await jwtService.storeRefreshToken(result.user.username, refreshToken, result.user.role, req);
+            jwtService.setTokenCookies(res, accessToken, refreshToken, result.user.role);
 
-            res.json({ ok: true, data: { token, user: result.user } });
+            res.json({ ok: true, data: { user: result.user } });
         } catch (error) {
             console.error('用户注册失败:', error.message);
             res.status(500).json({ ok: false, error: '注册失败，请稍后重试' });
@@ -1295,9 +1362,7 @@ function startAdminServer(dataProvider) {
                 return res.status(400).json(result);
             }
 
-            // 更新 token 中的用户信息
             req.currentUser.card = result.card;
-            tokenUserMap.set(req.adminToken, req.currentUser);
 
             res.json({ ok: true, data: { card: result.card } });
         } catch (error) {
@@ -1411,6 +1476,10 @@ function startAdminServer(dataProvider) {
         }
     }, 60 * 60 * 1000);
 
+    // 定时清理过期 refresh token（每小时执行一次）
+    setInterval(() => { jwtService.cleanExpiredTokens(); }, 60 * 60 * 1000);
+    jwtService.cleanExpiredTokens();
+
     // ============ 体验卡 API ============
 
     // 公开 API：自助生成体验卡（无需登录）[带防刷限制]
@@ -1478,9 +1547,7 @@ function startAdminServer(dataProvider) {
             if (!result.ok) {
                 return res.status(400).json(result);
             }
-            // 更新 token 中的用户信息
             req.currentUser.card = result.card;
-            tokenUserMap.set(req.adminToken, req.currentUser);
             res.json({ ok: true, data: { card: result.card } });
         } catch (e) {
             res.status(500).json({ ok: false, error: e.message });
@@ -2222,26 +2289,45 @@ function startAdminServer(dataProvider) {
         pingTimeout: 5000,
         pingInterval: 10000,
         cors: {
-            origin: '*',
+            origin: allowedOrigins.length > 0
+                ? (origin, cb) => {
+                    if (!origin || allowedOrigins.includes(origin) || /^https?:\/\/(localhost|127\.0\.0\.1|192\.168\.\d+\.\d+|10\.\d+\.\d+\.\d+)(:\d+)?$/.test(origin)) {
+                        cb(null, true);
+                    } else {
+                        cb(null, false);
+                    }
+                }
+                : '*',
             methods: ['GET', 'POST'],
-            allowedHeaders: ['x-admin-token', 'x-account-id'],
+            credentials: allowedOrigins.length > 0,
         },
     });
 
-    io.use((socket, next) => {
-        const authToken = socket.handshake.auth && socket.handshake.auth.token
-            ? String(socket.handshake.auth.token)
-            : '';
-        const headerToken = socket.handshake.headers && socket.handshake.headers['x-admin-token']
-            ? String(socket.handshake.headers['x-admin-token'])
-            : '';
-        const token = authToken || headerToken;
-        if (!token || !tokens.has(token)) {
+    io.use(async (socket, next) => {
+        try {
+            const cookieHeader = socket.handshake.headers?.cookie || '';
+            const cookies = {};
+            for (const part of cookieHeader.split(';')) {
+                const [k, ...v] = part.trim().split('=');
+                if (k) {
+                    try { cookies[k.trim()] = decodeURIComponent(v.join('=').trim()); }
+                    catch { cookies[k.trim()] = v.join('=').trim(); }
+                }
+            }
+            const accessToken = cookies.access_token || socket.handshake.auth?.token || socket.handshake.headers?.['x-admin-token'] || '';
+            if (!accessToken) return next(new Error('Unauthorized'));
+
+            const decoded = jwtService.verifyAccessToken(accessToken);
+            if (!decoded) return next(new Error('Unauthorized'));
+
+            const userInfo = await userStore.getUserInfo(decoded.username);
+            if (!userInfo) return next(new Error('Unauthorized'));
+
+            socket.data.currentUser = userInfo;
+            return next();
+        } catch {
             return next(new Error('Unauthorized'));
         }
-        socket.data.adminToken = token;
-        socket.data.currentUser = tokenUserMap.get(token); // 把 user 信息绑定到 socket
-        return next();
     });
 
     io.on('connection', async (socket) => {

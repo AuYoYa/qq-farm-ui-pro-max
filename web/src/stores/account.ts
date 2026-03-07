@@ -41,7 +41,7 @@ export const useAccountStore = defineStore('account', () => {
   async function fetchAccounts() {
     loading.value = true
     try {
-      // api interceptor adds x-admin-token
+      // credentials sent via HttpOnly cookies
       const res = await api.get(`/api/accounts?_t=${Date.now()}`)
       if (res.data.ok && res.data.data && res.data.data.accounts) {
         accounts.value = res.data.data.accounts

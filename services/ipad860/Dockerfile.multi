@@ -1,0 +1,52 @@
+# ==================== Ipad860 多阶段构建 ====================
+# 注意：因 libv08.so / libz.so 为 x86-64 ELF，仅支持 linux/amd64
+#
+# 构建命令：
+#   docker build -f Dockerfile.multi -t smdk000/ipad860:latest .
+# 或使用 buildx（推送到仓库）：
+#   docker buildx build -f Dockerfile.multi --platform linux/amd64 \
+#     -t smdk000/ipad860:latest --push .
+
+# ========== 阶段 1：编译 Go 二进制 ==========
+FROM golang:1.24-bookworm AS builder
+
+WORKDIR /src
+COPY go.mod go.sum ./
+# 使用国内代理加速下载
+RUN GOPROXY=https://goproxy.cn,direct go mod download
+COPY . .
+
+# CGO_ENABLED=1 因为依赖 go-sqlite3 等 CGO 模块
+RUN CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o /app/main main.go
+
+# ========== 阶段 2：运行环境 ==========
+FROM ubuntu:24.04
+
+# 安装运行时依赖（ca-certificates 和时区数据）
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates tzdata && \
+    ln -sf /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone && \
+    rm -rf /var/lib/apt/lists/*
+
+WORKDIR /app
+
+# 复制编译产物
+COPY --from=builder /app/main .
+
+# 复制数据文件（加密算法需要）
+COPY 08sae.dat rqtx.dat ./
+
+# 复制共享库文件（Linux x86-64 版本）
+COPY lib/libv08.so lib/libz.so ./lib/
+COPY lib/key ./lib/
+
+# 复制配置和 Swagger 文档
+COPY conf/ ./conf/
+COPY swagger/ ./swagger/
+
+# 设置共享库搜索路径
+ENV LD_LIBRARY_PATH=/app:/app/lib
+
+EXPOSE 8058
+ENTRYPOINT ["./main"]

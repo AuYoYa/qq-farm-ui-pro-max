@@ -5,7 +5,6 @@ let systemLogBatch = [];
 setInterval(() => {
     if (systemLogBatch.length > 0) {
         const pool = getPool();
-        if (!pool) return;
         const currentBatch = systemLogBatch;
         systemLogBatch = [];
         try {

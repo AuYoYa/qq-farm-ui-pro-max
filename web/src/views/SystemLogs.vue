@@ -1,8 +1,8 @@
 <script setup lang="ts">
-import axios from 'axios'
 import { onMounted, reactive, ref } from 'vue'
+import api from '@/api'
 import BaseButton from '@/components/ui/BaseButton.vue'
-import { adminToken } from '@/utils/auth'
+
 
 const loading = ref(false)
 const dataSource = ref<any[]>([])
@@ -31,8 +31,7 @@ function formatDate(dateStr: string) {
 async function fetchData(page = pagination.current, limit = pagination.pageSize) {
   loading.value = true
   try {
-    const res = await axios.get('/api/system-logs', {
-      headers: { 'x-admin-token': adminToken.value },
+    const res = await api.get('/api/system-logs', {
       params: {
         page,
         limit,

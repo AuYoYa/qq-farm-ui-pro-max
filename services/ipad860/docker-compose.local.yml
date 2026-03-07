@@ -1,0 +1,42 @@
+version: '3.8'
+
+# Ipad860 本地测试 —— ARM Mac 通过 Rosetta/QEMU 模拟 x86-64
+# 使用方法:
+#   构建+启动: docker-compose -f docker-compose.local.yml up -d --build
+#   查看日志:   docker-compose -f docker-compose.local.yml logs -f
+#   停止:       docker-compose -f docker-compose.local.yml down
+
+services:
+  ipad860:
+    build:
+      context: .
+      dockerfile: Dockerfile.multi
+    platform: linux/amd64 # ARM Mac 自动走 Rosetta 模拟
+    container_name: ipad860
+    restart: unless-stopped
+    ports:
+      - "8058:8058" # 暴露到宿主机，方便调试和 qq-farm-bot 连接
+    environment:
+      - TZ=Asia/Shanghai
+    depends_on:
+      - redis
+    networks:
+      - ipad860-net
+
+  redis:
+    image: redis:7-alpine
+    container_name: ipad860-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis-data:/data
+    networks:
+      - ipad860-net
+
+networks:
+  ipad860-net:
+    driver: bridge
+
+volumes:
+  redis-data:
+    driver: local

@@ -1,0 +1,579 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>根目录瘦身与 Git 主仓切换计划</title>
+  <style>
+    :root {
+      --bg: #f4efe7;
+      --panel: #fffdf8;
+      --text: #1f2937;
+      --muted: #5f6b7a;
+      --line: #ddd3c7;
+      --accent: #1f6f5f;
+      --warn: #9a5b00;
+      --risk: #a61b1b;
+      --soft-accent: #e6f3ef;
+      --soft-warn: #fff1db;
+      --soft-risk: #fde8e8;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      color: var(--text);
+      background:
+        radial-gradient(circle at top left, rgba(31,111,95,0.08), transparent 28%),
+        radial-gradient(circle at top right, rgba(154,91,0,0.08), transparent 26%),
+        linear-gradient(180deg, #f0e7da 0%, var(--bg) 100%);
+      font: 15px/1.7 "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+    }
+
+    .wrap {
+      width: min(1180px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 28px 0 56px;
+    }
+
+    .hero,
+    .card,
+    .table-wrap,
+    .code-block {
+      background: rgba(255, 253, 248, 0.94);
+      border: 1px solid var(--line);
+      border-radius: 20px;
+      box-shadow: 0 14px 36px rgba(57, 47, 32, 0.08);
+    }
+
+    .hero {
+      padding: 30px;
+      margin-bottom: 18px;
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: 32px;
+      line-height: 1.2;
+    }
+
+    .hero p {
+      margin: 8px 0;
+    }
+
+    .meta {
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .badge-row {
+      margin-top: 16px;
+    }
+
+    .badge {
+      display: inline-block;
+      margin: 0 10px 10px 0;
+      padding: 6px 12px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+    }
+
+    .badge.accent { background: var(--soft-accent); color: var(--accent); }
+    .badge.warn { background: var(--soft-warn); color: var(--warn); }
+    .badge.risk { background: var(--soft-risk); color: var(--risk); }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 16px;
+      margin-bottom: 16px;
+    }
+
+    .card {
+      padding: 20px;
+    }
+
+    h2 {
+      margin: 24px 0 12px;
+      color: var(--accent);
+      font-size: 21px;
+    }
+
+    h3 {
+      margin: 0 0 10px;
+      font-size: 17px;
+    }
+
+    ul,
+    ol {
+      margin: 10px 0 0 20px;
+      padding: 0;
+    }
+
+    li + li {
+      margin-top: 6px;
+    }
+
+    .table-wrap {
+      overflow: hidden;
+      margin-top: 12px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--line);
+      vertical-align: top;
+      text-align: left;
+    }
+
+    th {
+      background: #f3ede4;
+      font-size: 13px;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .code-block {
+      margin-top: 14px;
+      padding: 18px;
+    }
+
+    pre,
+    code {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    pre {
+      margin: 0;
+      white-space: pre-wrap;
+      word-break: break-word;
+      font-size: 13px;
+      line-height: 1.65;
+    }
+
+    code.inline {
+      background: #f6f0e8;
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 0.95em;
+    }
+
+    .note {
+      margin-top: 12px;
+      padding: 12px 14px;
+      border-left: 4px solid var(--accent);
+      background: #f4fbf8;
+      border-radius: 12px;
+    }
+
+    .risk-note {
+      border-left-color: var(--risk);
+      background: #fff4f4;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    @media (max-width: 920px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .hero h1 {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>项目根目录瘦身与 Git 主仓切换联合计划</h1>
+      <p class="meta">项目路径：/Users/smdk000/文稿/qq/qq-farm-bot-ui-main_副本</p>
+      <p class="meta">生成日期：2026-03-07</p>
+      <p>本报告用于回答两个核心问题：一是如何把当前已经膨胀的根目录瘦身并统一归集；二是如何让“当前根目录”接管旧 Git 仓库历史，成为新的唯一主工作目录。</p>
+      <div class="badge-row">
+        <span class="badge accent">目标 1：当前根目录成为 Git 主仓</span>
+        <span class="badge accent">目标 2：旧 github-sync 目录退役</span>
+        <span class="badge warn">本阶段仅输出计划，不执行迁移</span>
+        <span class="badge risk">根目录当前不是 Git 仓库</span>
+      </div>
+    </section>
+
+    <div class="grid">
+      <section class="card">
+        <h3>当前仓库现状</h3>
+        <ul>
+          <li>当前根目录本身没有 <span class="inline-wrap"><code class="inline">.git</code></span>，因此不是 Git 仓库。</li>
+          <li>真正连接 GitHub 的仓库位于 <code class="inline">github-sync/.git</code>。</li>
+          <li>旧仓远端为 <code class="inline">https://github.com/smdk000/qq-farm-ui-pro-max.git</code>，当前分支为 <code class="inline">main</code>。</li>
+          <li>旧仓当前存在本地未提交变更：<code class="inline">github-sync/CHANGELOG.DEVELOPMENT.md</code>。</li>
+        </ul>
+      </section>
+
+      <section class="card">
+        <h3>推荐的总策略</h3>
+        <ul>
+          <li>先做“主仓切换”，再做“根目录瘦身”。</li>
+          <li>不新开一个断历史的新仓，优先继承旧仓历史。</li>
+          <li>让当前根目录成为唯一主工作树，旧 <code class="inline">github-sync/</code> 退出主流程。</li>
+          <li>将归档、运行数据、可再生产物从 Git 跟踪边界中剥离。</li>
+        </ul>
+      </section>
+    </div>
+
+    <h2>如何理解“当前根目录不是 Git 仓库”</h2>
+    <div class="card">
+      <p>这句话的准确含义是：当前根目录下没有 Git 元数据目录 <code class="inline">.git</code>，因此这个目录里的绝大多数文件虽然真实存在，但并不直接受 Git 管理。你现在看到的根目录其实更像一个“实际开发总工作区”，而旧的 <code class="inline">github-sync/</code> 才是与 GitHub 同步的正式仓库副本。</p>
+      <div class="note">
+        这并不代表当前根目录不能成为 Git 仓库。相反，它完全可以接管旧仓历史，升级为新的主仓。
+      </div>
+    </div>
+
+    <h2>是否可以把 Git 仓库做成当前这个目录</h2>
+    <div class="card">
+      <p><strong>可以，而且这是本方案的推荐方向。</strong></p>
+      <p>但推荐的做法不是“直接重新初始化一个全新 Git 仓库”，而是“继承旧仓历史，让当前根目录成为新的主工作树”。这样做有三个直接收益：</p>
+      <ul>
+        <li>GitHub 历史不会断裂，仍然保持连续提交记录。</li>
+        <li>当前根目录里的真实开发内容能够被正式纳入版本管理。</li>
+        <li>后续淘汰旧 <code class="inline">github-sync/</code> 目录时，路径关系和协作方式都会更简单。</li>
+      </ul>
+    </div>
+
+    <h2>是否可以给 Git 仓库做增量更新并替换成现在的根目录</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>问题</th>
+            <th>结论</th>
+            <th>说明</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>能否增量更新</td>
+            <td>可以</td>
+            <td>前提是沿用旧仓历史，而不是重新建一个断历史的新仓。</td>
+          </tr>
+          <tr>
+            <td>能否替换为当前根目录</td>
+            <td>可以</td>
+            <td>推荐把当前根目录升格为唯一主工作区，旧 <code class="inline">github-sync/</code> 退役。</td>
+          </tr>
+          <tr>
+            <td>能否淘汰旧 Git 仓库目录</td>
+            <td>可以</td>
+            <td>但必须在新主仓验证通过后进行，不能先删旧仓再验证。</td>
+          </tr>
+          <tr>
+            <td>是否建议先瘦身再切仓</td>
+            <td>不建议</td>
+            <td>先切仓更稳，因为切仓后每一步瘦身都有版本记录和可追踪变更。</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>推荐的三层管理模型</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>层级</th>
+            <th>内容范围</th>
+            <th>是否进入 Git</th>
+            <th>管理原则</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Git 主仓跟踪层</td>
+            <td><code class="inline">core/</code>、<code class="inline">web/</code>、<code class="inline">scripts/</code>、<code class="inline">docker/</code>、<code class="inline">deploy/</code>、<code class="inline">nginx/</code>、根级配置</td>
+            <td>是</td>
+            <td>只保留开发、构建、部署、协作必需内容</td>
+          </tr>
+          <tr>
+            <td>本地归档层</td>
+            <td><code class="inline">archive/</code> 中的大文件、旧报告、历史发布包、镜像包、旧副本、原始素材</td>
+            <td>原则上否</td>
+            <td>本地集中保存，保留索引说明，不让仓库持续膨胀</td>
+          </tr>
+          <tr>
+            <td>运行与缓存层</td>
+            <td><code class="inline">data/</code>、<code class="inline">logs/</code>、<code class="inline">node_modules/</code>、<code class="inline">dist/</code>、<code class="inline">tmp/</code></td>
+            <td>否</td>
+            <td>统一忽略规则，避免运行态数据进入仓库</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>优化后的总体计划</h2>
+    <div class="card">
+      <ol>
+        <li><strong>阶段 A：主仓切换规划</strong>。先定义新主仓边界、旧仓接管策略、保留哪些历史、忽略哪些目录。</li>
+        <li><strong>阶段 B：Git 主仓接管实施</strong>。让当前根目录接管旧仓历史，形成新的唯一工作树。</li>
+        <li><strong>阶段 C：目录瘦身与统一归集</strong>。在新主仓稳定后，再进行归档、剥离和目录收敛。</li>
+        <li><strong>阶段 D：旧仓退役</strong>。只有新主仓完成验证后，旧 <code class="inline">github-sync/</code> 才退出主流程。</li>
+      </ol>
+    </div>
+
+    <h2>阶段 A：主仓切换规划</h2>
+    <div class="card">
+      <ol>
+        <li>确认旧仓作为历史源，远端继续沿用现有 GitHub 仓库。</li>
+        <li>锁定新主仓的 Git 跟踪清单。</li>
+        <li>锁定不进入 Git 的清单，包括归档目录、运行数据、日志、依赖、构建产物。</li>
+        <li>核对旧仓当前未提交差异，避免切换时漏掉本地变更。</li>
+        <li>为后续根目录瘦身预留清晰的归档分区。</li>
+      </ol>
+      <div class="note">
+        这一阶段的目标不是“整理干净目录”，而是先回答“今后哪个目录才是正式仓库、哪些内容应该被 Git 跟踪”。
+      </div>
+    </div>
+
+    <h2>阶段 B：Git 主仓接管实施思路</h2>
+    <div class="card">
+      <p>推荐路线是：保留旧仓历史，把当前根目录提升为新的 Git 主工作树，然后将旧 <code class="inline">github-sync/</code> 从“主工作目录”降级为“待退役旧目录”。</p>
+      <ol>
+        <li>先建立完整快照或文件级备份，原因是当前根目录不是 Git 仓库，不能靠 Git 回退。</li>
+        <li>再让当前根目录与旧仓历史建立正式关联。</li>
+        <li>第一笔提交只做主仓接管，不混入目录搬迁和归档动作。</li>
+        <li>在新主仓上验证 <code class="inline">status</code>、分支、远端、推送流程是否正常。</li>
+      </ol>
+      <div class="note risk-note">
+        主仓接管和目录瘦身必须拆开。否则一旦出问题，很难判断是仓库切换失败，还是目录归集误伤了启动链路。
+      </div>
+    </div>
+
+    <h2>阶段 C：根目录瘦身与统一归集</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>优先级</th>
+            <th>对象</th>
+            <th>建议动作</th>
+            <th>原因</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>P0</td>
+            <td><code class="inline">data/</code>、<code class="inline">core/data/</code>、<code class="inline">logs/</code>、<code class="inline">scripts/service/logs/</code></td>
+            <td>先做路径策略设计，暂不移动</td>
+            <td>这是当前最容易误伤运行链路的高风险区域</td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td><code class="inline">github-sync/</code></td>
+            <td>新主仓稳定后退役，并归档或删除</td>
+            <td>旧主工作目录，不应长期与新主仓并存</td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td><code class="inline">wxcode/</code></td>
+            <td>归集到归档区</td>
+            <td>与 <code class="inline">services/ipad860/</code> 高度重复</td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td><code class="inline">releases/</code>、<code class="inline">core/dist/</code></td>
+            <td>移入归档区或独立保存区</td>
+            <td>体积大，可单独管理</td>
+          </tr>
+          <tr>
+            <td>P1</td>
+            <td><code class="inline">nc_local_version/</code>、<code class="inline">图鉴/</code></td>
+            <td>归档到原始素材区</td>
+            <td>运行时已主要使用 <code class="inline">web/public/nc_local_version/</code></td>
+          </tr>
+          <tr>
+            <td>P2</td>
+            <td><code class="inline">docs/</code> 中历史报告、审计、预览 HTML</td>
+            <td>归集到 <code class="inline">archive/docs/</code></td>
+            <td>有保留价值，但不是运行必需</td>
+          </tr>
+          <tr>
+            <td>P2</td>
+            <td><code class="inline">.cursor/</code>、<code class="inline">.agent/</code>、<code class="inline">.specstory/</code>、<code class="inline">.llm-chat-history/</code></td>
+            <td>归档或剥离出主仓</td>
+            <td>属于工具痕迹，不属于业务工程本体</td>
+          </tr>
+          <tr>
+            <td>P3</td>
+            <td><code class="inline">node_modules/</code>、<code class="inline">web/dist/</code>、<code class="inline">tmp/</code>、<code class="inline">.DS_Store</code></td>
+            <td>验证通过后再清理</td>
+            <td>属于可再生产物，适合最后收尾</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>阶段 D：旧仓退役标准</h2>
+    <div class="card">
+      <p>旧 <code class="inline">github-sync/</code> 目录不能“看着差不多就删”，必须满足明确门槛：</p>
+      <ol>
+        <li>当前根目录已成为正式 Git 主仓。</li>
+        <li>新主仓可正常执行版本管理基础操作。</li>
+        <li>远端推送验证通过。</li>
+        <li>源码模式启动链路验证通过。</li>
+        <li>Docker 部署链路验证通过。</li>
+        <li>归档索引已建立，旧目录需要保留的内容已迁出。</li>
+      </ol>
+    </div>
+
+    <h2>建议保留与建议剥离清单</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>类别</th>
+            <th>建议保留在主仓</th>
+            <th>建议剥离或归档</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>工程核心</td>
+            <td><code class="inline">core/</code>、<code class="inline">web/</code>、<code class="inline">scripts/</code>、<code class="inline">docker/</code>、<code class="inline">deploy/</code>、<code class="inline">nginx/</code></td>
+            <td>无</td>
+          </tr>
+          <tr>
+            <td>文档入口</td>
+            <td><code class="inline">README.md</code>、少量当前有效的部署说明和计划</td>
+            <td>历史报告、预览 HTML、阶段总结、旧 SOP</td>
+          </tr>
+          <tr>
+            <td>服务源码</td>
+            <td><code class="inline">services/</code> 中保留唯一有效来源</td>
+            <td><code class="inline">wxcode/</code> 这类重复来源</td>
+          </tr>
+          <tr>
+            <td>历史资产</td>
+            <td>索引文件</td>
+            <td><code class="inline">archive/</code> 大文件、发布包、镜像、旧快照</td>
+          </tr>
+          <tr>
+            <td>运行缓存</td>
+            <td>无</td>
+            <td><code class="inline">node_modules/</code>、<code class="inline">dist/</code>、<code class="inline">logs/</code>、<code class="inline">data/</code></td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>目标根目录形态</h2>
+    <div class="code-block">
+      <pre>.
+├── .git/                       # 新主仓 Git 元数据
+├── .github/
+├── .gitignore
+├── .dockerignore
+├── .env
+├── README.md
+├── LICENSE
+├── package.json
+├── pnpm-lock.yaml
+├── pnpm-workspace.yaml
+├── docker-compose.yml
+├── core/
+├── web/
+├── scripts/
+├── docker/
+├── deploy/
+├── nginx/
+├── services/
+├── data/                       # 运行数据口，后续统一策略
+├── logs/                       # 运行日志口，后续统一策略
+├── docs/
+└── archive/                    # 唯一本地集中保存区
+    ├── docs/
+    ├── releases/
+    ├── builds/
+    ├── repo-mirrors/
+    ├── third-party-mirror/
+    ├── tools-data/
+    └── dev-tool-history/</pre>
+    </div>
+
+    <h2>本阶段不做什么</h2>
+    <div class="card">
+      <ul>
+        <li>不执行任何 Git 切换操作。</li>
+        <li>不删除或移动任何根目录文件。</li>
+        <li>不修改任何启动脚本、Docker 配置或路径代码。</li>
+        <li>不处理运行数据迁移。</li>
+        <li>不执行旧仓退役动作。</li>
+      </ul>
+    </div>
+
+    <h2>风险与前置约束</h2>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>风险点</th>
+            <th>影响</th>
+            <th>控制方式</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>根目录不是 Git 仓库</td>
+            <td>不能直接用 Git 回滚当前真实工作区</td>
+            <td>主仓接管前必须先做文件级备份或快照</td>
+          </tr>
+          <tr>
+            <td>旧仓有未提交改动</td>
+            <td>切换时可能遗漏本地历史差异</td>
+            <td>先核对旧仓差异，再进入主仓切换</td>
+          </tr>
+          <tr>
+            <td>数据与日志路径不统一</td>
+            <td>瘦身时容易误伤启动或运行数据</td>
+            <td>把路径治理单独作为高风险任务拆开处理</td>
+          </tr>
+          <tr>
+            <td>归档目录过大</td>
+            <td>若直接纳入 Git，会让仓库再次膨胀</td>
+            <td>将归档本体默认排除在 Git 之外，只保留索引说明</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <h2>结论</h2>
+    <div class="card">
+      <p>最优顺序不是“先大整理，再搞 Git”，而是：</p>
+      <ol>
+        <li>先把当前根目录升级为新的 Git 主仓。</li>
+        <li>再在新主仓内分批完成根目录瘦身和统一归集。</li>
+        <li>最后正式退役旧 <code class="inline">github-sync/</code>。</li>
+      </ol>
+      <div class="note">
+        这样能同时满足两个目标：既保住 Git 历史连续性，也能让后续每一轮目录治理都变成可审计、可追踪、可回退的正式工程变更。
+      </div>
+    </div>
+
+    <p class="small" style="margin-top: 16px;">
+      备注：本文件属于计划文档，生成时未执行任何目录迁移、文件删除、Git 切换、远端推送或运行验证动作。
+    </p>
+  </div>
+</body>
+</html>

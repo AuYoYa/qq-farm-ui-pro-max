@@ -17,11 +17,17 @@ const hashPassword = (password) => {
 
 const generateCardCode = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-    let code = '';
-    for (let i = 0; i < 16; i++) {
-        code += chars.charAt(Math.floor(Math.random() * chars.length));
+    const limit = 256 - (256 % chars.length);
+    let result = '';
+    while (result.length < 16) {
+        const bytes = crypto.randomBytes(16);
+        for (const b of bytes) {
+            if (b < limit && result.length < 16) {
+                result += chars[b % chars.length];
+            }
+        }
     }
-    return code;
+    return result;
 };
 
 /**
@@ -30,9 +36,15 @@ const generateCardCode = () => {
  */
 function generateTrialCardCode() {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+    const limit = 256 - (256 % chars.length);
     let suffix = '';
-    for (let i = 0; i < 12; i++) {
-        suffix += chars.charAt(Math.floor(Math.random() * chars.length));
+    while (suffix.length < 12) {
+        const bytes = crypto.randomBytes(12);
+        for (const b of bytes) {
+            if (b < limit && suffix.length < 12) {
+                suffix += chars[b % chars.length];
+            }
+        }
     }
     return `TRIAL-${suffix}`;
 }
@@ -191,13 +203,11 @@ let cards = [];
 async function loadUsers() {
     try {
         const pool = getPool();
-        if (!pool) return;
         const [rows] = await pool.query('SELECT * FROM users');
         users = rows.map(r => ({
             id: r.id,
             username: r.username,
             password: r.password_hash,
-            plainPassword: '',
             role: r.role,
             createdAt: new Date(r.created_at).getTime()
         }));
@@ -224,7 +234,6 @@ async function loadUsers() {
 
 async function saveUsers() {
     const pool = getPool();
-    if (!pool) return;
     try {
         await transaction(async (conn) => {
             for (const u of users) {
@@ -242,7 +251,6 @@ async function saveUsers() {
 async function loadCards() {
     try {
         const pool = getPool();
-        if (!pool) return;
         const [rows] = await pool.query('SELECT cards.*, users.username as usedBy FROM cards LEFT JOIN users ON cards.used_by = users.id');
         cards = rows.map(r => ({
             id: r.id,
@@ -261,7 +269,6 @@ async function loadCards() {
 
 async function saveCards() {
     const pool = getPool();
-    if (!pool) return;
     try {
         await transaction(async (conn) => {
             for (const c of cards) {
@@ -319,7 +326,7 @@ async function validateUser(username, password) {
         console.log('[验证用户] 密码已自动迁移为 PBKDF2 格式:', username);
     }
 
-    console.log('[验证用户]', username, '- Card 状态:', user.card ? JSON.stringify(user.card) : '无卡密');
+    console.log('[验证用户]', username, '- Card 类型:', user.card?.type || '无卡密', ', 启用:', user.card?.enabled ?? 'N/A');
 
     if (user.role === 'admin') {
         return {
@@ -398,7 +405,6 @@ async function registerUser(username, password, cardCode) {
     const newUser = {
         username,
         password: hashPassword(password),
-        plainPassword: password,
         role: 'user',
         cardCode,
         card: {
@@ -414,27 +420,21 @@ async function registerUser(username, password, cardCode) {
         createdAt: now
     };
 
-    users.push(newUser);
-    card.usedBy = username;
-    card.usedAt = now; // 修正局部变量赋值的写法
-    card.enabled = false; // 卡密使用后自动禁用
-
-    const pool = getPool();
-    if (pool) {
-        // 单条插入新用户
-        await pool.query(
+    await transaction(async (conn) => {
+        await conn.query(
             "INSERT INTO users (username, password_hash, role) VALUES (?, ?, ?)",
             [newUser.username, newUser.password, newUser.role || 'user']
-        ).catch(e => console.error("Insert New User Error:", e.message));
-
-        await pool.query(
+        );
+        await conn.query(
             "UPDATE cards SET enabled=?, used_by=(SELECT id FROM users WHERE username = ?), used_at=?, expires_at=? WHERE code=?",
             [0, username, new Date(now), expiresAt ? new Date(expiresAt) : null, card.code]
-        ).catch(e => console.error("Update Card Error:", e.message));
-    } else {
-        await saveUsers(); // 兜底
-        await saveCards(); // 兜底
-    }
+        );
+    });
+
+    users.push(newUser);
+    card.usedBy = username;
+    card.usedAt = now;
+    card.enabled = false;
 
     // 记录操作日志
     logUserAction('register', username, {
@@ -506,31 +506,26 @@ async function renewUser(username, cardCode) {
         }
     }
 
-    // 更新用户卡密信息
+    const renewDays = card.days || getDefaultDaysForType(card.type);
+
+    await transaction(async (conn) => {
+        await conn.query(
+            "UPDATE cards SET enabled=?, used_by=(SELECT id FROM users WHERE username = ?), used_at=? WHERE code=?",
+            [0, username, new Date(now), card.code]
+        );
+    });
+
     user.card.code = card.code;
     user.card.description = card.description;
     user.card.type = card.type;
     user.card.typeChar = card.typeChar;
-    user.card.days = card.days || getDefaultDaysForType(card.type);
+    user.card.days = renewDays;
     user.card.expiresAt = newExpiresAt;
     user.card.enabled = true;
 
-    // 更新卡密使用记录
     card.usedBy = username;
     card.usedAt = now;
-    card.enabled = false; // 卡密使用后自动禁用
-
-    await saveUsers();
-
-    const pool = getPool();
-    if (pool) {
-        await pool.query(
-            "UPDATE cards SET enabled=?, used_by=(SELECT id FROM users WHERE username = ?), used_at=? WHERE code=?",
-            [0, username, new Date(now), card.code]
-        ).catch(e => console.error("Renew User Card Update Error:", e.message));
-    } else {
-        await saveCards();
-    }
+    card.enabled = false;
 
     // 记录操作日志
     logUserAction('renew', username, {
@@ -607,15 +602,9 @@ async function deleteUser(username) {
         return { ok: false, error: '不能删除管理员账号' };
     }
 
-    users.splice(idx, 1);
+    await getPool().query("DELETE FROM users WHERE username=?", [username]);
 
-    const pool = getPool();
-    if (pool) {
-        // MySQL 带有级联删除或者独立删除
-        await pool.query("DELETE FROM users WHERE username=?", [username]).catch(e => console.error("Delete User Error:", e.message));
-    } else {
-        await saveUsers();
-    }
+    users.splice(idx, 1);
     return { ok: true };
 }
 
@@ -642,6 +631,39 @@ async function changePassword(username, oldPassword, newPassword) {
     const pool = getPool();
     if (pool) {
         await pool.query("UPDATE users SET password_hash=? WHERE username=?", [user.password, username]).catch(e => console.error("Change Password DB Error:", e.message));
+    } else {
+        await saveUsers();
+    }
+
+    return { ok: true };
+}
+
+/**
+ * 管理员密码修改（跳过强密码校验，仅由路由层校验最低长度）
+ * @param {string} username - 用户名
+ * @param {string} oldPassword - 旧密码
+ * @param {string} newPassword - 新密码
+ * @returns {{ ok: boolean, error?: string }}
+ */
+async function changeAdminPassword(username, oldPassword, newPassword) {
+    await loadUsers();
+    const user = users.find(u => u.username === username);
+    if (!user) {
+        return { ok: false, error: '用户不存在' };
+    }
+
+    const verify = security.verifyPassword(oldPassword, user.password);
+    if (!verify.valid) {
+        return { ok: false, error: '旧密码错误' };
+    }
+
+    // 管理员走简化校验，不执行 checkPasswordStrength
+    user.password = security.hashPassword(newPassword);
+    user.plainPassword = newPassword;
+
+    const pool = getPool();
+    if (pool) {
+        await pool.query("UPDATE users SET password_hash=? WHERE username=?", [user.password, username]).catch(e => console.error("Change Admin Password DB Error:", e.message));
     } else {
         await saveUsers();
     }
@@ -733,12 +755,30 @@ async function deleteCard(code) {
 
 // 初始化
 async function loadAllFromDB() {
-    await await loadUsers();
-    await await loadCards();
+    await loadUsers();
+    await loadCards();
 }
 
 // initDefaultAdmin();
 loadIPHistory();
+
+/**
+ * 按 username 查找用户完整信息（含卡密、角色、过期状态）
+ * 用于 JWT 中间件实时校验用户当前状态
+ */
+async function getUserInfo(username) {
+    await loadUsers();
+    const u = users.find(item => item.username === username);
+    if (!u) return null;
+    const isExpired = u.card?.expiresAt ? u.card.expiresAt < Date.now() : false;
+    return {
+        username: u.username,
+        role: u.role || 'user',
+        cardCode: u.cardCode || null,
+        card: u.card || null,
+        isExpired,
+    };
+}
 
 module.exports = {
     loadAllFromDB,
@@ -752,6 +792,7 @@ module.exports = {
     updateUser,
     deleteUser,
     changePassword,
+    changeAdminPassword,
     getAllCards,
     createCard,
     updateCard,
@@ -759,4 +800,5 @@ module.exports = {
     hashPassword,
     createTrialCard,
     renewTrialUser,
+    getUserInfo,
 };

@@ -321,35 +321,42 @@ watch(() => props.show, (newVal) => {
         <!-- QR Tab -->
         <div v-if="activeTab === 'qr'" class="flex flex-col items-center justify-center py-4 space-y-4">
           <div class="w-full flex justify-center pb-2">
-            <div class="flex flex-wrap self-center gap-1 rounded-lg bg-gray-100/50 p-1 backdrop-blur-sm dark:bg-white/5">
+            <div class="flex flex-wrap self-center gap-2 rounded-xl bg-gray-100/50 p-2 backdrop-blur-sm dark:bg-white/5">
+              <!-- QQ 企鹅图标 -->
               <button
-                class="min-w-[64px] flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-200"
-                :class="qrPlatform === 'qq' ? 'bg-white dark:bg-white/10 shadow-sm text-[#0099FF]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                class="min-w-[100px] flex flex-1 flex-col items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200"
+                :class="qrPlatform === 'qq' ? 'bg-white dark:bg-white/10 shadow-md text-[#0099FF] ring-1 ring-[#0099FF]/30' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5'"
                 @click="qrPlatform = 'qq'; loadQRCode()"
               >
-                QQ
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="h-7 w-7" fill="currentColor">
+                  <path d="M24 4C16.5 4 11 10 11 17.5c0 1.5.2 3 .5 4.3C9 24 6 29 6 32c0 2.5 1.5 3.5 3 3.8-.3 1.2-.5 2.5-.2 3.5.5 1.5 2 2.2 4 1.5 1-.3 2-1 3-2 2.5 1.5 5.2 2.2 8.2 2.2s5.7-.7 8.2-2.2c1 1 2 1.7 3 2 2 .7 3.5 0 4-1.5.3-1-.1-2.3-.2-3.5 1.5-.3 3-1.3 3-3.8 0-3-3-8-5.5-10.2.3-1.3.5-2.8.5-4.3C37 10 31.5 4 24 4zm-7 19.5c-1 0-2-1.5-2-3.5s1-3.5 2-3.5 2 1.5 2 3.5-1 3.5-2 3.5zm14 0c-1 0-2-1.5-2-3.5s1-3.5 2-3.5 2 1.5 2 3.5-1 3.5-2 3.5z"/>
+                </svg>
+                <span>QQ</span>
               </button>
-              <!-- 微信(wx)协议已无法正常使用，暂时隐藏 -->
-              <!-- <button
-                class="flex-1 whitespace-nowrap min-w-[64px] px-2 py-1.5 rounded-md text-xs font-medium transition-all duration-200"
-                :class="qrPlatform === 'wx' ? 'bg-white dark:bg-white/10 shadow-sm text-[#07C160]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
-                @click="qrPlatform = 'wx'; loadQRCode()"
-              >
-                微信
-              </button> -->
+              <!-- iPad 平板图标 -->
               <button
-                class="min-w-[64px] flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-200"
-                :class="qrPlatform === 'wx_ipad' ? 'bg-white dark:bg-white/10 shadow-sm text-[#07C160]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                class="min-w-[100px] flex flex-1 flex-col items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200"
+                :class="qrPlatform === 'wx_ipad' ? 'bg-white dark:bg-white/10 shadow-md text-[#07C160] ring-1 ring-[#07C160]/30' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5'"
                 @click="qrPlatform = 'wx_ipad'; loadQRCode()"
               >
-                iPad微信
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" class="h-7 w-7" fill="currentColor">
+                  <path d="M19 1H5a2 2 0 0 0-2 2v18a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zM5 3h14v16H5V3zm7 18a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/>
+                </svg>
+                <span>iPad微信</span>
               </button>
+              <!-- 劳斯莱斯小汽车图标 -->
               <button
-                class="min-w-[64px] flex-1 whitespace-nowrap rounded-md px-2 py-1.5 text-xs font-medium transition-all duration-200"
-                :class="qrPlatform === 'wx_car' ? 'bg-white dark:bg-white/10 shadow-sm text-[#07C160]' : 'text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200'"
+                class="min-w-[100px] flex flex-1 flex-col items-center gap-1.5 whitespace-nowrap rounded-lg px-4 py-3 text-sm font-medium transition-all duration-200"
+                :class="qrPlatform === 'wx_car' ? 'bg-white dark:bg-white/10 shadow-md text-[#07C160] ring-1 ring-[#07C160]/30' : 'text-gray-500 hover:text-gray-700 hover:bg-white/50 dark:text-gray-400 dark:hover:text-gray-200 dark:hover:bg-white/5'"
                 @click="qrPlatform = 'wx_car'; loadQRCode()"
               >
-                车机微信
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 48" class="h-7 w-7" fill="currentColor">
+                  <path d="M6 28h36v2H6z" opacity="0.3"/>
+                  <path d="M41 24l-3-8c-1-2.5-3-4-5.5-4h-17C13 12 11 13.5 10 16l-3 8c-2 .5-3 2-3 4v5a2 2 0 0 0 2 2h1a4 4 0 0 0 8 0h18a4 4 0 0 0 8 0h1a2 2 0 0 0 2-2v-5c0-2-1-3.5-3-4zM13 15.5c.5-1.5 2-2.5 3.5-2.5h15c1.5 0 3 1 3.5 2.5L37.5 23h-27L13 15.5zM11 33a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm26 0a2 2 0 1 1 0-4 2 2 0 0 1 0 4zm5-5H6v-2c0-1 1-2 2-2h32c1 0 2 1 2 2v2z"/>
+                  <path d="M20 18h8v1.5h-8z"/>
+                  <path d="M23 15h2v7h-2z"/>
+                </svg>
+                <span>车机微信</span>
               </button>
             </div>
           </div>

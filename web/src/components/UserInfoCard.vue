@@ -5,9 +5,8 @@ import ConfirmModal from '@/components/ConfirmModal.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import { useAppStore } from '@/stores/app'
 import { useSettingStore } from '@/stores/setting'
-import { adminToken } from '@/utils/auth'
+import { clearAuth } from '@/utils/auth'
 
-const token = adminToken
 const currentUser = ref<any>(null)
 const appStore = useAppStore()
 const settingStore = useSettingStore()
@@ -175,10 +174,7 @@ const tooltip = computed(() => {
 })
 
 async function handleLogout() {
-  token.value = ''
-  saveCurrentUser(null)
-  localStorage.removeItem('current_account_id')
-  // 使用 window.location.href 强制刷新页面，彻底销毁 Pinia 内存残留的所有数据
+  await clearAuth()
   window.location.href = '/login'
 }
 

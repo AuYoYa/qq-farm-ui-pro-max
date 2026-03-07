@@ -2,20 +2,39 @@ import { useStorage } from '@vueuse/core'
 
 /**
  * 统一的 Auth 状态管理
- * 解决多处独立调用 useStorage 导致的响应式同步延迟或失效问题
+ *
+ * 认证令牌存储在 HttpOnly Cookie 中，前端 JS 无法访问。
+ * adminToken 仅作为登录状态标识，存储当前登录用户名（非敏感信息）。
  */
 
-// 管理员令牌
 export const adminToken = useStorage('admin_token', '')
 
-// 当前选中的账号 ID
 export const currentAccountId = useStorage('current_account_id', '')
 
 /**
- * 清除认证信息并跳转登录
+ * 仅清除本地认证状态，不发起任何网络请求。
+ * 适用于拦截器/守卫等无法安全发起 API 调用的场景。
  */
-export function clearAuth() {
+export function clearLocalAuthState() {
   adminToken.value = ''
-  // 保持 accountId 存在以方便下次登录后恢复，或者也可以选择清除
-  // currentAccountId.value = ''
+  currentAccountId.value = ''
+  localStorage.removeItem('current_user')
+}
+
+/**
+ * 完整注销：调用后端撤销 refresh token + 清理本地状态。
+ * 适用于用户主动登出等可以安全发起 API 调用的场景。
+ */
+export async function clearAuth() {
+  try {
+    const { useStatusStore } = await import('@/stores/status')
+    useStatusStore().disconnectRealtime()
+  }
+  catch { /* ignore */ }
+  try {
+    const { default: api } = await import('@/api')
+    await api.post('/api/auth/logout')
+  }
+  catch { /* ignore */ }
+  clearLocalAuthState()
 }

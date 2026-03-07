@@ -319,7 +319,6 @@ function ensureAccountConfig(accountId, options = {}) {
 async function loadGlobalConfigFromDB() {
     try {
         const pool = getPool();
-        if (!pool) return;
         const [rows] = await pool.query('SELECT * FROM account_configs');
         accountFallbackConfig = cloneAccountConfig(DEFAULT_ACCOUNT_CONFIG);
         globalConfig.defaultAccountConfig = cloneAccountConfig(accountFallbackConfig);
@@ -394,7 +393,6 @@ let _globalConfigSaveTimer = null;
 function saveGlobalConfigImmediate() {
     sanitizeGlobalConfigBeforeSave();
     const pool = getPool();
-    if (!pool) return;
     try {
         transaction(async (conn) => {
             for (const [id, cfg] of Object.entries(globalConfig.accountConfigs)) {
@@ -711,7 +709,6 @@ function setOfflineReminder(cfg) {
 async function loadAccountsFromDB() {
     try {
         const pool = getPool();
-        if (!pool) return;
         const [rows] = await pool.query('SELECT * FROM accounts');
         let mapped = rows.map(r => ({
             id: r.id,
@@ -744,7 +741,6 @@ function saveAccounts(data) {
     _accountsSaveTimer = setTimeout(() => {
         _accountsSaveTimer = null;
         const pool = getPool();
-        if (!pool) return;
         try {
             for (const acc of cachedAccountsData.accounts) {
                 pool.query(

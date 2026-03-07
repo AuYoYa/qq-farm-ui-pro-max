@@ -8,7 +8,8 @@ import NotificationPanel from '@/components/NotificationPanel.vue'
 import BaseButton from '@/components/ui/BaseButton.vue'
 import BaseInput from '@/components/ui/BaseInput.vue'
 import { useAppStore } from '@/stores/app'
-import { adminToken } from '@/utils/auth'
+import { useToastStore } from '@/stores/toast'
+import { adminToken, clearAuth } from '@/utils/auth'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -172,8 +173,10 @@ async function handleLogin() {
 // 免责声明统一处理方法
 function onDisclaimerAgree() {
   if (pendingAuthData.value) {
-    adminToken.value = pendingAuthData.value.token
-    saveCurrentUser(pendingAuthData.value.user)
+    const authData = pendingAuthData.value
+    const user = authData.user
+    adminToken.value = user?.username || username.value
+    saveCurrentUser(user)
     if (rememberUsername.value) {
       savedUsername.value = username.value
     }
@@ -181,6 +184,9 @@ function onDisclaimerAgree() {
       savedUsername.value = ''
     }
     showDisclaimer.value = false
+    if (authData.passwordWarning) {
+      useToastStore().warning(authData.passwordWarning, 8000)
+    }
     router.push('/')
   }
 }
@@ -188,6 +194,7 @@ function onDisclaimerAgree() {
 function onDisclaimerDecline() {
   pendingAuthData.value = null
   showDisclaimer.value = false
+  clearAuth()
   error.value = '您已拒绝免责声明协议，无法继续使用本软件。'
 }
 

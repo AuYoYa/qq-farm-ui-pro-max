@@ -8,7 +8,6 @@ const logger = createModuleLogger('db-store');
 class DbStore {
     async getAccounts() {
         const pool = getPool();
-        if(!pool) return [];
         const [rows] = await pool.query("SELECT * FROM accounts");
         return rows;
     }

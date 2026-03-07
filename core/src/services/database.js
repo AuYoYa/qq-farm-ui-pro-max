@@ -83,7 +83,6 @@ async function flushLogBatch() {
     const batch = logBatch.splice(0, logBatch.length);
     try {
         const pool = getPool();
-        if (!pool) return;
         const values = batch.map(b => [b.accountId, b.action, b.result, b.details]);
         // mysql2/promise `query` handles `[[]]` as batch insert if statement is string: `VALUES ?`
         await pool.query('INSERT INTO operation_logs (account_id, action, result, details, created_at) VALUES ?', [values]);
@@ -171,7 +170,6 @@ async function getAnnouncements() {
     }
 
     const pool = getPool();
-    if (!pool) return [];
     try {
         // 按照 ID 倒序排列获取所有有效和非有效公告
         const [rows] = await pool.execute(
@@ -203,7 +201,6 @@ async function getAnnouncements() {
 
 async function saveAnnouncement(data) {
     const pool = getPool();
-    if (!pool) throw new Error('MySQL 不可用');
     const { id, title = '', version = '', publish_date = '', content = '', enabled = true, createdBy = null } = data || {};
     try {
         if (id) {
@@ -227,7 +224,6 @@ async function saveAnnouncement(data) {
 
 async function deleteAnnouncement(id) {
     const pool = getPool();
-    if (!pool) throw new Error('MySQL 不可用');
     try {
         if (id) {
             await pool.execute('DELETE FROM announcements WHERE id = ?', [id]);

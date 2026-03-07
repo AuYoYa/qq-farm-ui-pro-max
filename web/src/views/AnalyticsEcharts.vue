@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import axios from 'axios'
 import { BarChart, LineChart } from 'echarts/charts'
 import {
   DataZoomComponent,
@@ -11,7 +10,7 @@ import {
 import { use } from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { defineAsyncComponent, onMounted, ref } from 'vue'
-import { adminToken } from '@/utils/auth'
+import api from '@/api'
 
 const VChart = defineAsyncComponent(() => import('vue-echarts'))
 
@@ -37,9 +36,7 @@ const stealOption = ref<any>({})
 async function fetchAnalytics() {
   loading.value = true
   try {
-    const res = await axios.get('/api/stats/trend', {
-      headers: { 'x-admin-token': adminToken.value },
-    })
+    const res = await api.get('/api/stats/trend')
     if (res.data && res.data.ok) {
       const { dates, series } = res.data.data
 

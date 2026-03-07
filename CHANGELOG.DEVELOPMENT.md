@@ -896,10 +896,85 @@
 
 ---
 
+## 🔒 安全审计与多用户系统加固（v4.2.0）
+
+> **日期**: 2026-03-07  
+> **范围**: 全量安全审计 → 12 项修复（高 4 / 中 5 / 低 3）  
+> **影响**: 前后端全栈，涉及认证、授权、数据库、Socket.IO
+
+### 修复清单
+
+#### 高优先级（H1–H4）
+
+| ID | 问题 | 修复 | 涉及文件 |
+|----|------|------|----------|
+| H1 | 路由守卫 `ensureTokenValid` 使用裸 `axios` 绕过拦截器 | 改用 `api.get` 统一走拦截器 | `web/src/router/index.ts` |
+| H2 | `userRequired` 中间件未全局化，部分路由可被过期/封禁用户访问 | 提取 `PUBLIC_PATHS` 白名单，全局挂载 `authRequired → userRequired` 链 | `core/src/controllers/admin.js` |
+| H3 | `getPool()` 返回 null 导致调用方静默降级 | `getPool()` 改为 throw；清除全部冗余 `if (!pool) return` | `mysql-db.js`, `jwt-service.js`, `user-store.js`, `store.js`, `database.js`, `worker-manager.js`, `db-store.js` |
+| H4 | 卡密生成使用 `Math.random()`，可预测 | 改用 `crypto.randomBytes` | `core/src/models/user-store.js` |
+
+#### 中优先级（M1–M5）
+
+| ID | 问题 | 修复 | 涉及文件 |
+|----|------|------|----------|
+| M1 | 前端状态清理不统一，拦截器/守卫可能遗漏字段 | 新增 `clearLocalAuthState()`（纯本地）；`clearAuth()`（含 API 注销）分层管理 | `web/src/utils/auth.ts`, `web/src/api/index.ts`, `web/src/router/index.ts` |
+| M2 | Socket.IO `connect_error` 调用 Axios 拦截器导致循环刷新 | 改用 `fetch` 直接调用 `/api/auth/refresh` 绕过拦截器；区分认证错误与网络错误 | `web/src/stores/status.ts` |
+| M3 | 排行榜 / 数据分析 `sortBy` 参数直接拼 SQL | 添加 `SORT_WHITELIST` / `ANALYTICS_SORT_WHITELIST` 白名单校验 | `core/src/controllers/admin.js` |
+| M4 | `atomicConsumeRefreshToken` 连接未在 finally 释放 | `conn.release()` 移入 `finally` 块 | `core/src/services/jwt-service.js` |
+| M5 | 数据库迁移使用临时连接未在 finally 释放 | 抽取 `runMigrationFile` 辅助函数，迁移连接统一 `finally { conn.end() }` | `core/src/services/mysql-db.js` |
+
+#### 低优先级（L1–L3）
+
+| ID | 问题 | 修复 | 涉及文件 |
+|----|------|------|----------|
+| L1 | `refresh_token` Cookie path 过宽 + JWT secret 文件权限 | Cookie path 限制为 `/api/auth`；secret 文件设置 `0o600` 权限 | `core/src/services/jwt-service.js` |
+| L2 | 401 拦截器中 logout 请求被排入刷新队列 + `isRefreshing` 时序问题 | logout 请求直接清除状态不排队；`isRefreshing = false` 移入 `finally` | `web/src/api/index.ts` |
+| L3 | `clearAuth` 未断开 Socket / Cookie URL 解码缺失 / 无默认密码警告 | `clearAuth` 先断开 Socket.IO → 调 API → 清本地状态；Socket.IO Cookie 解析加 `decodeURIComponent`；登录响应含 `passwordWarning`，前端 Toast 展示 | `web/src/utils/auth.ts`, `core/src/controllers/admin.js`, `web/src/views/Login.vue` |
+
+#### 后续巡检追加修复
+
+| # | 问题 | 修复 | 涉及文件 |
+|---|------|------|----------|
+| R1 | `/api/system-logs` 未做数据隔离，非管理员可查看所有账号的系统日志 | 非管理员根据 `username → account_id` 映射过滤，仅返回自己账号的日志 | `core/src/controllers/admin.js` |
+| R2 | `/api/stats/trend` 返回全局聚合统计，非管理员不应访问 | 添加 `role !== 'admin'` 守卫，非管理员返回 403 | `core/src/controllers/admin.js` |
+| R3 | `/api/accounts` 残留调试 `console.log`，`analytics.js` 残留 `console.warn` | 移除所有调试输出语句 | `core/src/controllers/admin.js`, `core/src/services/analytics.js` |
+
+### 架构变更要点
+
+```
+前端认证状态分层
+├── clearLocalAuthState()    ← 拦截器/守卫：仅清本地（无网络请求）
+└── clearAuth()              ← 用户主动登出：断 Socket → API 注销 → 清本地
+
+后端全局中间件链
+app.use('/api', (req, res, next) => {
+    if (PUBLIC_PATHS.has(req.path)) return next();
+    authRequired → userRequired → next();
+});
+
+Socket.IO 认证刷新
+connect_error → 识别 "Unauthorized" / "jwt expired"
+             → fetch('/api/auth/refresh')  // 绕过 Axios
+             → 成功: socket.connect()
+             → 失败: clearAuth() + router.push('/login')
+```
+
+### 遗留 `Math.random()` 说明
+
+以下文件仍使用 `Math.random()`，但均用于**游戏逻辑随机性**（延迟、扰动、概率分支），不涉及安全敏感场景，无需替换：
+
+- `farm.js` / `worker.js`：操作间隔随机偏移
+- `friend-scanner.js` / `friend-actions.js`：好友扫描延迟
+- `network.js`：请求重试抖动
+- `QQPlatform.js` / `WeChatPlatform.js`：平台模拟延迟
+- `warehouse.js`：仓库操作随机间隔
+
+---
+
 ## 📝 更新说明
 
-**最后更新**: 2026-03-04  
-**版本**: v4.1.1  
+**最后更新**: 2026-03-07  
+**版本**: v4.2.0  
 **状态**: ✅ 生产就绪
 
 **更新内容**:
@@ -908,7 +983,19 @@
 - ✅ 公告弹窗品牌信息注入
 - ✅ Tooltip 推荐标签颜色修复
 - ✅ 性能模式全面增强
-- ✅ 记录最近所有优化和更新
+- ✅ **安全审计全量修复**（12 项 H/M/L，详见上方清单）
+- ✅ 前端认证状态分层管理（clearLocalAuthState / clearAuth）
+- ✅ 全局 userRequired 中间件 + PUBLIC_PATHS 白名单
+- ✅ getPool() 异常化 + 全代码库冗余检查清理
+- ✅ 卡密生成改用 crypto.randomBytes
+- ✅ Socket.IO 认证刷新独立于 Axios 拦截器
+- ✅ sortBy SQL 注入防护（白名单校验）
+- ✅ 数据库连接泄漏修复（atomic token / migration finally）
+- ✅ refresh_token Cookie path 收窄 + JWT secret 文件权限加固
+- ✅ 默认密码警告（后端响应 + 前端 Toast）
+- ✅ `/api/system-logs` 数据隔离（非管理员仅可查看自己账号的系统日志）
+- ✅ `/api/stats/trend` 限制为管理员专用（全局聚合统计不暴露给普通用户）
+- ✅ 移除生产调试日志（`/api/accounts` console.log、`analytics.js` console.warn）
 
 ---
 

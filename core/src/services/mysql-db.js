@@ -11,6 +11,10 @@ const DB_PASS = process.env.MYSQL_PASSWORD || '123456';
 const DB_NAME = process.env.MYSQL_DATABASE || 'qq_farm_bot';
 const DB_LIMIT = Number.parseInt(process.env.MYSQL_POOL_LIMIT || '100', 10);
 
+if (!/^[a-zA-Z0-9_]+$/.test(DB_NAME)) {
+    throw new Error(`Invalid MYSQL_DATABASE: "${DB_NAME}". Only alphanumeric and underscore allowed.`);
+}
+
 // MySQL 连接池配置 — Phase 2 扩容
 // connectionLimit: 100 可支撑数百账号的 Worker 并发 + UI 面板查询
 const pool = mysql.createPool({
@@ -30,6 +34,8 @@ const pool = mysql.createPool({
     // 最大空闲连接数，超出的空闲连接会被回收
     maxIdle: 20,
 });
+
+let _initialized = false;
 
 /**
  * 获取连接池实时状态快照（用于监控和告警）
@@ -63,69 +69,54 @@ setInterval(() => {
     }
 }, 30000).unref();
 
+async function runMigrationFile(sqlPath, description) {
+    const fs = require('node:fs');
+    if (!fs.existsSync(sqlPath)) {
+        logger.error(`❌ 缺失迁移脚本: ${sqlPath}`);
+        return;
+    }
+    logger.info(`${description}...`);
+    const conn = await mysql.createConnection({
+        host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASS,
+        database: DB_NAME, multipleStatements: true,
+    });
+    try {
+        await conn.query(fs.readFileSync(sqlPath, 'utf8'));
+        logger.info(`✅ ${description} — 完成`);
+    } finally {
+        await conn.end();
+    }
+}
+
 async function initMysql() {
     try {
-        // 先测试连接并创建数据库（若不存在）
         const tempPool = mysql.createPool({
-            host: DB_HOST,
-            port: DB_PORT,
-            user: DB_USER,
-            password: DB_PASS,
+            host: DB_HOST, port: DB_PORT, user: DB_USER, password: DB_PASS,
         });
         await tempPool.query(`CREATE DATABASE IF NOT EXISTS \`${DB_NAME}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;`);
         await tempPool.end();
 
-        // 检查核心表结构是否缺失，若缺失则自动执行初始化建表脚本
-        const fs = require('node:fs');
         const path = require('node:path');
         const migrationsDir = path.join(__dirname, '../database/migrations');
 
         const [rows] = await pool.execute(`SHOW TABLES LIKE 'accounts'`);
         if (rows.length === 0) {
-            logger.info('检测到空载数据库，正在自动执行建表初始化...');
-            const initSqlPath = path.join(migrationsDir, '001-init_mysql.sql');
-            if (fs.existsSync(initSqlPath)) {
-                const initConn = await mysql.createConnection({
-                    host: DB_HOST,
-                    port: DB_PORT,
-                    user: DB_USER,
-                    password: DB_PASS,
-                    database: DB_NAME,
-                    multipleStatements: true // 开启多语句模式以执行整个 .sql
-                });
-                const initSql = fs.readFileSync(initSqlPath, 'utf8');
-                await initConn.query(initSql);
-                await initConn.end();
-                logger.info('✅ MySQL 核心表结构自动初始化完成');
-            } else {
-                logger.error('❌ 缺失 MySQL 初始化脚本: 001-init_mysql.sql');
-            }
+            await runMigrationFile(
+                path.join(migrationsDir, '001-init_mysql.sql'),
+                '检测到空载数据库，正在自动执行建表初始化',
+            );
         } else {
-            // accounts 表已存在，检查并执行增量迁移（如 005-add-avatar）
             const [cols] = await pool.execute(
                 `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'accounts' AND COLUMN_NAME = 'avatar'`,
                 [DB_NAME]
             );
             if (cols.length === 0) {
-                const avatarMigrationPath = path.join(migrationsDir, '005-add-avatar.sql');
-                if (fs.existsSync(avatarMigrationPath)) {
-                    logger.info('检测到 accounts 表缺少 avatar 列，正在执行迁移 005-add-avatar.sql...');
-                    const migConn = await mysql.createConnection({
-                        host: DB_HOST,
-                        port: DB_PORT,
-                        user: DB_USER,
-                        password: DB_PASS,
-                        database: DB_NAME,
-                        multipleStatements: true
-                    });
-                    const migSql = fs.readFileSync(avatarMigrationPath, 'utf8');
-                    await migConn.query(migSql);
-                    await migConn.end();
-                    logger.info('✅ avatar 列迁移完成');
-                }
+                await runMigrationFile(
+                    path.join(migrationsDir, '005-add-avatar.sql'),
+                    '检测到 accounts 表缺少 avatar 列，正在执行迁移 005-add-avatar.sql',
+                );
             }
 
-            // 检查 accounts 表是否缺少 code 列（微信登录 code 持久化）
             const [codeCols] = await pool.execute(
                 `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'accounts' AND COLUMN_NAME = 'code'`,
                 [DB_NAME]
@@ -136,72 +127,32 @@ async function initMysql() {
                 logger.info('✅ accounts.code 列添加完成');
             }
 
-            // 检查 account_configs 表并执行增量迁移 002-account-mode.sql
             const [modeCols] = await pool.execute(
                 `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'account_configs' AND COLUMN_NAME = 'account_mode'`,
                 [DB_NAME]
             );
             if (modeCols.length === 0) {
-                const modeMigrationPath = path.join(migrationsDir, '002-account-mode.sql');
-                if (fs.existsSync(modeMigrationPath)) {
-                    logger.info('检测到 account_configs 表缺少 account_mode 列，正在执行迁移 002-account-mode.sql...');
-                    const migConn = await mysql.createConnection({
-                        host: DB_HOST,
-                        port: DB_PORT,
-                        user: DB_USER,
-                        password: DB_PASS,
-                        database: DB_NAME,
-                        multipleStatements: true
-                    });
-                    const migSql = fs.readFileSync(modeMigrationPath, 'utf8');
-                    await migConn.query(migSql);
-                    await migConn.end();
-                    logger.info('✅ account_mode 新列迁移完成');
-                }
+                await runMigrationFile(
+                    path.join(migrationsDir, '002-account-mode.sql'),
+                    '检测到 account_configs 表缺少 account_mode 列，正在执行迁移 002-account-mode.sql',
+                );
             }
 
-            // 检查 system_logs 表并执行增量迁移 006-system-logs.sql
             const [logsTable] = await pool.execute(`SHOW TABLES LIKE 'system_logs'`);
             if (logsTable.length === 0) {
-                const logsMigrationPath = path.join(migrationsDir, '006-system-logs.sql');
-                if (fs.existsSync(logsMigrationPath)) {
-                    logger.info('检测到缺少 system_logs 表，正在执行迁移 006-system-logs.sql...');
-                    const migConn = await mysql.createConnection({
-                        host: DB_HOST,
-                        port: DB_PORT,
-                        user: DB_USER,
-                        password: DB_PASS,
-                        database: DB_NAME,
-                        multipleStatements: true
-                    });
-                    const migSql = fs.readFileSync(logsMigrationPath, 'utf8');
-                    await migConn.query(migSql);
-                    await migConn.end();
-                    logger.info('✅ system_logs 日志归档表迁移完成');
-                }
+                await runMigrationFile(
+                    path.join(migrationsDir, '006-system-logs.sql'),
+                    '检测到缺少 system_logs 表，正在执行迁移 006-system-logs.sql',
+                );
             }
 
-            // 检查 announcements 表并执行增量迁移 007-announcements.sql
             const [annTable] = await pool.execute(`SHOW TABLES LIKE 'announcements'`);
             if (annTable.length === 0) {
-                const annMigrationPath = path.join(migrationsDir, '007-announcements.sql');
-                if (fs.existsSync(annMigrationPath)) {
-                    logger.info('检测到缺少 announcements 表，正在执行迁移 007-announcements.sql...');
-                    const migConn = await mysql.createConnection({
-                        host: DB_HOST,
-                        port: DB_PORT,
-                        user: DB_USER,
-                        password: DB_PASS,
-                        database: DB_NAME,
-                        multipleStatements: true
-                    });
-                    const migSql = fs.readFileSync(annMigrationPath, 'utf8');
-                    await migConn.query(migSql);
-                    await migConn.end();
-                    logger.info('✅ announcements 公告表迁移完成');
-                }
+                await runMigrationFile(
+                    path.join(migrationsDir, '007-announcements.sql'),
+                    '检测到缺少 announcements 表，正在执行迁移 007-announcements.sql',
+                );
             } else {
-                // 如果表存在，检查是否需要追加 version 和 publish_date 字段 (防旧版未创建)
                 const [verCols] = await pool.execute(
                     `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'announcements' AND COLUMN_NAME = 'version'`,
                     [DB_NAME]
@@ -213,31 +164,52 @@ async function initMysql() {
                 }
             }
 
-            // 检查 stats_daily 表并执行增量建表
+            const [rtTable] = await pool.execute(`SHOW TABLES LIKE 'refresh_tokens'`);
+            if (rtTable.length === 0) {
+                await runMigrationFile(
+                    path.join(migrationsDir, '008-refresh-tokens.sql'),
+                    '检测到缺少 refresh_tokens 表，正在执行迁移 008-refresh-tokens.sql',
+                );
+            }
+
+            const [fkRows] = await pool.execute(
+                `SELECT CONSTRAINT_NAME FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'accounts' AND CONSTRAINT_NAME = 'fk_accounts_username'`,
+                [DB_NAME]
+            );
+            if (fkRows.length === 0) {
+                logger.info('检测到 accounts 表缺少 username 外键约束，正在添加...');
+                try {
+                    await pool.query(`DELETE FROM accounts WHERE username IS NOT NULL AND username NOT IN (SELECT username FROM users)`);
+                    await pool.query(`ALTER TABLE accounts ADD CONSTRAINT fk_accounts_username FOREIGN KEY (username) REFERENCES users(username) ON DELETE SET NULL ON UPDATE CASCADE`);
+                    logger.info('✅ accounts.username 外键约束添加完成');
+                } catch (fkErr) {
+                    logger.warn('添加 accounts.username 外键约束失败(可忽略):', fkErr.message);
+                }
+            }
+
             const [statsTable] = await pool.execute(`SHOW TABLES LIKE 'stats_daily'`);
             if (statsTable.length === 0) {
                 logger.info('检测到缺少 stats_daily 表，正在自动创建...');
-                const createStatsSql = `
-                CREATE TABLE IF NOT EXISTS stats_daily (
-                    id INT AUTO_INCREMENT PRIMARY KEY,
-                    record_date DATE NOT NULL,
-                    total_exp INT DEFAULT 0,
-                    total_gold INT DEFAULT 0,
-                    total_steal INT DEFAULT 0,
-                    total_help INT DEFAULT 0,
-                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-                    UNIQUE KEY \`uk_date\` (\`record_date\`)
-                ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
-                `;
-                await pool.query(createStatsSql);
+                await pool.query(`
+                    CREATE TABLE IF NOT EXISTS stats_daily (
+                        id INT AUTO_INCREMENT PRIMARY KEY,
+                        record_date DATE NOT NULL,
+                        total_exp INT DEFAULT 0,
+                        total_gold INT DEFAULT 0,
+                        total_steal INT DEFAULT 0,
+                        total_help INT DEFAULT 0,
+                        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                        UNIQUE KEY \`uk_date\` (\`record_date\`)
+                    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+                `);
                 logger.info('✅ stats_daily 收益表创建完成');
             }
         }
 
-        // 测试主池的连通性
         const connection = await pool.getConnection();
         logger.info(`✅ MySQL 数据库连接池初始化成功 (${DB_HOST}:${DB_PORT}, 上限=${DB_LIMIT})`);
         connection.release();
+        _initialized = true;
     } catch (e) {
         logger.error('❌ MySQL 初始化失败:', e.message);
         throw e;
@@ -276,13 +248,13 @@ async function transaction(fn, retries = 1) {
         throw err;
     }
 
-    await connection.beginTransaction();
     try {
+        await connection.beginTransaction();
         const result = await fn(connection);
         await connection.commit();
         return result;
     } catch (e) {
-        await connection.rollback();
+        try { await connection.rollback(); } catch { /* transaction may not have started */ }
         if (retries > 0 && (e.code === 'ECONNRESET' || e.code === 'PROTOCOL_CONNECTION_LOST' || e.code === 'ETIMEDOUT')) {
             logger.warn(`[mysql-db] 事务执行期遭逢断链 ${e.code}，回滚并移交重试管道 (剩余: ${retries})`);
             try { connection.release(); } catch (ignore) { }
@@ -298,6 +270,9 @@ async function transaction(fn, retries = 1) {
 }
 
 function getPool() {
+    if (!_initialized) {
+        throw new Error('MySQL pool is not initialized. Call initMysql() first.');
+    }
     return pool;
 }
 

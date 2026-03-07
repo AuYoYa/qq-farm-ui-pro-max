@@ -68,16 +68,10 @@ function formatTime(seconds) {
 
 function getPlantRankings(sortBy = 'exp', levelMax = null) {
     const plants = getAllPlants();
-    console.warn(`[分析] 获取到 ${plants.length} 种作物`);
-    
-    // 筛选普通作物
+
     const normalPlants = plants.filter(p => {
-        // const idStr = String(p.id);
-        // return idStr.startsWith('102') && p.seed_id && p.seed_id >= 20000 && p.seed_id < 30000;
-        // 放宽条件，只要有种子ID且有生长阶段数据
         return p.seed_id > 0 && p.grow_phases;
     });
-    console.warn(`[分析] 筛选出 ${normalPlants.length} 种普通作物`);
 
 
 

@@ -1,33 +1,32 @@
-import axios from 'axios'
 import NProgress from 'nprogress'
 import { createRouter, createWebHistory } from 'vue-router'
-import { adminToken } from '@/utils/auth'
+import api from '@/api'
+import { adminToken, clearLocalAuthState } from '@/utils/auth'
 import { menuRoutes } from './menu'
 import 'nprogress/nprogress.css'
 
 NProgress.configure({ showSpinner: false })
 
-let validatedToken = ''
+let validatedUser = ''
 let validatingPromise: Promise<boolean> | null = null
 
 async function ensureTokenValid() {
-  const token = String(adminToken.value || '').trim()
-  if (!token)
+  const loginMarker = String(adminToken.value || '').trim()
+  if (!loginMarker)
     return false
 
-  if (validatedToken && validatedToken === token)
+  if (validatedUser && validatedUser === loginMarker)
     return true
 
   if (validatingPromise)
     return validatingPromise
 
-  validatingPromise = axios.get('/api/auth/validate', {
-    headers: { 'x-admin-token': token },
+  validatingPromise = api.get('/api/auth/validate', {
     timeout: 6000,
   }).then((res) => {
     const ok = !!(res.data && res.data.ok)
     if (ok)
-      validatedToken = token
+      validatedUser = loginMarker
     return ok
   }).catch(() => false).finally(() => {
     validatingPromise = null
@@ -73,26 +72,26 @@ router.beforeEach(async (to, _from) => {
 
   if (to.name === 'login') {
     if (!adminToken.value) {
-      validatedToken = ''
+      validatedUser = ''
       return true
     }
     const valid = await ensureTokenValid()
     if (valid)
       return { name: 'dashboard' }
-    adminToken.value = ''
-    validatedToken = ''
+    validatedUser = ''
+    clearLocalAuthState()
     return true
   }
 
   if (!adminToken.value) {
-    validatedToken = ''
+    validatedUser = ''
     return { name: 'login' }
   }
 
   const valid = await ensureTokenValid()
   if (!valid) {
-    adminToken.value = ''
-    validatedToken = ''
+    validatedUser = ''
+    clearLocalAuthState()
     return { name: 'login' }
   }
 

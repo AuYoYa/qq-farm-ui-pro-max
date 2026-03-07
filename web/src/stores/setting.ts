@@ -196,8 +196,8 @@ export const useSettingStore = defineStore('setting', () => {
         settings.value.friendQuietHours = d.friendQuietHours || { enabled: false, start: '23:00', end: '07:00' }
         settings.value.automation = d.automation || {}
         settings.value.ui = d.ui || {}
-        // 蹲守配置挂到 settings 上层以便 StealSettings.vue 读取
-        ; (settings.value as any).stakeoutSteal = d.stakeoutSteal || { enabled: false, delaySec: 3 }
+          // 蹲守配置挂到 settings 上层以便 StealSettings.vue 读取
+          ; (settings.value as any).stakeoutSteal = d.stakeoutSteal || { enabled: false, delaySec: 3 }
         settings.value.workflowConfig = d.workflowConfig || { farm: { enabled: false, minInterval: 30, maxInterval: 120, nodes: [] }, friend: { enabled: false, minInterval: 60, maxInterval: 300, nodes: [] } }
         settings.value.offlineReminder = d.offlineReminder || {
           channel: 'webhook',
@@ -271,10 +271,20 @@ export const useSettingStore = defineStore('setting', () => {
     }
   }
 
-  async function changeAdminPassword(oldPassword: string, newPassword: string) {
+  /**
+   * 修改当前登录用户的密码（自动隔离，基于 token 识别用户）
+   */
+  async function changePassword(oldPassword: string, newPassword: string) {
     // 不设置 loading，避免整页切换导致闪烁；Settings.vue 已用 passwordSaving 控制按钮加载态
-    const res = await api.post('/api/admin/change-password', { oldPassword, newPassword })
-    return res.data
+    try {
+      const res = await api.post('/api/auth/change-password', { oldPassword, newPassword })
+      return res.data
+    }
+    catch (e: any) {
+      // axios 对 4xx/5xx 状态码会抛异常，需要从 response.data 中提取后端错误信息
+      const backendError = e.response?.data?.error
+      return { ok: false, error: backendError || e.message || '密码修改失败' }
+    }
   }
 
   async function fetchTrialCardConfig() {
@@ -382,5 +392,5 @@ export const useSettingStore = defineStore('setting', () => {
     }
   }
 
-  return { settings, loading, timingLoading, fetchSettings, saveSettings, saveOfflineConfig, changeAdminPassword, fetchTrialCardConfig, fetchThirdPartyApiConfig, saveThirdPartyApiConfig, fetchTimingConfig, saveTimingConfig, fetchClusterConfig, saveClusterConfig }
+  return { settings, loading, timingLoading, fetchSettings, saveSettings, saveOfflineConfig, changePassword, fetchTrialCardConfig, fetchThirdPartyApiConfig, saveThirdPartyApiConfig, fetchTimingConfig, saveTimingConfig, fetchClusterConfig, saveClusterConfig }
 })

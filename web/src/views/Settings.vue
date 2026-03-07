@@ -49,13 +49,22 @@ const timeWarningVisible = computed(() => {
   )
 })
 
-// ============ 体验卡配置（仅管理员） ============
+// ============ 用户身份识别 ============
 const isAdmin = computed(() => {
   try {
     const u = JSON.parse(localStorage.getItem('current_user') || 'null')
     return u?.role === 'admin'
   }
   catch { return false }
+})
+
+// 当前登录用户名（用于密码修改等用户隔离场景）
+const currentUsername = computed(() => {
+  try {
+    const u = JSON.parse(localStorage.getItem('current_user') || 'null')
+    return u?.username || ''
+  }
+  catch { return '' }
 })
 
 const trialConfig = ref({
@@ -776,17 +785,19 @@ async function handleChangePassword() {
     showAlert('两次密码输入不一致', 'danger')
     return
   }
-  if (passwordForm.value.new.length < 4) {
-    showAlert('密码长度至少4位', 'danger')
+  // 管理员：≥4 位；普通用户：≥6 位 + 字母数字（后端会二次校验）
+  const minLen = isAdmin.value ? 4 : 6
+  if (passwordForm.value.new.length < minLen) {
+    showAlert(`密码长度至少 ${minLen} 位`, 'danger')
     return
   }
 
   passwordSaving.value = true
   try {
-    const res = await settingStore.changeAdminPassword(passwordForm.value.old, passwordForm.value.new)
+    const res = await settingStore.changePassword(passwordForm.value.old, passwordForm.value.new)
 
     if (res.ok) {
-      showAlert('密码修改成功')
+      showAlert(`用户 ${currentUsername.value} 密码修改成功`)
       passwordForm.value = { old: '', new: '', confirm: '' }
     }
     else {
@@ -1279,7 +1290,10 @@ async function restoreTimingDefaults() {
         <div class="border-b border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
           <h3 class="glass-text-main flex items-center gap-2 text-base font-bold">
             <div class="i-carbon-password" />
-            管理密码
+            账号密码
+            <span v-if="currentUsername" class="rounded bg-primary-100 px-2 py-0.5 text-xs text-primary-600 font-normal dark:bg-primary-900/30 dark:text-primary-400">
+              {{ currentUsername }}
+            </span>
           </h3>
         </div>
 
@@ -1290,13 +1304,13 @@ async function restoreTimingDefaults() {
               v-model="passwordForm.old"
               label="当前密码"
               type="password"
-              placeholder="当前管理密码"
+              placeholder="当前登录密码"
             />
             <BaseInput
               v-model="passwordForm.new"
               label="新密码"
               type="password"
-              placeholder="至少 4 位"
+              :placeholder="isAdmin ? '至少 4 位' : '至少 6 位，需含字母和数字'"
             />
             <BaseInput
               v-model="passwordForm.confirm"
@@ -1308,7 +1322,7 @@ async function restoreTimingDefaults() {
 
           <div class="flex items-center justify-between pt-1">
             <p class="glass-text-muted text-xs">
-              建议修改默认密码 (admin)
+              修改当前登录账号 <strong>{{ currentUsername }}</strong> 的密码
             </p>
             <BaseButton
               variant="primary"
@@ -1316,7 +1330,7 @@ async function restoreTimingDefaults() {
               :loading="passwordSaving"
               @click="handleChangePassword"
             >
-              修改管理密码
+              修改密码
             </BaseButton>
           </div>
         </div>

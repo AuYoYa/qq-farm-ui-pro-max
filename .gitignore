@@ -1,52 +1,95 @@
-# 依赖
+# Dependencies
 node_modules/
+**/node_modules/
 .pnpm-store/
 
-# 敏感数据
-.env
-.env.local
-.env.*.local
-*.db
-*.db-wal
-*.db-shm
-data/*.json
-data/*.db
+# Lockfiles (pnpm workspace keeps pnpm-lock.yaml)
+package-lock.json
+**/package-lock.json
 
-# 日志
-logs/
+# Build artifacts
+dist/
+**/dist/
+core/dist-*/
+core/dist-nest/
+web/stats.html
+*.tsbuildinfo
+
+# Runtime data
+data/
+core/data/
+
+# Logs
 *.log
 npm-debug.log*
+pnpm-debug.log*
 yarn-debug.log*
 yarn-error.log*
-pnpm-debug.log*
 
-# AI 历史
-.llm-chat-history/
-.specstory/
-.agent/
+# Env & local
+.env
+.env.*
+!.env.example
+*.local
 
-# IDE
+# Editor & OS
+.vscode/
 .idea/
-.vscode/*
-!.vscode/extensions.json
-!.vscode/settings.json
-.cursor/
-
-# 构建产物
-dist/
-build/
-*.exe
-*.app
-*.dmg
-
-# 临时文件
-*.tmp
-*.swp
 .DS_Store
 Thumbs.db
 
-# 特定敏感文件
-openviking-service/.env
-core/.env.ai
-core/data/*.json
-core/data/*.db
+# Large binaries (ipad860 service)
+services/ipad860/staydd
+services/ipad860/*.dat
+services/ipad860/*.dll
+services/ipad860/.idea/
+services/ipad860/lib/
+services/ipad860/swagger/
+services/ipad860/clientsdk/ccdata/wechatdll
+
+# Large archives
+*.tar
+*.tar.gz
+
+# AI tools data
+.llm-chat-history/
+.specstory/
+.agent/
+.cursor/
+
+# Archive (旧脚本/镜像归档，不进入版本控制)
+archive/
+tmp/
+
+# 图鉴（root权限静态资源，不进入版本控制）
+图鉴/
+
+# GitHub 同步子仓库
+github-sync/
+
+# 大型归档文件
+*.zip
+
+# Local-only archives and historical materials
+releases/
+wxcode/
+nc_local_version/
+log开发日志/
+qq_farm_bot.sql
+IMPLEMENTATION_PLAN.html
+SOP_目录整理.md
+说明文档.md
+CHANGELOG.md.orig
+CHANGELOG.md.rej
+docs/plans/未命名.html
+
+# Local runtime residues
+logs/ai-daemon.pid
+logs/development/Log_*.md
+web/diff_calc.patch
+core/public/
+core/pnpm-lock.yaml
+web/pnpm-lock.yaml
+deploy/offline/
+services/openviking/ov.conf
+scripts/service/logs/

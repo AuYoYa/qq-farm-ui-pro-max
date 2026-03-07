@@ -75,12 +75,13 @@ async function deleteUser(req, res) {
 }
 
 /**
- * 修改密码
+ * 修改密码（根据当前登录用户自动隔离）
  */
 async function changePassword(req, res) {
     try {
         // 从 req.currentUser 获取用户名（由 authRequired 中间件设置）
         const username = req.currentUser?.username;
+        const role = req.currentUser?.role;
         const { oldPassword, newPassword } = req.body;
 
         if (!username) {
@@ -91,20 +92,30 @@ async function changePassword(req, res) {
             return res.status(400).json({ ok: false, error: '缺少必要参数' });
         }
 
-        // 新密码格式验证（复杂度校验）
-        const { validatePassword } = require('../utils/validators');
-        const pwdValidation = validatePassword(newPassword);
-        if (!pwdValidation.valid) {
-            return res.status(400).json({ ok: false, error: pwdValidation.error });
+        // 管理员：简化校验，仅要求 ≥4 位
+        // 普通用户：完整复杂度校验（≥6位 + 字母 + 数字）
+        if (role === 'admin') {
+            if (newPassword.length < 4) {
+                return res.status(400).json({ ok: false, error: '密码长度至少 4 位' });
+            }
+        } else {
+            const { validatePassword } = require('../utils/validators');
+            const pwdValidation = validatePassword(newPassword);
+            if (!pwdValidation.valid) {
+                return res.status(400).json({ ok: false, error: pwdValidation.error });
+            }
         }
 
-        const result = await userStore.changePassword(username, oldPassword, newPassword);
+        // 管理员走简化密码修改（跳过 user-store 内部的强密码校验）
+        const result = (role === 'admin' && userStore.changeAdminPassword)
+            ? await userStore.changeAdminPassword(username, oldPassword, newPassword)
+            : await userStore.changePassword(username, oldPassword, newPassword);
 
         if (!result.ok) {
             return res.status(400).json(result);
         }
 
-        res.json({ ok: true });
+        res.json({ ok: true, message: `用户 ${username} 密码修改成功` });
     } catch (error) {
         console.error('修改密码失败:', error.message);
         res.status(500).json({ ok: false, error: '修改密码失败' });

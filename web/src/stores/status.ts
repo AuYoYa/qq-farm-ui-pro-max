@@ -3,7 +3,7 @@ import { defineStore } from 'pinia'
 import { io } from 'socket.io-client'
 import { ref } from 'vue'
 import api from '@/api'
-import { adminToken } from '@/utils/auth'
+import { adminToken, clearAuth } from '@/utils/auth'
 
 // Define interfaces for better type checking
 interface DailyGift {
@@ -37,8 +37,8 @@ export const useStatusStore = defineStore('status', () => {
   const tokenRef = adminToken
 
   let socket: Socket | null = null
-  // 幂等订阅守卫：记录最近一次成功订阅的账号 ID，避免重复 subscribe 触发 snapshot 覆盖
   let lastSubscribedAccountId = ''
+  let refreshingSocketAuth = false
 
   function normalizeStatusPayload(input: any) {
     return (input && typeof input === 'object') ? { ...input } : {}
@@ -171,11 +171,7 @@ export const useStatusStore = defineStore('status', () => {
       path: '/socket.io',
       autoConnect: false,
       transports: ['websocket'],
-      auth: {
-        token: tokenRef.value,
-      },
-      // 分布式网关防雪崩退避策略：
-      // 起步2秒避让，最大15秒，外加50%随机抖动，彻底打散并发大军
+      withCredentials: true,
       reconnectionDelay: 2000,
       reconnectionDelayMax: 15000,
       randomizationFactor: 0.5,
@@ -193,9 +189,32 @@ export const useStatusStore = defineStore('status', () => {
       realtimeConnected.value = false
     })
 
-    socket.on('connect_error', (err) => {
+    socket.on('connect_error', async (err) => {
       realtimeConnected.value = false
-      console.error('[realtime] 连接失败:', err.message)
+      const isAuthError = err.message === 'Unauthorized' || err.message === 'jwt expired'
+      if (isAuthError && !refreshingSocketAuth) {
+        refreshingSocketAuth = true
+        try {
+          await fetch('/api/auth/refresh', {
+            method: 'POST',
+            credentials: 'include',
+          }).then((res) => {
+            if (!res.ok)
+              throw new Error(`refresh failed: ${res.status}`)
+          })
+          socket?.connect()
+        }
+        catch {
+          await clearAuth()
+          window.location.href = '/login'
+        }
+        finally {
+          refreshingSocketAuth = false
+        }
+      }
+      else if (!isAuthError) {
+        console.warn('[realtime] 非认证连接错误，等待自动重连:', err.message)
+      }
     })
 
     socket.on('status:update', handleRealtimeStatus)
@@ -218,12 +237,11 @@ export const useStatusStore = defineStore('status', () => {
 
     const client = ensureRealtimeSocket()
 
-    // 按条件构造认证凭据
     if (Array.isArray(newId)) {
-      client.auth = { token: tokenRef.value, accountIds: newId }
+      client.auth = { accountIds: newId }
     }
     else {
-      client.auth = { token: tokenRef.value, accountId: newId || 'all' }
+      client.auth = { accountId: newId || 'all' }
     }
 
     const nextSubKey = Array.isArray(newId) ? newId.join(',') : (newId || 'all')
