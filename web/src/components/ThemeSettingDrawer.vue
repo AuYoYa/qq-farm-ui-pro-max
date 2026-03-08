@@ -161,7 +161,7 @@ function applyThemeBackground(themeKey: string) {
                     可一键同步同主题背景预设
                   </span>
                   <button
-                    class="rounded-full border border-white/20 bg-white/30 px-3 py-1 text-[10px] font-bold transition-colors dark:border-white/10 dark:bg-black/25 hover:bg-white/45 dark:hover:bg-black/35"
+                    class="border border-white/20 rounded-full bg-white/30 px-3 py-1 text-[10px] font-bold transition-colors dark:border-white/10 dark:bg-black/25 hover:bg-white/45 dark:hover:bg-black/35"
                     @click.stop="applyThemeBackground(t.key)"
                   >
                     套用主题背景

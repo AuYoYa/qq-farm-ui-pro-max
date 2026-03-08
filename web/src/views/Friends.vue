@@ -341,11 +341,11 @@ function handleFriendAvatarError(friend: any) {
           收起
         </button>
       </div>
-      <div class="mt-3 max-h-64 space-y-2 overflow-y-auto pr-1">
+      <div class="mt-3 max-h-64 overflow-y-auto pr-1 space-y-2">
         <div
           v-for="row in batchResult.results || []"
           :key="`batch-${row.gid}-${row.opType}`"
-          class="flex items-center justify-between rounded-lg border border-gray-200/60 px-3 py-2 text-sm dark:border-gray-700/60"
+          class="flex items-center justify-between border border-gray-200/60 rounded-lg px-3 py-2 text-sm dark:border-gray-700/60"
         >
           <div>
             <div class="font-medium">
@@ -405,7 +405,7 @@ function handleFriendAvatarError(friend: any) {
             <div class="flex items-center gap-3">
               <label
                 v-if="selectionMode"
-                class="h-5 w-5 flex shrink-0 items-center justify-center rounded border border-gray-300/70 bg-white/80 dark:border-gray-600 dark:bg-black/30"
+                class="h-5 w-5 flex shrink-0 items-center justify-center border border-gray-300/70 rounded bg-white/80 dark:border-gray-600 dark:bg-black/30"
                 @click.stop
               >
                 <input

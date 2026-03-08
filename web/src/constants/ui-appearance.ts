@@ -1,7 +1,7 @@
 export type UiColorTheme = 'default' | 'sakura' | 'cyber' | 'elegant' | 'ocean'
 export type UiBackgroundScope = 'login_only' | 'login_and_app' | 'global'
 
-export type ThemeOption = {
+export interface ThemeOption {
   key: UiColorTheme
   color: string
   bg: string
@@ -11,7 +11,7 @@ export type ThemeOption = {
   desc: string
 }
 
-export type LoginBackgroundPreset = {
+export interface LoginBackgroundPreset {
   key: string
   themeKey?: UiColorTheme
   title: string

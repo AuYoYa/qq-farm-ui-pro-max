@@ -223,7 +223,7 @@ useIntervalFn(loadBag, 60000)
 
     <div class="grid gap-3 lg:grid-cols-3">
       <div class="glass-panel rounded-xl p-4 shadow">
-        <div class="text-xs text-gray-400 uppercase tracking-[0.2em]">
+        <div class="text-xs text-gray-400 tracking-[0.2em] uppercase">
           交易策略
         </div>
         <div class="mt-2 text-sm font-medium">
@@ -244,7 +244,7 @@ useIntervalFn(loadBag, 60000)
       </div>
 
       <div class="glass-panel rounded-xl p-4 shadow">
-        <div class="text-xs text-gray-400 uppercase tracking-[0.2em]">
+        <div class="text-xs text-gray-400 tracking-[0.2em] uppercase">
           预计出售
         </div>
         <div class="mt-2 text-sm font-medium">
@@ -256,7 +256,7 @@ useIntervalFn(loadBag, 60000)
       </div>
 
       <div class="glass-panel rounded-xl p-4 shadow">
-        <div class="text-xs text-gray-400 uppercase tracking-[0.2em]">
+        <div class="text-xs text-gray-400 tracking-[0.2em] uppercase">
           快速选择
         </div>
         <div class="mt-3 flex flex-wrap gap-2">
@@ -322,7 +322,7 @@ useIntervalFn(loadBag, 60000)
           :key="`dashboard-${item.id}`"
           class="glass-panel rounded-xl p-4 shadow"
         >
-          <div class="text-xs text-gray-400 uppercase tracking-[0.2em]">
+          <div class="text-xs text-gray-400 tracking-[0.2em] uppercase">
             {{ item.name }}
           </div>
           <div class="mt-2 text-lg font-semibold">
@@ -358,7 +358,7 @@ useIntervalFn(loadBag, 60000)
             </div>
 
             <div
-              class="thumb-wrap mb-2 mt-6 h-16 w-16 flex items-center justify-center self-center rounded-full bg-gray-50 dark:bg-gray-700/50"
+              class="thumb-wrap mb-2 mt-6 h-16 w-16 flex items-center self-center justify-center rounded-full bg-gray-50 dark:bg-gray-700/50"
               :data-fallback="(item.name || '物').slice(0, 1)"
             >
               <img
@@ -458,7 +458,7 @@ useIntervalFn(loadBag, 60000)
               </div>
             </div>
             <div class="text-right text-sm">
-              <div class="font-semibold text-emerald-500">
+              <div class="text-emerald-500 font-semibold">
                 预计 {{ item.sellValue }} 金币
               </div>
               <div class="mt-1 text-xs text-gray-400">

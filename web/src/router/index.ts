@@ -14,7 +14,7 @@ type CurrentUser = {
   card?: unknown
 } | null
 
-type SessionValidation = {
+interface SessionValidation {
   valid: boolean
   user: CurrentUser
 }

@@ -1,6 +1,8 @@
 /* eslint-disable no-alert, unused-imports/no-unused-vars */
 
 <script setup lang="ts">
+import type { LoginBackgroundPreset } from '@/constants/ui-appearance'
+import type { ReportLogEntry } from '@/stores/setting'
 import { storeToRefs } from 'pinia'
 import { computed, onMounted, ref, watch, watchEffect } from 'vue'
 import api from '@/api' // Apply config from server if possible
@@ -10,12 +12,12 @@ import BaseInput from '@/components/ui/BaseInput.vue'
 import BaseSelect from '@/components/ui/BaseSelect.vue'
 import BaseSwitch from '@/components/ui/BaseSwitch.vue'
 import BaseTooltip from '@/components/ui/BaseTooltip.vue'
-import { getThemeBackgroundPreset, getThemeOption, LOGIN_BACKGROUND_PRESETS, type LoginBackgroundPreset, UI_BACKGROUND_SCOPE_OPTIONS } from '@/constants/ui-appearance'
+import { getThemeBackgroundPreset, getThemeOption, LOGIN_BACKGROUND_PRESETS, THEME_OPTIONS, UI_BACKGROUND_SCOPE_OPTIONS } from '@/constants/ui-appearance'
 import { useAccountStore } from '@/stores/account'
 import { useAppStore } from '@/stores/app'
 import { useFarmStore } from '@/stores/farm'
 import { useFriendStore } from '@/stores/friend'
-import { type ReportLogEntry, useSettingStore } from '@/stores/setting'
+import { useSettingStore } from '@/stores/setting'
 
 const REPORT_HISTORY_VIEW_STORAGE_KEY = 'qq-farm-bot:report-history-view:v1'
 
@@ -345,6 +347,13 @@ const appScenePreviewMaskStyle = computed(() => ({
 }))
 const currentThemeOption = computed(() => getThemeOption(appStore.colorTheme))
 const currentThemeBackgroundPreset = computed(() => getThemeBackgroundPreset(appStore.colorTheme))
+
+const themePresetBundles = computed(() => {
+  return THEME_OPTIONS.map(theme => ({
+    theme,
+    preset: getThemeBackgroundPreset(theme.key),
+  }))
+})
 const orderedLoginBackgroundPresets = computed(() => {
   const currentThemeKey = appStore.colorTheme
   return [...loginBackgroundPresets].sort((a, b) => {
@@ -388,6 +397,23 @@ function applyBackgroundPreset(preset: LoginBackgroundPreset) {
 
 function applyCurrentThemeBackgroundPreset() {
   applyBackgroundPreset(currentThemeBackgroundPreset.value)
+}
+
+function isThemeBundleApplied(themeKey: string) {
+  const preset = getThemeBackgroundPreset(themeKey)
+  return appStore.colorTheme === themeKey
+    && appStore.loginBackground.trim() === preset.url.trim()
+    && appStore.loginBackgroundOverlayOpacity === preset.overlayOpacity
+    && appStore.loginBackgroundBlur === preset.blur
+    && appStore.appBackgroundOverlayOpacity === preset.appOverlayOpacity
+    && appStore.appBackgroundBlur === preset.appBlur
+}
+
+function applyThemeBundle(themeKey: string) {
+  const preset = getThemeBackgroundPreset(themeKey)
+  appStore.backgroundScope = 'login_and_app'
+  appStore.colorTheme = themeKey
+  applyBackgroundPreset(preset)
 }
 
 async function saveLoginAppearance() {
@@ -519,7 +545,7 @@ async function handleBackgroundFileChange(event: Event) {
   if (!file)
     return
 
-  if (!/^image\/(png|jpeg|webp)$/i.test(file.type)) {
+  if (!/^image\/(?:png|jpeg|webp)$/i.test(file.type)) {
     showAlert('仅支持上传 JPG / PNG / WebP 图片', 'danger')
     return
   }
@@ -777,7 +803,7 @@ function syncLocalSettings() {
               ...defaultTradeConfig.sell,
               ...(((settings.value as any).tradeConfig || {}).sell || {}),
               keepFruitIds: Array.isArray((((settings.value as any).tradeConfig || {}).sell || {}).keepFruitIds)
-                ? [ ...((((settings.value as any).tradeConfig || {}).sell || {}).keepFruitIds) ]
+                ? [...((((settings.value as any).tradeConfig || {}).sell || {}).keepFruitIds)]
                 : [],
               rareKeep: {
                 ...defaultTradeConfig.sell.rareKeep,
@@ -786,12 +812,12 @@ function syncLocalSettings() {
             },
           }
         : {
-        sell: {
-          ...defaultTradeConfig.sell,
-          keepFruitIds: [...defaultTradeConfig.sell.keepFruitIds],
-          rareKeep: { ...defaultTradeConfig.sell.rareKeep },
-        },
-      },
+            sell: {
+              ...defaultTradeConfig.sell,
+              keepFruitIds: [...defaultTradeConfig.sell.keepFruitIds],
+              rareKeep: { ...defaultTradeConfig.sell.rareKeep },
+            },
+          },
       reportConfig: (settings.value as any).reportConfig || defaultReportConfig,
       automation: settings.value.automation,
     }))
@@ -2128,13 +2154,13 @@ async function restoreTimingDefaults() {
               />
             </div>
 
-            <div class="mt-4 grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div class="rounded-xl border border-gray-200/70 p-4 dark:border-gray-700/70">
+            <div class="grid grid-cols-1 mt-4 gap-3 md:grid-cols-2">
+              <div class="border border-gray-200/70 rounded-xl p-4 dark:border-gray-700/70">
                 <BaseSwitch
                   v-model="localSettings.tradeConfig.sell.rareKeep.enabled"
                   label="启用稀有果实保留"
                 />
-                <div class="mt-3 grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-2 mt-3 gap-3">
                   <BaseInput
                     v-model.number="localSettings.tradeConfig.sell.rareKeep.minPlantLevel"
                     label="最低作物等级"
@@ -2152,7 +2178,7 @@ async function restoreTimingDefaults() {
                 </div>
               </div>
 
-              <div class="rounded-xl border border-gray-200/70 p-4 dark:border-gray-700/70">
+              <div class="border border-gray-200/70 rounded-xl p-4 dark:border-gray-700/70">
                 <BaseSwitch
                   v-model="localSettings.tradeConfig.sell.previewBeforeManualSell"
                   label="手动出售前先刷新预览"
@@ -2201,7 +2227,9 @@ async function restoreTimingDefaults() {
                         class="w-16 shrink-0 text-sm shadow-inner !py-1"
                       />
                     </div>
-                    <p class="text-[10px] text-gray-500 dark:text-gray-400">0=普通，6=蓝宝石</p>
+                    <p class="text-[10px] text-gray-500 dark:text-gray-400">
+                      0=普通，6=蓝宝石
+                    </p>
                   </div>
                 </div>
                 <BaseSwitch v-model="localSettings.automation.sell" label="自动卖果实" hint="收获后自动将仓库中的果实出售换取金币。关闭则果实堆积在仓库不处理。" recommend="on" />
@@ -2338,7 +2366,6 @@ async function restoreTimingDefaults() {
               前往偷菜控制台 <div class="i-carbon-arrow-right ml-2" />
             </BaseButton>
           </div>
-
         </div>
 
         <!-- Save Button -->
@@ -2616,7 +2643,7 @@ async function restoreTimingDefaults() {
                 </div>
 
                 <div class="grid grid-cols-1 gap-4 md:grid-cols-2">
-                  <div class="rounded-xl border border-emerald-200/60 bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10">
+                  <div class="border border-emerald-200/60 rounded-xl bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10">
                     <BaseSwitch
                       v-model="localSettings.reportConfig.hourlyEnabled"
                       label="小时汇报"
@@ -2637,7 +2664,7 @@ async function restoreTimingDefaults() {
                     </div>
                   </div>
 
-                  <div class="rounded-xl border border-emerald-200/60 bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10">
+                  <div class="border border-emerald-200/60 rounded-xl bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10">
                     <BaseSwitch
                       v-model="localSettings.reportConfig.dailyEnabled"
                       label="每日汇报"
@@ -2668,7 +2695,7 @@ async function restoreTimingDefaults() {
                   </div>
                 </div>
 
-                <div class="rounded-xl border border-emerald-200/60 bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10">
+                <div class="border border-emerald-200/60 rounded-xl bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10">
                   <div class="mb-2 flex items-center gap-2 text-xs text-emerald-700 font-bold tracking-widest uppercase dark:text-emerald-300">
                     <div class="i-carbon-data-base mr-1" /> 历史保留策略
                   </div>
@@ -2730,7 +2757,7 @@ async function restoreTimingDefaults() {
                     </div>
                   </div>
 
-                  <div class="mb-3 grid grid-cols-1 gap-3 md:grid-cols-4">
+                  <div class="grid grid-cols-1 mb-3 gap-3 md:grid-cols-4">
                     <BaseSelect
                       v-model="reportFilters.mode"
                       label="筛选类型"
@@ -2793,7 +2820,7 @@ async function restoreTimingDefaults() {
                     </div>
                   </div>
 
-                  <div class="mb-3 grid grid-cols-1 gap-3 md:grid-cols-2">
+                  <div class="grid grid-cols-1 mb-3 gap-3 md:grid-cols-2">
                     <BaseSelect
                       v-model="reportSortOrder"
                       label="时间排序"
@@ -2801,12 +2828,12 @@ async function restoreTimingDefaults() {
                     />
                   </div>
 
-                  <div class="mb-3 grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-6">
+                  <div class="grid grid-cols-2 mb-3 gap-3 md:grid-cols-3 xl:grid-cols-6">
                     <button
                       v-for="item in reportHistoryStatsCards"
                       :key="item.key"
                       type="button"
-                      class="rounded-xl border border-emerald-200/60 px-3 py-3 text-left transition-all duration-150 dark:border-emerald-800/30"
+                      class="border border-emerald-200/60 rounded-xl px-3 py-3 text-left transition-all duration-150 dark:border-emerald-800/30"
                       :class="[
                         item.bg,
                         item.active
@@ -2834,10 +2861,10 @@ async function restoreTimingDefaults() {
                       <span>
                         共 {{ reportLogPagination.total }} 条记录，当前第 {{ reportLogPagination.page }} / {{ reportLogPagination.totalPages }} 页
                       </span>
-                      <label class="inline-flex items-center gap-2 select-none">
+                      <label class="inline-flex select-none items-center gap-2">
                         <input
                           type="checkbox"
-                          class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                          class="h-4 w-4 border-gray-300 rounded text-emerald-600 focus:ring-emerald-500"
                           :checked="allVisibleReportLogsSelected"
                           @change="toggleSelectAllVisibleReportLogs"
                         >
@@ -2867,11 +2894,11 @@ async function restoreTimingDefaults() {
                     </div>
                   </div>
 
-                  <div v-if="reportHistoryLoading" class="rounded-xl border border-dashed border-emerald-200/70 bg-white/40 px-4 py-5 text-center text-xs text-gray-500 dark:border-emerald-800/30 dark:bg-black/10 dark:text-gray-400">
+                  <div v-if="reportHistoryLoading" class="border border-emerald-200/70 rounded-xl border-dashed bg-white/40 px-4 py-5 text-center text-xs text-gray-500 dark:border-emerald-800/30 dark:bg-black/10 dark:text-gray-400">
                     正在加载汇报历史...
                   </div>
 
-                  <div v-else-if="reportLogs.length === 0" class="rounded-xl border border-dashed border-emerald-200/70 bg-white/40 px-4 py-5 text-center text-xs text-gray-500 dark:border-emerald-800/30 dark:bg-black/10 dark:text-gray-400">
+                  <div v-else-if="reportLogs.length === 0" class="border border-emerald-200/70 rounded-xl border-dashed bg-white/40 px-4 py-5 text-center text-xs text-gray-500 dark:border-emerald-800/30 dark:bg-black/10 dark:text-gray-400">
                     还没有经营汇报历史记录
                   </div>
 
@@ -2879,14 +2906,14 @@ async function restoreTimingDefaults() {
                     <div
                       v-for="item in reportLogs"
                       :key="item.id"
-                      class="rounded-xl border border-emerald-200/60 bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10"
+                      class="border border-emerald-200/60 rounded-xl bg-white/50 p-4 dark:border-emerald-800/30 dark:bg-black/10"
                     >
                       <div class="flex flex-wrap items-start justify-between gap-2">
                         <div class="min-w-0 flex flex-1 items-start gap-3">
                           <label class="mt-0.5 inline-flex items-center">
                             <input
                               type="checkbox"
-                              class="h-4 w-4 rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                              class="h-4 w-4 border-gray-300 rounded text-emerald-600 focus:ring-emerald-500"
                               :checked="isReportLogSelected(item.id)"
                               @change="toggleReportLogSelected(item.id)"
                             >
@@ -2919,7 +2946,7 @@ async function restoreTimingDefaults() {
                       </div>
 
                       <div
-                        class="mt-3 overflow-auto whitespace-pre-line rounded-lg bg-black/5 px-3 py-2 text-xs leading-5 text-gray-700 dark:bg-white/5 dark:text-gray-300"
+                        class="mt-3 overflow-auto whitespace-pre-line rounded-lg bg-black/5 px-3 py-2 text-xs text-gray-700 leading-5 dark:bg-white/5 dark:text-gray-300"
                         :class="isReportLogExpanded(item.id) ? 'max-h-64' : 'max-h-24'"
                       >
                         {{ isReportLogExpanded(item.id) ? (item.content || '无正文') : getReportLogPreview(item.content) }}
@@ -3154,7 +3181,7 @@ async function restoreTimingDefaults() {
       </div>
 
       <!-- Card 3: 体验卡配置（仅管理员可见） -->
-      <div v-if="isAdmin" class="card glass-panel h-full flex flex-col rounded-lg shadow lg:col-span-2 relative z-10">
+      <div v-if="isAdmin" class="card glass-panel relative z-10 h-full flex flex-col rounded-lg shadow lg:col-span-2">
         <div class="border-b border-gray-200/50 bg-transparent px-4 py-3 dark:border-gray-700/50">
           <h3 class="glass-text-main flex items-center gap-2 text-base font-bold">
             <div class="i-carbon-chemistry" />
@@ -3289,7 +3316,7 @@ async function restoreTimingDefaults() {
               placeholder="请输入图片链接 (如: https://example.com/bg.jpg)"
             />
 
-            <div class="rounded-2xl border border-primary-500/20 bg-primary-500/8 p-4">
+            <div class="border border-primary-500/20 rounded-2xl bg-primary-500/8 p-4">
               <div class="flex flex-wrap items-center justify-between gap-3">
                 <div>
                   <div class="glass-text-main text-sm font-bold">
@@ -3309,16 +3336,99 @@ async function restoreTimingDefaults() {
               </div>
             </div>
 
-            <div class="rounded-2xl border border-white/10 bg-black/5 p-4 dark:bg-white/5">
+            <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
+              <div class="flex flex-wrap items-center justify-between gap-3">
+                <div>
+                  <div class="glass-text-main text-sm font-bold">
+                    5 套主题联动方案
+                  </div>
+                  <p class="glass-text-muted mt-1 text-xs leading-5">
+                    每套方案都会同步主题色、背景图、登录页参数和主界面参数，并默认启用“登录页 + 主界面”。
+                  </p>
+                </div>
+                <div class="rounded-full bg-white/10 px-3 py-1 text-[11px] text-primary-500 dark:bg-black/20">
+                  一键套用整套皮肤
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 mt-4 gap-4 md:grid-cols-2 xl:grid-cols-5">
+                <button
+                  v-for="bundle in themePresetBundles"
+                  :key="bundle.theme.key"
+                  type="button"
+                  class="group overflow-hidden border rounded-2xl bg-black/5 text-left transition-all duration-300 dark:bg-white/5 hover:shadow-xl hover:-translate-y-1"
+                  :class="isThemeBundleApplied(bundle.theme.key)
+                    ? 'border-primary-500 shadow-lg shadow-primary-500/15'
+                    : 'border-white/10 dark:border-white/10'"
+                  @click="applyThemeBundle(bundle.theme.key)"
+                >
+                  <div
+                    class="relative h-28 overflow-hidden"
+                    :style="{
+                      backgroundImage: `url(${bundle.preset.url})`,
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                    }"
+                  >
+                    <div
+                      class="absolute inset-0"
+                      :style="{
+                        backgroundColor: `rgba(0, 0, 0, ${bundle.preset.overlayOpacity / 100})`,
+                        backdropFilter: `blur(${bundle.preset.blur}px)`,
+                        WebkitBackdropFilter: `blur(${bundle.preset.blur}px)`,
+                      }"
+                    />
+                    <div class="absolute left-3 top-3 flex items-center gap-2">
+                      <span
+                        class="h-2.5 w-2.5 rounded-full"
+                        :style="{
+                          backgroundColor: bundle.theme.color,
+                          boxShadow: `0 0 0 4px ${bundle.theme.color}22`,
+                        }"
+                      />
+                      <span class="border border-white/20 rounded-full bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
+                        {{ bundle.theme.name }}
+                      </span>
+                    </div>
+                    <div class="absolute bottom-3 right-3 border border-white/20 rounded-full bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
+                      {{ bundle.preset.title }}
+                    </div>
+                  </div>
+
+                  <div class="p-3 space-y-2">
+                    <div class="flex items-center justify-between gap-3">
+                      <span class="glass-text-main text-sm font-semibold">{{ bundle.preset.title }}</span>
+                      <span
+                        class="rounded-full px-2 py-0.5 text-[10px] font-bold"
+                        :class="isThemeBundleApplied(bundle.theme.key)
+                          ? 'bg-primary-500/15 text-primary-500'
+                          : 'bg-white/10 text-gray-300 dark:bg-black/20 dark:text-gray-200'"
+                      >
+                        {{ isThemeBundleApplied(bundle.theme.key) ? '当前整套' : '点击套用' }}
+                      </span>
+                    </div>
+                    <p class="glass-text-muted text-xs leading-5">
+                      {{ bundle.preset.description }}
+                    </p>
+                    <div class="glass-text-muted flex items-center justify-between text-[11px]">
+                      <span>登录 {{ bundle.preset.overlayOpacity }}% / {{ bundle.preset.blur }}px</span>
+                      <span>主界面 {{ bundle.preset.appOverlayOpacity }}% / {{ bundle.preset.appBlur }}px</span>
+                    </div>
+                  </div>
+                </button>
+              </div>
+            </div>
+
+            <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
               <div class="glass-text-main text-sm font-medium">
                 背景作用范围
               </div>
-              <div class="mt-3 grid grid-cols-1 gap-3 md:grid-cols-3">
+              <div class="grid grid-cols-1 mt-3 gap-3 md:grid-cols-3">
                 <button
                   v-for="option in UI_BACKGROUND_SCOPE_OPTIONS"
                   :key="option.value"
                   type="button"
-                  class="rounded-2xl border px-3 py-3 text-left transition-all"
+                  class="border rounded-2xl px-3 py-3 text-left transition-all"
                   :class="appStore.backgroundScope === option.value
                     ? 'border-primary-500 bg-primary-500/10 shadow-lg shadow-primary-500/10'
                     : 'border-white/10 bg-white/5 hover:border-primary-500/30 hover:bg-white/10 dark:bg-black/10'"
@@ -3343,10 +3453,10 @@ async function restoreTimingDefaults() {
             >
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div class="rounded-2xl border border-white/10 bg-black/5 p-4 dark:bg-white/5">
+              <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
                 <div class="flex items-center justify-between gap-3">
                   <span class="glass-text-main text-sm font-medium">登录页遮罩强度</span>
-                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] font-bold text-primary-500">
+                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] text-primary-500 font-bold">
                     {{ appStore.loginBackgroundOverlayOpacity }}%
                   </span>
                 </div>
@@ -3363,10 +3473,10 @@ async function restoreTimingDefaults() {
                 </p>
               </div>
 
-              <div class="rounded-2xl border border-white/10 bg-black/5 p-4 dark:bg-white/5">
+              <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
                 <div class="flex items-center justify-between gap-3">
                   <span class="glass-text-main text-sm font-medium">登录页模糊度</span>
-                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] font-bold text-primary-500">
+                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] text-primary-500 font-bold">
                     {{ appStore.loginBackgroundBlur }}px
                   </span>
                 </div>
@@ -3385,10 +3495,10 @@ async function restoreTimingDefaults() {
             </div>
 
             <div class="grid grid-cols-1 gap-3 md:grid-cols-2">
-              <div class="rounded-2xl border border-white/10 bg-black/5 p-4 dark:bg-white/5">
+              <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
                 <div class="flex items-center justify-between gap-3">
                   <span class="glass-text-main text-sm font-medium">主界面遮罩强度</span>
-                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] font-bold text-primary-500">
+                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] text-primary-500 font-bold">
                     {{ appStore.appBackgroundOverlayOpacity }}%
                   </span>
                 </div>
@@ -3405,10 +3515,10 @@ async function restoreTimingDefaults() {
                 </p>
               </div>
 
-              <div class="rounded-2xl border border-white/10 bg-black/5 p-4 dark:bg-white/5">
+              <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
                 <div class="flex items-center justify-between gap-3">
                   <span class="glass-text-main text-sm font-medium">主界面模糊度</span>
-                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] font-bold text-primary-500">
+                  <span class="rounded-full bg-primary-500/15 px-2.5 py-1 text-[11px] text-primary-500 font-bold">
                     {{ appStore.appBackgroundBlur }}px
                   </span>
                 </div>
@@ -3426,7 +3536,7 @@ async function restoreTimingDefaults() {
               </div>
             </div>
 
-            <div class="rounded-2xl border border-white/10 bg-black/5 p-4 dark:bg-white/5">
+            <div class="border border-white/10 rounded-2xl bg-black/5 p-4 dark:bg-white/5">
               <div class="flex flex-wrap items-center gap-3">
                 <BaseButton
                   variant="secondary"
@@ -3464,7 +3574,7 @@ async function restoreTimingDefaults() {
               <span class="glass-text-muted text-xs font-medium">预览 (效果参考)</span>
               <button
                 type="button"
-                class="glass-text-main rounded-full border border-white/20 bg-white/15 px-3 py-1 text-[11px] transition-all hover:bg-white/25 dark:border-white/10 dark:bg-black/20 dark:hover:bg-black/35"
+                class="glass-text-main border border-white/20 rounded-full bg-white/15 px-3 py-1 text-[11px] transition-all dark:border-white/10 dark:bg-black/20 hover:bg-white/25 dark:hover:bg-black/35"
                 @click="openLoginPreview"
               >
                 打开全屏预览
@@ -3473,14 +3583,14 @@ async function restoreTimingDefaults() {
 
             <button
               type="button"
-              class="group relative h-40 w-full overflow-hidden border border-white/20 rounded-2xl text-left shadow-sm transition-all duration-300 dark:border-white/10 hover:shadow-lg hover:shadow-black/10"
+              class="group relative h-40 w-full overflow-hidden border border-white/20 rounded-2xl text-left shadow-sm transition-all duration-300 dark:border-white/10 hover:shadow-black/10 hover:shadow-lg"
               :style="loginPreviewBackgroundStyle"
               @click="openLoginPreview"
             >
               <div v-if="loginPreviewUsesCustomBackground" class="absolute inset-0" :style="loginPreviewMaskStyle" />
-              <div class="absolute inset-0 bg-gradient-to-t from-black/35 via-transparent to-white/10 opacity-80" />
+              <div class="absolute inset-0 from-black/35 via-transparent to-white/10 bg-gradient-to-t opacity-80" />
               <div class="absolute inset-0 flex items-center justify-center">
-                <div class="glass-text-main border border-white/25 rounded-xl bg-white/55 px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-md transition-transform duration-300 dark:bg-black/40 dark:text-white group-hover:scale-105">
+                <div class="glass-text-main border border-white/25 rounded-xl bg-white/55 px-4 py-2 text-xs font-medium shadow-lg backdrop-blur-md transition-transform duration-300 group-hover:scale-105 dark:bg-black/40 dark:text-white">
                   玻璃拟态预览
                 </div>
               </div>
@@ -3497,8 +3607,8 @@ async function restoreTimingDefaults() {
               :style="loginPreviewBackgroundStyle"
             >
               <div v-if="loginPreviewUsesCustomBackground" class="absolute inset-0" :style="appScenePreviewMaskStyle" />
-              <div class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/20" />
-              <div class="absolute left-3 top-3 rounded-full border border-white/20 bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
+              <div class="absolute inset-0 from-white/10 via-transparent to-black/20 bg-gradient-to-br" />
+              <div class="absolute left-3 top-3 border border-white/20 rounded-full bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
                 主界面氛围预览
               </div>
               <div class="absolute inset-0 flex gap-3 p-4">
@@ -3514,7 +3624,7 @@ async function restoreTimingDefaults() {
                   <div class="border border-white/15 rounded-2xl bg-white/14 p-3 backdrop-blur-xl">
                     <div class="h-3 w-36 rounded bg-white/55" />
                   </div>
-                  <div class="grid flex-1 grid-cols-2 gap-3">
+                  <div class="grid grid-cols-2 flex-1 gap-3">
                     <div class="border border-white/15 rounded-2xl bg-white/12 p-3 backdrop-blur-xl" />
                     <div class="border border-white/15 rounded-2xl bg-white/12 p-3 backdrop-blur-xl" />
                   </div>
@@ -3552,12 +3662,12 @@ async function restoreTimingDefaults() {
             </div>
           </div>
 
-          <div class="mt-4 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-5">
+          <div class="grid grid-cols-1 mt-4 gap-4 md:grid-cols-2 xl:grid-cols-5">
             <button
               v-for="preset in orderedLoginBackgroundPresets"
               :key="preset.key"
               type="button"
-              class="group overflow-hidden border rounded-2xl bg-black/5 text-left transition-all duration-300 dark:bg-white/5 hover:-translate-y-1 hover:shadow-xl"
+              class="group overflow-hidden border rounded-2xl bg-black/5 text-left transition-all duration-300 dark:bg-white/5 hover:shadow-xl hover:-translate-y-1"
               :class="isSelectedLoginBackgroundPreset(preset)
                 ? 'border-primary-500 shadow-lg shadow-primary-500/15'
                 : 'border-white/10 dark:border-white/10'"
@@ -3578,20 +3688,20 @@ async function restoreTimingDefaults() {
                     WebkitBackdropFilter: `blur(${preset.blur}px)`,
                   }"
                 />
-                <div class="absolute left-3 top-3 rounded-full border border-white/20 bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
+                <div class="absolute left-3 top-3 border border-white/20 rounded-full bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
                   {{ preset.themeKey === appStore.colorTheme ? '当前主题推荐' : (preset.badge || '预设') }}
                 </div>
-                <div class="absolute bottom-3 right-3 rounded-full border border-white/20 bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
+                <div class="absolute bottom-3 right-3 border border-white/20 rounded-full bg-black/25 px-2.5 py-1 text-[10px] text-white/90 backdrop-blur-md">
                   {{ preset.overlayOpacity }}% / {{ preset.blur }}px
                 </div>
               </div>
 
-              <div class="space-y-2 p-3">
+              <div class="p-3 space-y-2">
                 <div class="flex items-center justify-between gap-3">
                   <span class="glass-text-main text-sm font-semibold">{{ preset.title }}</span>
                   <span
                     v-if="isSelectedLoginBackgroundPreset(preset)"
-                    class="rounded-full bg-primary-500/15 px-2 py-0.5 text-[10px] font-bold text-primary-500"
+                    class="rounded-full bg-primary-500/15 px-2 py-0.5 text-[10px] text-primary-500 font-bold"
                   >
                     当前
                   </span>
@@ -3608,186 +3718,186 @@ async function restoreTimingDefaults() {
         </div>
       </div>
     </div>
-  <Teleport to="body">
-    <div v-if="loginPreviewVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        class="absolute inset-0 bg-black/65 backdrop-blur-md"
-        @click="loginPreviewVisible = false"
-      />
-
-      <div class="relative z-10 max-h-[90vh] w-full max-w-6xl overflow-hidden rounded-[28px] border border-white/20 shadow-2xl dark:border-white/10">
+    <Teleport to="body">
+      <div v-if="loginPreviewVisible" class="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div
-          class="relative min-h-[78vh] overflow-hidden"
-          :style="loginPreviewBackgroundStyle"
-        >
-          <div v-if="loginPreviewUsesCustomBackground" class="absolute inset-0" :style="loginPreviewMaskStyle" />
-          <div v-else class="absolute inset-0 bg-gradient-to-br from-white/10 via-transparent to-black/5" />
+          class="absolute inset-0 bg-black/65 backdrop-blur-md"
+          @click="loginPreviewVisible = false"
+        />
 
-          <div class="absolute left-5 top-5 z-20 rounded-full border border-white/20 bg-black/25 px-4 py-1.5 text-xs text-white/90 backdrop-blur-md">
-            登录页玻璃拟态预览
-          </div>
-          <div class="absolute left-5 top-16 z-20 rounded-full border border-white/20 bg-black/25 px-4 py-1.5 text-xs text-white/90 backdrop-blur-md">
-            遮罩 {{ appStore.loginBackgroundOverlayOpacity }}% · 模糊 {{ appStore.loginBackgroundBlur }}px
-          </div>
-
-          <button
-            type="button"
-            class="absolute right-5 top-5 z-20 h-10 w-10 flex items-center justify-center rounded-full border border-white/20 bg-black/25 text-white/90 backdrop-blur-md transition-colors hover:bg-black/40"
-            @click="loginPreviewVisible = false"
-          >
-            <div class="i-carbon-close text-lg" />
-          </button>
-
-          <div class="relative z-10 min-h-[78vh] flex items-center justify-center px-5 py-12 lg:px-10">
-            <div class="grid w-full max-w-5xl gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-              <div class="hidden border border-white/20 rounded-[28px] bg-white/10 p-8 text-white shadow-2xl backdrop-blur-xl lg:flex lg:flex-col lg:justify-between">
-                <div>
-                  <div class="mb-6 h-16 w-16 flex items-center justify-center rounded-3xl bg-white text-emerald-500 shadow-xl">
-                    <div class="i-carbon-sprout text-3xl" />
-                  </div>
-                  <h3 class="text-3xl font-black tracking-tight">
-                    御农·QQ 农场智能助手
-                  </h3>
-                  <p class="mt-3 max-w-md text-sm leading-6 text-white/80">
-                    这里模拟的是登录页左侧品牌区和右侧表单卡片的叠层效果，主要用来判断背景图是否会干扰按钮、标题和输入区可读性。
-                  </p>
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                  <div class="rounded-2xl border border-white/15 bg-white/10 p-4">
-                    <div class="i-carbon-flash mb-2 text-xl" />
-                    <div class="text-sm font-semibold">
-                      极速自动化
-                    </div>
-                  </div>
-                  <div class="rounded-2xl border border-white/15 bg-white/10 p-4">
-                    <div class="i-carbon-security mb-2 text-xl" />
-                    <div class="text-sm font-semibold">
-                      安全隔离
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div class="border border-white/25 rounded-[28px] bg-white/18 p-5 shadow-2xl backdrop-blur-2xl dark:bg-black/25 lg:p-8">
-                <div class="mx-auto max-w-md">
-                  <div class="mb-6 flex items-center gap-3 text-white">
-                    <div class="h-11 w-11 flex items-center justify-center rounded-2xl bg-white/80 text-emerald-500 shadow-lg">
-                      <div class="i-carbon-sprout text-xl" />
-                    </div>
-                    <div>
-                      <div class="text-lg font-bold">
-                        欢迎回来
-                      </div>
-                      <div class="text-xs text-white/80">
-                        预览背景图在真实登录页中的玻璃卡片表现
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class="space-y-4">
-                    <div class="rounded-2xl border border-white/20 bg-white/35 px-4 py-3 text-sm text-white/85 backdrop-blur-md dark:bg-black/25">
-                      用户名 / 账号
-                    </div>
-                    <div class="rounded-2xl border border-white/20 bg-white/35 px-4 py-3 text-sm text-white/85 backdrop-blur-md dark:bg-black/25">
-                      密码
-                    </div>
-                    <div class="rounded-2xl bg-white/85 px-4 py-3 text-center text-sm font-bold text-slate-800 shadow-lg">
-                      登录按钮预览
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-center text-xs text-white/85">
-                      <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-md">
-                        自动化
-                      </div>
-                      <div class="rounded-2xl border border-white/15 bg-white/10 px-4 py-3 backdrop-blur-md">
-                        多账号
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-
+        <div class="relative z-10 max-h-[90vh] max-w-6xl w-full overflow-hidden border border-white/20 rounded-[28px] shadow-2xl dark:border-white/10">
           <div
-            v-if="loginPreviewLoadFailed"
-            class="absolute bottom-5 left-5 right-5 z-20 rounded-2xl border border-rose-200/40 bg-rose-500/20 px-4 py-3 text-sm text-white backdrop-blur-xl"
+            class="relative min-h-[78vh] overflow-hidden"
+            :style="loginPreviewBackgroundStyle"
           >
-            当前图片链接无法直接加载，预览已自动回退为默认渐变背景。正式保存前建议先换成可直链图片。
-          </div>
-        </div>
-      </div>
-    </div>
+            <div v-if="loginPreviewUsesCustomBackground" class="absolute inset-0" :style="loginPreviewMaskStyle" />
+            <div v-else class="absolute inset-0 from-white/10 via-transparent to-black/5 bg-gradient-to-br" />
 
-    <div v-if="reportDetailVisible && reportDetailItem" class="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div
-        class="absolute inset-0 bg-gray-900/45 backdrop-blur-sm dark:bg-black/70"
-        @click="closeReportLogDetail"
-      />
-      <div class="glass-panel relative z-10 max-h-[85vh] max-w-3xl w-full overflow-hidden border border-white/20 rounded-2xl shadow-2xl dark:border-white/10">
-        <div class="flex items-center justify-between border-b border-gray-200/50 px-6 py-4 dark:border-white/10">
-          <div class="min-w-0">
-            <h3 class="truncate text-base text-gray-900 font-bold dark:text-gray-100">
-              {{ reportDetailItem.title || '经营汇报详情' }}
-            </h3>
-            <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
-              {{ formatReportMode(reportDetailItem.mode) }} · {{ formatReportLogTime(reportDetailItem.createdAt) }} · {{ reportDetailItem.channel || 'unknown' }}
+            <div class="absolute left-5 top-5 z-20 border border-white/20 rounded-full bg-black/25 px-4 py-1.5 text-xs text-white/90 backdrop-blur-md">
+              登录页玻璃拟态预览
             </div>
-          </div>
-          <button
-            class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
-            @click="closeReportLogDetail"
-          >
-            <div class="i-carbon-close text-xl" />
-          </button>
-        </div>
+            <div class="absolute left-5 top-16 z-20 border border-white/20 rounded-full bg-black/25 px-4 py-1.5 text-xs text-white/90 backdrop-blur-md">
+              遮罩 {{ appStore.loginBackgroundOverlayOpacity }}% · 模糊 {{ appStore.loginBackgroundBlur }}px
+            </div>
 
-        <div class="max-h-[calc(85vh-8rem)] overflow-auto px-6 py-5 space-y-4">
-          <div class="flex flex-wrap items-center gap-2">
-            <span
-              class="rounded-full px-2.5 py-1 text-[11px] font-bold"
-              :class="reportDetailItem.ok ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'"
+            <button
+              type="button"
+              class="absolute right-5 top-5 z-20 h-10 w-10 flex items-center justify-center border border-white/20 rounded-full bg-black/25 text-white/90 backdrop-blur-md transition-colors hover:bg-black/40"
+              @click="loginPreviewVisible = false"
             >
-              {{ reportDetailItem.ok ? '发送成功' : '发送失败' }}
-            </span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-600 dark:bg-white/10 dark:text-gray-300">
-              账号：{{ reportDetailItem.accountName || reportDetailItem.accountId || '-' }}
-            </span>
-            <span class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-600 dark:bg-white/10 dark:text-gray-300">
-              ID：{{ reportDetailItem.accountId || '-' }}
-            </span>
-          </div>
+              <div class="i-carbon-close text-lg" />
+            </button>
 
-          <div v-if="reportDetailItem.errorMessage" class="rounded-xl border border-red-200/70 bg-red-50/70 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
-            失败原因：{{ reportDetailItem.errorMessage }}
-          </div>
+            <div class="relative z-10 min-h-[78vh] flex items-center justify-center px-5 py-12 lg:px-10">
+              <div class="grid max-w-5xl w-full gap-6 lg:grid-cols-[1.1fr_0.9fr]">
+                <div class="hidden border border-white/20 rounded-[28px] bg-white/10 p-8 text-white shadow-2xl backdrop-blur-xl lg:flex lg:flex-col lg:justify-between">
+                  <div>
+                    <div class="mb-6 h-16 w-16 flex items-center justify-center rounded-3xl bg-white text-emerald-500 shadow-xl">
+                      <div class="i-carbon-sprout text-3xl" />
+                    </div>
+                    <h3 class="text-3xl font-black tracking-tight">
+                      御农·QQ 农场智能助手
+                    </h3>
+                    <p class="mt-3 max-w-md text-sm text-white/80 leading-6">
+                      这里模拟的是登录页左侧品牌区和右侧表单卡片的叠层效果，主要用来判断背景图是否会干扰按钮、标题和输入区可读性。
+                    </p>
+                  </div>
 
-          <div class="rounded-xl border border-emerald-200/60 bg-black/5 px-4 py-4 dark:border-emerald-800/30 dark:bg-white/5">
-            <div class="mb-2 text-xs text-gray-500 font-bold tracking-widest uppercase dark:text-gray-400">
-              完整正文
+                  <div class="grid grid-cols-2 gap-3">
+                    <div class="border border-white/15 rounded-2xl bg-white/10 p-4">
+                      <div class="i-carbon-flash mb-2 text-xl" />
+                      <div class="text-sm font-semibold">
+                        极速自动化
+                      </div>
+                    </div>
+                    <div class="border border-white/15 rounded-2xl bg-white/10 p-4">
+                      <div class="i-carbon-security mb-2 text-xl" />
+                      <div class="text-sm font-semibold">
+                        安全隔离
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="border border-white/25 rounded-[28px] bg-white/18 p-5 shadow-2xl backdrop-blur-2xl dark:bg-black/25 lg:p-8">
+                  <div class="mx-auto max-w-md">
+                    <div class="mb-6 flex items-center gap-3 text-white">
+                      <div class="h-11 w-11 flex items-center justify-center rounded-2xl bg-white/80 text-emerald-500 shadow-lg">
+                        <div class="i-carbon-sprout text-xl" />
+                      </div>
+                      <div>
+                        <div class="text-lg font-bold">
+                          欢迎回来
+                        </div>
+                        <div class="text-xs text-white/80">
+                          预览背景图在真实登录页中的玻璃卡片表现
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="space-y-4">
+                      <div class="border border-white/20 rounded-2xl bg-white/35 px-4 py-3 text-sm text-white/85 backdrop-blur-md dark:bg-black/25">
+                        用户名 / 账号
+                      </div>
+                      <div class="border border-white/20 rounded-2xl bg-white/35 px-4 py-3 text-sm text-white/85 backdrop-blur-md dark:bg-black/25">
+                        密码
+                      </div>
+                      <div class="rounded-2xl bg-white/85 px-4 py-3 text-center text-sm text-slate-800 font-bold shadow-lg">
+                        登录按钮预览
+                      </div>
+                      <div class="grid grid-cols-2 gap-3 text-center text-xs text-white/85">
+                        <div class="border border-white/15 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md">
+                          自动化
+                        </div>
+                        <div class="border border-white/15 rounded-2xl bg-white/10 px-4 py-3 backdrop-blur-md">
+                          多账号
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
-            <div class="whitespace-pre-line break-words text-sm leading-6 text-gray-800 dark:text-gray-200">
-              {{ reportDetailItem.content || '无正文' }}
+
+            <div
+              v-if="loginPreviewLoadFailed"
+              class="absolute bottom-5 left-5 right-5 z-20 border border-rose-200/40 rounded-2xl bg-rose-500/20 px-4 py-3 text-sm text-white backdrop-blur-xl"
+            >
+              当前图片链接无法直接加载，预览已自动回退为默认渐变背景。正式保存前建议先换成可直链图片。
             </div>
           </div>
-        </div>
-
-        <div class="flex justify-end border-t border-gray-200/50 px-6 py-4 dark:border-white/10">
-          <BaseButton
-            variant="secondary"
-            size="sm"
-            @click="closeReportLogDetail"
-          >
-            关闭
-          </BaseButton>
         </div>
       </div>
-    </div>
-  </Teleport>
 
-  <ConfirmModal
-    :show="modalVisible"
-    :title="modalConfig.title"
+      <div v-if="reportDetailVisible && reportDetailItem" class="fixed inset-0 z-50 flex items-center justify-center p-4">
+        <div
+          class="absolute inset-0 bg-gray-900/45 backdrop-blur-sm dark:bg-black/70"
+          @click="closeReportLogDetail"
+        />
+        <div class="glass-panel relative z-10 max-h-[85vh] max-w-3xl w-full overflow-hidden border border-white/20 rounded-2xl shadow-2xl dark:border-white/10">
+          <div class="flex items-center justify-between border-b border-gray-200/50 px-6 py-4 dark:border-white/10">
+            <div class="min-w-0">
+              <h3 class="truncate text-base text-gray-900 font-bold dark:text-gray-100">
+                {{ reportDetailItem.title || '经营汇报详情' }}
+              </h3>
+              <div class="mt-1 text-xs text-gray-500 dark:text-gray-400">
+                {{ formatReportMode(reportDetailItem.mode) }} · {{ formatReportLogTime(reportDetailItem.createdAt) }} · {{ reportDetailItem.channel || 'unknown' }}
+              </div>
+            </div>
+            <button
+              class="rounded-full p-2 text-gray-400 transition-colors hover:bg-gray-100 hover:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-gray-300"
+              @click="closeReportLogDetail"
+            >
+              <div class="i-carbon-close text-xl" />
+            </button>
+          </div>
+
+          <div class="max-h-[calc(85vh-8rem)] overflow-auto px-6 py-5 space-y-4">
+            <div class="flex flex-wrap items-center gap-2">
+              <span
+                class="rounded-full px-2.5 py-1 text-[11px] font-bold"
+                :class="reportDetailItem.ok ? 'bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300' : 'bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300'"
+              >
+                {{ reportDetailItem.ok ? '发送成功' : '发送失败' }}
+              </span>
+              <span class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                账号：{{ reportDetailItem.accountName || reportDetailItem.accountId || '-' }}
+              </span>
+              <span class="rounded-full bg-gray-100 px-2.5 py-1 text-[11px] text-gray-600 dark:bg-white/10 dark:text-gray-300">
+                ID：{{ reportDetailItem.accountId || '-' }}
+              </span>
+            </div>
+
+            <div v-if="reportDetailItem.errorMessage" class="border border-red-200/70 rounded-xl bg-red-50/70 px-4 py-3 text-sm text-red-700 dark:border-red-900/40 dark:bg-red-950/20 dark:text-red-300">
+              失败原因：{{ reportDetailItem.errorMessage }}
+            </div>
+
+            <div class="border border-emerald-200/60 rounded-xl bg-black/5 px-4 py-4 dark:border-emerald-800/30 dark:bg-white/5">
+              <div class="mb-2 text-xs text-gray-500 font-bold tracking-widest uppercase dark:text-gray-400">
+                完整正文
+              </div>
+              <div class="whitespace-pre-line break-words text-sm text-gray-800 leading-6 dark:text-gray-200">
+                {{ reportDetailItem.content || '无正文' }}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end border-t border-gray-200/50 px-6 py-4 dark:border-white/10">
+            <BaseButton
+              variant="secondary"
+              size="sm"
+              @click="closeReportLogDetail"
+            >
+              关闭
+            </BaseButton>
+          </div>
+        </div>
+      </div>
+    </Teleport>
+
+    <ConfirmModal
+      :show="modalVisible"
+      :title="modalConfig.title"
       :message="modalConfig.message"
       :type="modalConfig.type"
       :is-alert="modalConfig.isAlert"
