@@ -1,14 +1,7 @@
 -- 卡密精细化管理增强
--- 为 cards 表补充批次/来源/备注/创建人等字段，并新增卡密操作日志表
-
-ALTER TABLE `cards`
-    ADD COLUMN IF NOT EXISTS `batch_no` VARCHAR(64) COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `code`,
-    ADD COLUMN IF NOT EXISTS `batch_name` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `batch_no`,
-    ADD COLUMN IF NOT EXISTS `source` VARCHAR(32) COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'manual' AFTER `days`,
-    ADD COLUMN IF NOT EXISTS `channel` VARCHAR(64) COLLATE utf8mb4_unicode_ci DEFAULT '' AFTER `source`,
-    ADD COLUMN IF NOT EXISTS `note` TEXT COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `channel`,
-    ADD COLUMN IF NOT EXISTS `created_by` VARCHAR(100) COLLATE utf8mb4_unicode_ci DEFAULT NULL AFTER `note`,
-    ADD COLUMN IF NOT EXISTS `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP AFTER `created_at`;
+-- 注意：cards 表字段补齐由 mysql-db.js 按列检测后执行，
+-- 这里仅保留可跨版本兼容的建表语句，避免部分 MySQL/MariaDB 因
+-- ALTER TABLE ... ADD COLUMN IF NOT EXISTS 语法差异导致启动失败。
 
 CREATE TABLE IF NOT EXISTS `card_operation_logs` (
     `id` BIGINT NOT NULL AUTO_INCREMENT,

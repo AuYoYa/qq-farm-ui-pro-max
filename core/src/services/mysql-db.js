@@ -148,19 +148,16 @@ async function initMysql() {
                 );
             }
 
-            const [cardBatchCols] = await pool.execute(
-                `SELECT COLUMN_NAME FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = 'cards' AND COLUMN_NAME = 'batch_no'`,
-                [DB_NAME]
-            );
             const [cardLogTable] = await pool.execute(`SHOW TABLES LIKE 'card_operation_logs'`);
-            if (cardBatchCols.length === 0 || cardLogTable.length === 0) {
+            if (cardLogTable.length === 0) {
                 await runMigrationFile(
                     path.join(migrationsDir, '012-card-management.sql'),
-                    '检测到 cards 表缺少精细化管理字段，正在执行迁移 012-card-management.sql',
+                    '检测到缺少 card_operation_logs 表，正在执行迁移 012-card-management.sql',
                 );
             }
 
             const cardColumnEnsures = [
+                ['batch_no', "ALTER TABLE cards ADD COLUMN batch_no VARCHAR(64) DEFAULT NULL AFTER code", 'cards.batch_no'],
                 ['batch_name', "ALTER TABLE cards ADD COLUMN batch_name VARCHAR(100) DEFAULT NULL AFTER batch_no", 'cards.batch_name'],
                 ['source', "ALTER TABLE cards ADD COLUMN source VARCHAR(32) NOT NULL DEFAULT 'manual' AFTER days", 'cards.source'],
                 ['channel', "ALTER TABLE cards ADD COLUMN channel VARCHAR(64) DEFAULT '' AFTER source", 'cards.channel'],
