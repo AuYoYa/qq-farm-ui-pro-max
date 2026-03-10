@@ -1,0 +1,215 @@
+# Git 同步范围清单（2026-03-10）
+
+## 1. 目的
+
+这份清单只回答一件事：
+
+- 当前工作树里，哪些改动已经适合单独同步。
+- 哪些改动还属于其他并行工作，不应该和这批持久化/回归收口混在一起。
+
+## 2. 当前分层概览
+
+- 已暂存：`31` 个文件
+- 未暂存已修改：`944` 个文件
+- 未跟踪：`178` 个文件
+
+结论：
+
+- 现在已经存在一批可以独立提交/同步的“收口包”。
+- 其余大面积变动仍然很多，不能直接把整个工作树当成一个提交范围。
+
+## 3. 当前可独立同步的范围
+
+### 3.1 CI / 前端回归链收口
+
+文件数：`7`
+
+- `.github/workflows/ci.yml`
+- `docs/REGRESSION_TEST_CHECKLIST.md`
+- `web/package.json`
+- `web/__tests__/use-view-preference-sync.test.mjs`
+- `web/src/components/LeaderboardModal.vue`
+- `web/src/views/StealSettings.vue`
+
+这一组负责：
+
+- 把 CI 入口统一到 `pnpm test:frontend`
+- 固化前端回归链
+- 补齐共享视图偏好同步的最小单测
+- 清掉会阻断回归链的页面残缺/格式问题
+
+### 3.2 用户级偏好与轻量状态持久化
+
+文件数：`21`
+
+- `.gitignore`
+- `core/src/services/user-preferences.js`
+- `core/src/controllers/admin/settings-report-routes.js`
+- `core/src/database/migrations/001-init_mysql.sql`
+- `core/src/database/migrations/015-user-preferences.sql`
+- `core/src/services/mysql-db.js`
+- `deploy/init-db/01-init.sql`
+- `core/__tests__/user-preferences.test.js`
+- `core/__tests__/admin-settings-report-routes.test.js`
+- `web/src/utils/view-preferences.ts`
+- `web/src/App.vue`
+- `web/src/components/AnnouncementDialog.vue`
+- `web/src/components/NotificationPanel.vue`
+- `web/src/components/NotificationModal.vue`
+- `web/src/components/Sidebar.vue`
+
+这一组负责：
+
+- 把 `app_seen_version`
+- `announcement_dismissed_id`
+- `last_read_notification_date`
+
+从纯浏览器本地状态迁入 `user_preferences`
+
+同时顺手收口：
+
+- `dist-runtime/` 构建产物忽略规则
+- 服务端优先、本地缓存兜底的同步链
+
+### 3.3 共享视图偏好抽象与页面接线
+
+- `web/src/composables/use-view-preference-sync.ts`
+- `web/src/components/ui/BaseCheckbox.vue`
+- `web/src/components/ui/BaseDataTableSelectionCell.vue`
+- `web/src/views/Accounts.vue`
+- `web/src/views/Analytics.vue`
+- `web/src/views/Dashboard.vue`
+- `web/src/views/Settings.vue`
+
+这一组负责：
+
+- 把页面里重复的 `hydrate -> watch -> debounce save` 逻辑抽成共享 composable
+- 统一账号页、分析页、仪表盘、设置页的视图偏好同步方式
+- 修正表格选择和基础控件的类型/接线问题
+
+### 3.4 文档与状态清单
+
+文件数：`3`
+
+- `docs/FRONTEND_STATE_PERSISTENCE_INVENTORY_2026-03-10.md`
+- `docs/RECENT_OPTIMIZATION_REVIEW_2026-03-08.md`
+- `docs/dev-notes/GIT_SYNC_SCOPE_2026-03-10.md`
+
+这一组负责：
+
+- 记录哪些状态已经进数据库
+- 说明哪些仍是浏览器缓存/迁移源
+- 留下本轮验证结果和边界判断
+
+## 4. 当前明确不应混入这批同步的范围
+
+下面这些范围当前仍有大量并行改动，但不属于这批“持久化 + 回归链 + git 收口”：
+
+- 大量截图、静态资源、图鉴和 `nc_local_version` 内容
+- 大量部署脚本、README、发布文档
+- 大量 `core/src/controllers/admin/*` 新拆分文件
+- 大量管理页基础组件与 UI 重构文件
+- 其他历史测试补充与运行时模块拆分
+
+这些改动并不一定有问题，但当前没有被整理成同一个可独立同步的范围。
+
+## 5. 当前推荐的同步方式
+
+如果现在只想同步“已经收口完成”的这批内容，建议只基于当前已暂存范围操作，不要直接 `git add .`。
+
+建议命令：
+
+```bash
+git diff --cached --name-only
+git diff --cached --stat
+```
+
+如果后面要继续拆提交，建议按下面 3 段切：
+
+1. `CI / 前端回归链`
+2. `用户级偏好与轻量状态持久化`
+3. `文档与状态清单`
+
+### 5.1 推荐提交切分
+
+#### Commit 1: CI / 前端回归链
+
+建议提交信息：
+
+```bash
+git commit -m "test(web): stabilize frontend regression chain"
+```
+
+对应路径：
+
+```text
+.github/workflows/ci.yml
+.gitignore
+docs/REGRESSION_TEST_CHECKLIST.md
+web/__tests__/use-view-preference-sync.test.mjs
+web/package.json
+web/src/components/LeaderboardModal.vue
+web/src/views/StealSettings.vue
+```
+
+#### Commit 2: 用户级偏好与轻量状态持久化
+
+建议提交信息：
+
+```bash
+git commit -m "feat(preferences): persist user view and read-state preferences"
+```
+
+对应路径：
+
+```text
+core/__tests__/admin-settings-report-routes.test.js
+core/__tests__/user-preferences.test.js
+core/src/controllers/admin/settings-report-routes.js
+core/src/database/migrations/001-init_mysql.sql
+core/src/database/migrations/015-user-preferences.sql
+core/src/services/mysql-db.js
+core/src/services/user-preferences.js
+deploy/init-db/01-init.sql
+web/src/App.vue
+web/src/components/AnnouncementDialog.vue
+web/src/components/NotificationModal.vue
+web/src/components/NotificationPanel.vue
+web/src/components/Sidebar.vue
+web/src/components/ui/BaseCheckbox.vue
+web/src/components/ui/BaseDataTableSelectionCell.vue
+web/src/composables/use-view-preference-sync.ts
+web/src/utils/view-preferences.ts
+web/src/views/Accounts.vue
+web/src/views/Analytics.vue
+web/src/views/Dashboard.vue
+web/src/views/Settings.vue
+```
+
+#### Commit 3: 文档与状态清单
+
+建议提交信息：
+
+```bash
+git commit -m "docs: record persistence inventory and sync scope"
+```
+
+对应路径：
+
+```text
+docs/FRONTEND_STATE_PERSISTENCE_INVENTORY_2026-03-10.md
+docs/RECENT_OPTIMIZATION_REVIEW_2026-03-08.md
+docs/dev-notes/GIT_SYNC_SCOPE_2026-03-10.md
+```
+
+### 5.2 额外说明
+
+- [CHANGELOG.DEVELOPMENT.md](/Users/smdk000/文稿/qq/qq-farm-bot-ui-main_副本/CHANGELOG.DEVELOPMENT.md) 已追加本轮记录，但它在本次整理前就处于未暂存修改状态。
+- 为避免把你其他历史编辑一并误纳入当前提交，这个文件暂时没有加入本次“可独立同步范围”。
+
+## 6. 当前结论
+
+- 这批“可独立同步范围”已经具备单独提交条件。
+- 最大的同步风险，已经不是这 30 个已暂存文件本身，而是剩余 `944 + 178` 项并行改动容易被误混进来。
+- 当前这批同步范围现在是 `31` 个已暂存文件。
+- 后续如果继续整理 git，优先级应该是继续把未暂存/未跟踪范围按主题切层，而不是再扩大本次提交面。
