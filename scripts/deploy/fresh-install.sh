@@ -16,6 +16,7 @@ CURRENT_LINK_INPUT="${CURRENT_LINK:-}"
 SOURCE_CACHE_DIR_INPUT="${SOURCE_CACHE_DIR:-}"
 CURRENT_LINK="${CURRENT_LINK_INPUT:-${DEPLOY_BASE_DIR}/qq-farm-current}"
 SOURCE_CACHE_DIR="${SOURCE_CACHE_DIR_INPUT:-${DEPLOY_BASE_DIR}/.qq-farm-build-src/${REPO_REF}}"
+SOURCE_CACHE_REFRESH="${SOURCE_CACHE_REFRESH:-auto}"
 OFFICIAL_DOCKERHUB_APP_IMAGE="${OFFICIAL_DOCKERHUB_APP_IMAGE:-smdk000/qq-farm-bot-ui}"
 OFFICIAL_GHCR_APP_IMAGE="${OFFICIAL_GHCR_APP_IMAGE:-ghcr.io/${REPO_SLUG}}"
 
@@ -397,6 +398,36 @@ is_truthy() {
     esac
 }
 
+is_immutable_repo_ref() {
+    local ref="${1:-}"
+
+    [[ "${ref}" =~ ^[0-9a-fA-F]{40}$ ]] && return 0
+    [[ "${ref}" =~ ^refs/tags/ ]] && return 0
+    [[ "${ref}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z._-]+)?$ ]] && return 0
+    return 1
+}
+
+should_refresh_source_cache() {
+    case "${SOURCE_CACHE_REFRESH:-auto}" in
+        1|true|TRUE|yes|YES|on|ON|always|ALWAYS)
+            return 0
+            ;;
+        0|false|FALSE|no|NO|off|OFF|never|NEVER)
+            return 1
+            ;;
+    esac
+
+    if [ "${SOURCE_CACHE_DIR_EXPLICIT}" = "1" ]; then
+        return 1
+    fi
+
+    if is_immutable_repo_ref "${REPO_REF}"; then
+        return 1
+    fi
+
+    return 0
+}
+
 normalize_arch() {
     case "${1:-}" in
         x86_64|amd64)
@@ -725,9 +756,18 @@ prepare_source_checkout() {
     local archive="/tmp/qq-farm-source-${REPO_REF//\//_}.tar.gz"
     local first_entry=""
     local strip_args=()
+    local cache_ready=0
+    local staged_dir=""
+    local target_dir="${cache_dir}"
 
     if source_checkout_ready "${cache_dir}" "${component}"; then
-        return 0
+        cache_ready=1
+        if ! should_refresh_source_cache; then
+            return 0
+        fi
+        staged_dir="${cache_dir}.refresh.$$"
+        target_dir="${staged_dir}"
+        print_warning "检测到 REPO_REF=${REPO_REF} 为可变引用，正在刷新源码缓存..."
     fi
 
     run_root mkdir -p "${cache_parent}"
@@ -735,15 +775,19 @@ prepare_source_checkout() {
         run_root chown -R "$(id -u):$(id -g)" "${cache_parent}"
     fi
 
-    run_root rm -rf "${cache_dir}"
-    run_root mkdir -p "${cache_dir}"
+    run_root rm -rf "${target_dir}"
+    run_root mkdir -p "${target_dir}"
     if [ -n "${SUDO}" ]; then
-        run_root chown -R "$(id -u):$(id -g)" "${cache_dir}"
+        run_root chown -R "$(id -u):$(id -g)" "${target_dir}"
     fi
 
     if [ "${component}" = "ipad860" ] && source_checkout_ready "${REPO_ROOT}" "${component}"; then
         print_warning "镜像仓库不可用，改用本地源码工作区补齐 ipad860 构建资产..."
-        copy_local_source_checkout "${REPO_ROOT}" "${cache_dir}" "${component}"
+        copy_local_source_checkout "${REPO_ROOT}" "${target_dir}" "${component}"
+        if [ -n "${staged_dir}" ]; then
+            run_root rm -rf "${cache_dir}"
+            run_root mv "${staged_dir}" "${cache_dir}"
+        fi
         return 0
     fi
 
@@ -753,20 +797,34 @@ prepare_source_checkout() {
         if [[ "${first_entry}" == */* ]]; then
             strip_args=(--strip-components=1)
         fi
-        tar -xzf "${archive}" "${strip_args[@]}" -C "${cache_dir}"
-        if source_checkout_ready "${cache_dir}" "${component}"; then
+        tar -xzf "${archive}" "${strip_args[@]}" -C "${target_dir}"
+        if source_checkout_ready "${target_dir}" "${component}"; then
+            if [ -n "${staged_dir}" ]; then
+                run_root rm -rf "${cache_dir}"
+                run_root mv "${staged_dir}" "${cache_dir}"
+            fi
             return 0
         fi
     fi
 
     if source_checkout_ready "${REPO_ROOT}" "${component}"; then
         print_warning "源码包不可用或不完整，改用本地源码工作区进行构建..."
-        run_root rm -rf "${cache_dir}"
-        run_root mkdir -p "${cache_dir}"
+        run_root rm -rf "${target_dir}"
+        run_root mkdir -p "${target_dir}"
         if [ -n "${SUDO}" ]; then
-            run_root chown -R "$(id -u):$(id -g)" "${cache_dir}"
+            run_root chown -R "$(id -u):$(id -g)" "${target_dir}"
         fi
-        copy_local_source_checkout "${REPO_ROOT}" "${cache_dir}" "${component}"
+        copy_local_source_checkout "${REPO_ROOT}" "${target_dir}" "${component}"
+        if [ -n "${staged_dir}" ]; then
+            run_root rm -rf "${cache_dir}"
+            run_root mv "${staged_dir}" "${cache_dir}"
+        fi
+        return 0
+    fi
+
+    if [ -n "${staged_dir}" ] && [ "${cache_ready}" = "1" ]; then
+        print_warning "源码缓存刷新失败，继续复用现有缓存: ${cache_dir}"
+        run_root rm -rf "${staged_dir}"
         return 0
     fi
 

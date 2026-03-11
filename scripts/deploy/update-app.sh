@@ -33,6 +33,7 @@ SKIP_DOCKER_PULL="${SKIP_DOCKER_PULL:-0}"
 SKIP_DB_REPAIR="${SKIP_DB_REPAIR:-0}"
 SKIP_IMAGE_ARCH_CHECK="${SKIP_IMAGE_ARCH_CHECK:-0}"
 SOURCE_CACHE_DIR="${SOURCE_CACHE_DIR:-${DEPLOY_BASE_DIR}/.qq-farm-build-src/${REPO_REF}}"
+SOURCE_CACHE_REFRESH="${SOURCE_CACHE_REFRESH:-auto}"
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 REPO_ROOT="$(cd "${SCRIPT_DIR}/../.." 2>/dev/null && pwd || pwd)"
 STACK_LAYOUT_PATH="${SCRIPT_DIR}/stack-layout.sh"
@@ -266,6 +267,32 @@ is_truthy() {
     esac
 }
 
+is_immutable_repo_ref() {
+    local ref="${1:-}"
+
+    [[ "${ref}" =~ ^[0-9a-fA-F]{40}$ ]] && return 0
+    [[ "${ref}" =~ ^refs/tags/ ]] && return 0
+    [[ "${ref}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+([.-][0-9A-Za-z._-]+)?$ ]] && return 0
+    return 1
+}
+
+should_refresh_source_cache() {
+    case "${SOURCE_CACHE_REFRESH:-auto}" in
+        1|true|TRUE|yes|YES|on|ON|always|ALWAYS)
+            return 0
+            ;;
+        0|false|FALSE|no|NO|off|OFF|never|NEVER)
+            return 1
+            ;;
+    esac
+
+    if is_immutable_repo_ref "${REPO_REF}"; then
+        return 1
+    fi
+
+    return 0
+}
+
 normalize_arch() {
     case "${1:-}" in
         x86_64|amd64)
@@ -469,9 +496,18 @@ prepare_source_checkout() {
     local archive="/tmp/qq-farm-source-${REPO_REF//\//_}.tar.gz"
     local first_entry=""
     local strip_args=()
+    local cache_ready=0
+    local staged_dir=""
+    local target_dir="${cache_dir}"
 
     if [ -f "${cache_dir}/pnpm-workspace.yaml" ] && [ -f "${cache_dir}/core/Dockerfile" ]; then
-        return 0
+        cache_ready=1
+        if ! should_refresh_source_cache; then
+            return 0
+        fi
+        staged_dir="${cache_dir}.refresh.$$"
+        target_dir="${staged_dir}"
+        print_warning "检测到 REPO_REF=${REPO_REF} 为可变引用，正在刷新源码缓存..."
     fi
 
     if [ -n "${SUDO}" ]; then
@@ -482,12 +518,12 @@ prepare_source_checkout() {
     fi
 
     if [ -n "${SUDO}" ]; then
-        "${SUDO}" rm -rf "${cache_dir}"
-        "${SUDO}" mkdir -p "${cache_dir}"
-        "${SUDO}" chown -R "$(id -u):$(id -g)" "${cache_dir}"
+        "${SUDO}" rm -rf "${target_dir}"
+        "${SUDO}" mkdir -p "${target_dir}"
+        "${SUDO}" chown -R "$(id -u):$(id -g)" "${target_dir}"
     else
-        rm -rf "${cache_dir}"
-        mkdir -p "${cache_dir}"
+        rm -rf "${target_dir}"
+        mkdir -p "${target_dir}"
     fi
 
     print_warning "镜像仓库不可用，开始下载源码包用于本地构建..."
@@ -496,8 +532,17 @@ prepare_source_checkout() {
         if [[ "${first_entry}" == */* ]]; then
             strip_args=(--strip-components=1)
         fi
-        tar -xzf "${archive}" "${strip_args[@]}" -C "${cache_dir}"
-        if [ -f "${cache_dir}/pnpm-workspace.yaml" ] && [ -f "${cache_dir}/core/Dockerfile" ]; then
+        tar -xzf "${archive}" "${strip_args[@]}" -C "${target_dir}"
+        if [ -f "${target_dir}/pnpm-workspace.yaml" ] && [ -f "${target_dir}/core/Dockerfile" ]; then
+            if [ -n "${staged_dir}" ]; then
+                if [ -n "${SUDO}" ]; then
+                    "${SUDO}" rm -rf "${cache_dir}"
+                    "${SUDO}" mv "${staged_dir}" "${cache_dir}"
+                else
+                    rm -rf "${cache_dir}"
+                    mv "${staged_dir}" "${cache_dir}"
+                fi
+            fi
             return 0
         fi
     fi
@@ -505,12 +550,12 @@ prepare_source_checkout() {
     if [ -f "${REPO_ROOT}/pnpm-workspace.yaml" ] && [ -f "${REPO_ROOT}/core/Dockerfile" ]; then
         print_warning "源码包不可用或不完整，改用本地源码工作区进行构建..."
         if [ -n "${SUDO}" ]; then
-            "${SUDO}" rm -rf "${cache_dir}"
-            "${SUDO}" mkdir -p "${cache_dir}"
-            "${SUDO}" chown -R "$(id -u):$(id -g)" "${cache_dir}"
+            "${SUDO}" rm -rf "${target_dir}"
+            "${SUDO}" mkdir -p "${target_dir}"
+            "${SUDO}" chown -R "$(id -u):$(id -g)" "${target_dir}"
         else
-            rm -rf "${cache_dir}"
-            mkdir -p "${cache_dir}"
+            rm -rf "${target_dir}"
+            mkdir -p "${target_dir}"
         fi
         (
             cd "${REPO_ROOT}"
@@ -522,9 +567,28 @@ prepare_source_checkout() {
                 --exclude='core/data' \
                 -cf - pnpm-workspace.yaml pnpm-lock.yaml package.json core web scripts/service
         ) | (
-            cd "${cache_dir}"
+            cd "${target_dir}"
             tar -xf -
         )
+        if [ -n "${staged_dir}" ]; then
+            if [ -n "${SUDO}" ]; then
+                "${SUDO}" rm -rf "${cache_dir}"
+                "${SUDO}" mv "${staged_dir}" "${cache_dir}"
+            else
+                rm -rf "${cache_dir}"
+                mv "${staged_dir}" "${cache_dir}"
+            fi
+        fi
+        return 0
+    fi
+
+    if [ -n "${staged_dir}" ] && [ "${cache_ready}" = "1" ]; then
+        print_warning "源码缓存刷新失败，继续复用现有缓存: ${cache_dir}"
+        if [ -n "${SUDO}" ]; then
+            "${SUDO}" rm -rf "${staged_dir}"
+        else
+            rm -rf "${staged_dir}"
+        fi
         return 0
     fi
 
